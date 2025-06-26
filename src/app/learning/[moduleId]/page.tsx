@@ -107,7 +107,11 @@ export default function ModulePage() {
                                     </TooltipTrigger>
                                     <TooltipContent side="top" className="max-w-xs text-center">
                                         <p className="font-bold">{isSurprise ? 'Surprise Level!' : `Level: ${level.name}`}</p>
-                                        <p className="text-sm">{level.question}</p>
+                                        {isSurprise ? (
+                                            <p className="text-sm">A random question from this module awaits!</p>
+                                        ) : (
+                                            <p className="text-sm">{level.question}</p>
+                                        )}
                                     </TooltipContent>
                                 </Tooltip>
                             </TooltipProvider>

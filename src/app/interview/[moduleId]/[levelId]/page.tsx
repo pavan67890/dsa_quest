@@ -23,7 +23,7 @@ type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: stri
 type InterviewerImageInfo = { src: string; hint: string };
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
-  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'anime interviewer' },
+  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'anime interviewer neutral' },
   curious:   { src: `https://placehold.co/1024x1024.png`, hint: 'curious anime' },
   satisfied: { src: `https://placehold.co/1024x1024.png`, hint: 'satisfied anime' },
   happy:     { src: `https://placehold.co/1024x1024.png`, hint: 'happy anime' },
@@ -51,6 +51,7 @@ export default function InterviewPage() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const [currentQuestion, setCurrentQuestion] = useState('');
 
   const module = dsaModules.find((m) => m.id === params.moduleId);
   const level = module?.levels.find((l) => l.id.toString() === params.levelId);
@@ -59,14 +60,26 @@ export default function InterviewPage() {
   useEffect(() => {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
       setIsApiKeyDialogOpen(true);
-    } else if (level) {
-      const initialText = `Hello! Welcome to your interview. Let's start with this question: ${level.question}`;
+    } else if (module && level) {
+      let questionText = level.question;
+      if (level.isSurprise) {
+        const regularLevels = module.levels.filter(l => !l.isSurprise && l.id !== level.id);
+        if (regularLevels.length > 0) {
+          const randomIndex = Math.floor(Math.random() * regularLevels.length);
+          questionText = regularLevels[randomIndex].question;
+        } else {
+          // Fallback if there are no other regular levels
+          questionText = "Tell me about yourself and your experience with data structures.";
+        }
+      }
+      setCurrentQuestion(questionText);
+      const initialText = `Hello! Welcome to your interview. Let's start with this question: ${questionText}`;
       setConversation([{ speaker: 'interviewer', text: initialText }]);
       textToSpeech(initialText)
         .then(res => setAudioUrl(res.audioDataUri))
         .catch(err => console.error("Initial TTS failed", err));
     }
-  }, [apiKeys, level]);
+  }, [apiKeys, level, module]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -143,17 +156,17 @@ export default function InterviewPage() {
     const newConversation = [...conversation, currentConversation];
     setConversation(newConversation);
 
-    const conversationHistory = newConversation.slice(-5).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
+    const conversationHistory = newConversation.slice(-6, -1).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
 
     try {
         let aiResponse;
         if(showCodeEditor) {
-            const review = await provideRealtimeCodeReview({ code: userCode, language: 'javascript', problemDescription: level?.question || '' });
+            const review = await provideRealtimeCodeReview({ code: userCode, language: 'javascript', problemDescription: currentQuestion });
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
                 previousConversationSummary: conversationHistory,
-                question: level?.question || '',
+                question: currentQuestion,
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
@@ -281,7 +294,12 @@ export default function InterviewPage() {
         {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
 
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex flex-col gap-4">
-          <div className="h-32 max-h-32 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2">
+          <motion.div 
+            className="h-32 max-h-32 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <AnimatePresence>
               {conversation.map((c, i) => (
                 <motion.div
@@ -298,7 +316,7 @@ export default function InterviewPage() {
             </AnimatePresence>
             {isLoading && <Loader className="animate-spin h-5 w-5" />}
             <div ref={dialogueEndRef} />
-          </div>
+          </motion.div>
 
           <Card className="bg-background/90 backdrop-blur-sm">
             <CardContent className="p-4">
