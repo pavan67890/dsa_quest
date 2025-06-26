@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -23,7 +24,7 @@ type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } }
 export default function ModulePage() {
   const router = useRouter();
   const params = useParams();
-  const moduleId = params.moduleId as string;
+  const moduleId = Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId;
   const module = dsaModules.find((m) => m.id === moduleId);
   
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
