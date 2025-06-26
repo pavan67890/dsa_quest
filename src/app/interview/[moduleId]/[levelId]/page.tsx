@@ -51,7 +51,6 @@ export default function InterviewPage() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const finalTranscriptRef = useRef('');
   const [currentQuestion, setCurrentQuestion] = useState('');
 
   const module = dsaModules.find((m) => m.id === params.moduleId);
@@ -60,8 +59,7 @@ export default function InterviewPage() {
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
-    // Initialize SpeechRecognition
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       const recognition = recognitionRef.current;
@@ -88,16 +86,11 @@ export default function InterviewPage() {
       };
 
       recognition.onresult = (event: any) => {
-        let interim_transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript_piece = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscriptRef.current += transcript_piece;
-          } else {
-            interim_transcript += transcript_piece;
-          }
-        }
-        setUserInput(finalTranscriptRef.current + interim_transcript);
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map((result) => result.transcript)
+          .join('');
+        setUserInput(transcript);
       };
     }
 
@@ -179,7 +172,6 @@ export default function InterviewPage() {
     if (isRecording) {
       recognitionRef.current.stop();
     } else {
-      finalTranscriptRef.current = '';
       setUserInput('');
       recognitionRef.current.start();
     }
@@ -195,7 +187,6 @@ export default function InterviewPage() {
     const currentConversation: Conversation = { speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
     const newConversation = [...conversation, currentConversation];
     setConversation(newConversation);
-    finalTranscriptRef.current = '';
 
     const conversationHistory = newConversation.slice(-6).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
 
