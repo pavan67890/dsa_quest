@@ -36,9 +36,7 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const params = useParams();
-  const moduleId = String(params.moduleId);
-  const levelId = String(params.levelId);
+  const { moduleId, levelId } = useParams() as { moduleId: string, levelId: string };
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
@@ -69,46 +67,43 @@ export default function InterviewPage() {
   const level = module?.levels.find((l) => l.id.toString() === levelId);
   const dialogueEndRef = useRef<HTMLDivElement>(null);
 
-  const handleInterviewerResponse = useCallback((text: string, isInitialMessage = false) => {
+  const handleInterviewerResponse = useCallback((text: string) => {
     setIsAiTyping(true);
+    const conversationId = conversationIdCounter.current++;
+    const newConversation: Conversation = { id: conversationId, speaker: 'interviewer', text };
+    setConversation(conv => [...conv, newConversation]);
+    setIsAiTyping(false); // Show text immediately
 
-    const ttsPromise = isTtsDisabled
-      ? Promise.resolve(null)
-      : textToSpeech({
-          text: text,
-          primaryApiKey: apiKeys.primaryApiKey,
-          backupApiKey: apiKeys.backupApiKey,
-        }).catch(ttsError => {
-          console.error('Text-to-speech failed:', ttsError);
-          const errorMessage = ttsError instanceof Error ? ttsError.message : String(ttsError);
-          if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-              toast({
-                title: 'Audio Quota Exceeded',
-                description: 'You have used up your daily free limit for text-to-speech. Audio will be disabled for this session.',
-                variant: 'destructive',
-              });
-              setIsTtsDisabled(true);
-          } else {
-              toast({
-                title: 'Audio Error',
-                description: 'Could not generate audio for the response.',
-                variant: 'destructive',
-              });
-          }
-          return null;
-        });
-    
-    ttsPromise.then(ttsResponse => {
-        setIsAiTyping(false);
-        const conversationId = conversationIdCounter.current++;
-        const newConversation: Conversation = { id: conversationId, speaker: 'interviewer', text };
-        setConversation(conv => [...conv, newConversation]);
-
+    if (!isTtsDisabled) {
+      textToSpeech({
+        text: text,
+        primaryApiKey: apiKeys.primaryApiKey,
+        backupApiKey: apiKeys.backupApiKey,
+      })
+      .then(ttsResponse => {
         if (ttsResponse?.audioDataUri) {
           setAudioUrl(ttsResponse.audioDataUri);
         }
-    });
-
+      })
+      .catch(ttsError => {
+        console.error('Text-to-speech failed:', ttsError);
+        const errorMessage = ttsError instanceof Error ? ttsError.message : String(ttsError);
+        if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
+          toast({
+            title: 'Audio Quota Exceeded',
+            description: 'You have used up your daily free limit. Audio will be disabled for this session.',
+            variant: 'destructive',
+          });
+          setIsTtsDisabled(true);
+        } else {
+          toast({
+            title: 'Audio Error',
+            description: 'Could not generate audio for the response.',
+            variant: 'destructive',
+          });
+        }
+      });
+    }
   }, [apiKeys, toast, isTtsDisabled]);
 
   useEffect(() => {
@@ -185,7 +180,7 @@ export default function InterviewPage() {
       setCurrentQuestion(questionText);
       const initialText = "Hello! I'm your AI interviewer for today's session. It's great to have you here. Are you ready to begin?";
       
-      handleInterviewerResponse(initialText, true);
+      handleInterviewerResponse(initialText);
     }
   }, [apiKeys, level, module, conversation.length, handleInterviewerResponse, interviewPhase]);
 
