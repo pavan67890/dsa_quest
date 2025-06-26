@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Editor from '@monaco-editor/react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +18,7 @@ import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-perfor
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 type ApiKeys = { primaryApiKey: string; backupApiKey: string };
@@ -47,6 +49,7 @@ export default function InterviewPage() {
   const [sentiment, setSentiment] = useState('neutral');
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [userCode, setUserCode] = useState('');
+  const [language, setLanguage] = useState('javascript');
   const [isInterviewOver, setIsInterviewOver] = useState(false);
   const [finalReport, setFinalReport] = useState<any>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -60,12 +63,13 @@ export default function InterviewPage() {
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
+    // Initialize SpeechRecognition only once
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
+    if (SpeechRecognition && !recognitionRef.current) {
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.continuous = false; // Listen for a single utterance
+      recognition.interimResults = false; // We only want the final result
       recognition.lang = 'en-US';
       recognitionRef.current = recognition;
     }
@@ -149,11 +153,13 @@ export default function InterviewPage() {
 
     if (isRecording) {
       recognition.stop();
+      setIsRecording(false);
       return;
     }
 
-    setUserInput(''); // Clear previous input before starting
-
+    setUserInput(''); // Clear previous input before starting a new recording
+    
+    // Assign event handlers fresh each time
     recognition.onstart = () => {
       setIsRecording(true);
     };
@@ -197,7 +203,7 @@ export default function InterviewPage() {
     try {
         let aiResponse;
         if(showCodeEditor) {
-            const review = await provideRealtimeCodeReview({ code: userCode, language: 'javascript', problemDescription: currentQuestion });
+            const review = await provideRealtimeCodeReview({ code: userCode, language: language, problemDescription: currentQuestion });
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
@@ -350,13 +356,37 @@ export default function InterviewPage() {
             <CardContent className="p-4">
               {showCodeEditor && (
                 <div className="mb-4">
-                  <label className="font-bold font-code text-lg">Your Code:</label>
-                  <Textarea
-                    value={userCode}
-                    onChange={(e) => setUserCode(e.target.value)}
-                    placeholder="Write your code here..."
-                    className="font-code bg-black text-green-400 h-48 border-accent"
-                  />
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="font-bold font-code text-lg">Your Code:</label>
+                    <Select value={language} onValueChange={setLanguage}>
+                        <SelectTrigger className="w-[180px] bg-background">
+                            <SelectValue placeholder="Language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="javascript">JavaScript</SelectItem>
+                            <SelectItem value="typescript">TypeScript</SelectItem>
+                            <SelectItem value="python">Python</SelectItem>
+                            <SelectItem value="java">Java</SelectItem>
+                            <SelectItem value="cpp">C++</SelectItem>
+                        </SelectContent>
+                    </Select>
+                  </div>
+                  <Card className="overflow-hidden border-accent">
+                      <Editor
+                          height="30vh"
+                          language={language}
+                          value={userCode}
+                          theme="vs-dark"
+                          onChange={(value) => setUserCode(value || '')}
+                          options={{
+                              fontSize: 14,
+                              minimap: { enabled: false },
+                              scrollBeyondLastLine: false,
+                              wordWrap: 'on',
+                              padding: { top: 10 },
+                          }}
+                      />
+                  </Card>
                 </div>
               )}
               <div className="flex gap-4">
