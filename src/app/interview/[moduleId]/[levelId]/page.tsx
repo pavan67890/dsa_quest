@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -35,9 +35,11 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
   angry:     { src: '/hr/shocked.png' },
 };
 
-export default function InterviewPage({ params }: { params: { moduleId: string, levelId: string }}) {
+export default function InterviewPage() {
   const router = useRouter();
-  const { moduleId, levelId } = params;
+  const params = useParams();
+  const moduleId = Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId;
+  const levelId = Array.isArray(params.levelId) ? params.levelId[0] : params.levelId;
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
@@ -103,7 +105,7 @@ export default function InterviewPage({ params }: { params: { moduleId: string, 
                 if (index === words.length - 1) {
                     resolve();
                 }
-            }, index * 120); // Adjust delay as needed for pacing
+            }, 120); // Adjust delay as needed for pacing
         });
         timeoutIdsRef.current = wordStreamTimeouts;
     });
@@ -359,7 +361,7 @@ export default function InterviewPage({ params }: { params: { moduleId: string, 
   return (
     <>
       <ApiKeyDialog isOpen={isApiKeyDialogOpen} />
-      <div className="relative h-screen w-screen overflow-hidden bg-black flex flex-col">
+      <div className="relative h-dvh w-screen overflow-hidden bg-black flex flex-col">
         <AnimatePresence>
             <motion.div
                 key={sentiment}
@@ -385,7 +387,7 @@ export default function InterviewPage({ params }: { params: { moduleId: string, 
 
         {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
 
-        <div className="relative mt-auto px-4 pb-4 flex flex-col gap-4">
+        <div className="relative mt-auto px-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversation.map((c) => (
