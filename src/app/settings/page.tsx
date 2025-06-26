@@ -18,7 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Shield, Save } from 'lucide-react';
+import { KeyRound, Shield, Save, Terminal } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
   primaryApiKey: z.string().min(1, 'Primary API key is required.'),
@@ -54,9 +55,13 @@ export default function SettingsPage() {
             <CardTitle className="font-headline text-3xl">API Key Settings</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-6">
-              DSA Quest uses a Bring-Your-Own-Key (BYOK) model. Your keys are stored securely on your local machine and never sent to our servers. Get your key from the <a href="https://ai.google.dev/studio" target="_blank" rel="noopener noreferrer" className="underline text-primary">Google AI Studio</a>.
-            </p>
+            <Alert className="mb-6">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Bring-Your-Own-Key (BYOK) Model</AlertTitle>
+                <AlertDescription>
+                This app uses your personal Google AI API keys. They are stored only in your browser and are never sent to our servers. To check your usage, quota, or key status, please visit your <a href="https://ai.google.dev/studio" target="_blank" rel="noopener noreferrer" className="underline text-primary font-semibold">Google AI Studio dashboard</a>.
+                </AlertDescription>
+            </Alert>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
