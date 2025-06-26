@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Editor from '@monaco-editor/react';
@@ -17,7 +17,7 @@ import { provideRealtimeCodeReview } from '@/ai/flows/provide-realtime-code-revi
 import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-performance';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
-import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User } from 'lucide-react';
+import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User, Play, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
@@ -36,7 +36,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const { moduleId, levelId } = useParams() as { moduleId: string, levelId: string };
+  const params = useParams();
+  const moduleId = params.moduleId as string;
+  const levelId = params.levelId as string;
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
@@ -72,8 +74,7 @@ export default function InterviewPage() {
     const conversationId = conversationIdCounter.current++;
     const newConversation: Conversation = { id: conversationId, speaker: 'interviewer', text };
     setConversation(conv => [...conv, newConversation]);
-    setIsAiTyping(false); // Show text immediately
-
+    
     if (!isTtsDisabled) {
       textToSpeech({
         text: text,
@@ -83,9 +84,13 @@ export default function InterviewPage() {
       .then(ttsResponse => {
         if (ttsResponse?.audioDataUri) {
           setAudioUrl(ttsResponse.audioDataUri);
+          setIsAiTyping(false); // Only stop typing when audio is ready
+        } else {
+          setIsAiTyping(false);
         }
       })
       .catch(ttsError => {
+        setIsAiTyping(false);
         console.error('Text-to-speech failed:', ttsError);
         const errorMessage = ttsError instanceof Error ? ttsError.message : String(ttsError);
         if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
@@ -103,6 +108,8 @@ export default function InterviewPage() {
           });
         }
       });
+    } else {
+      setIsAiTyping(false); // If TTS is disabled, stop typing immediately
     }
   }, [apiKeys, toast, isTtsDisabled]);
 
@@ -340,6 +347,13 @@ The main technical question you must ask is provided in the 'question' field. Af
 
   const currentImage = interviewerImages[sentiment.toLowerCase()] || interviewerImages.neutral;
 
+  const handleRunCode = () => {
+    toast({
+      title: 'Running Code',
+      description: 'Code execution is a planned feature and not yet implemented.',
+    });
+  };
+
   const lastUserMessageIndex = conversation.map(c => c.speaker).lastIndexOf('user');
   const lastInterviewerMessageIndex = conversation.map(c => c.speaker).lastIndexOf('interviewer');
 
@@ -381,7 +395,7 @@ The main technical question you must ask is provided in the 'question' field. Af
 
         {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
 
-        <div className="relative mt-auto p-4 pb-0 flex flex-col gap-4">
+        <div className="relative mt-auto p-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversationToDisplay.map((c) => (
@@ -449,18 +463,27 @@ The main technical question you must ask is provided in the 'question' field. Af
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <label className="font-bold font-code text-lg">Your Code:</label>
-                    <Select value={language} onValueChange={setLanguage}>
-                        <SelectTrigger className="w-[180px] bg-background">
-                            <SelectValue placeholder="Language" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="javascript">JavaScript</SelectItem>
-                            <SelectItem value="typescript">TypeScript</SelectItem>
-                            <SelectItem value="python">Python</SelectItem>
-                            <SelectItem value="java">Java</SelectItem>
-                            <SelectItem value="cpp">C++</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={handleRunCode}>
+                            <Play className="mr-2 h-4 w-4" />
+                            Run
+                        </Button>
+                        <Select value={language} onValueChange={setLanguage}>
+                            <SelectTrigger className="w-[180px] bg-background h-9">
+                                <SelectValue placeholder="Language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="javascript">JavaScript</SelectItem>
+                                <SelectItem value="typescript">TypeScript</SelectItem>
+                                <SelectItem value="python">Python</SelectItem>
+                                <SelectItem value="java">Java</SelectItem>
+                                <SelectItem value="cpp">C++</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="icon" onClick={() => setShowCodeEditor(false)} className="h-9 w-9">
+                            <X className="h-5 w-5" />
+                        </Button>
+                    </div>
                   </div>
                   <Card className="overflow-hidden border-accent">
                       <Editor
