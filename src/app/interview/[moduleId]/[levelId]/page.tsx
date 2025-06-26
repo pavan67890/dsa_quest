@@ -36,9 +36,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const params = useParams();
-  const moduleId = String(Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId);
-  const levelId = String(Array.isArray(params.levelId) ? params.levelId[0] : params.levelId);
+  const { moduleId: rawModuleId, levelId: rawLevelId } = useParams();
+  const moduleId = String(rawModuleId);
+  const levelId = String(rawLevelId);
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});

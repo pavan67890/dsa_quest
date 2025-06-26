@@ -23,8 +23,8 @@ type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } }
 
 export default function ModulePage() {
   const router = useRouter();
-  const params = useParams();
-  const moduleId = String(Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId);
+  const { moduleId: rawModuleId } = useParams();
+  const moduleId = String(rawModuleId);
   const module = dsaModules.find((m) => m.id === moduleId);
   
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
