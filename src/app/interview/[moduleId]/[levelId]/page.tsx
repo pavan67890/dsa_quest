@@ -56,11 +56,54 @@ export default function InterviewPage() {
   const module = dsaModules.find((m) => m.id === params.moduleId);
   const level = module?.levels.find((l) => l.id.toString() === params.levelId);
   const dialogueEndRef = useRef<HTMLDivElement>(null);
+  const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
+  useEffect(() => {
+    return () => {
+      timeoutIdsRef.current.forEach(clearTimeout);
+      recognitionRef.current?.stop();
+    };
+  }, []);
+
+  const streamInterviewerResponse = (text: string, isInitialMessage = false) => {
+    timeoutIdsRef.current.forEach(clearTimeout);
+    timeoutIdsRef.current = [];
+
+    textToSpeech(text)
+      .then(res => setAudioUrl(res.audioDataUri))
+      .catch(err => console.error("TTS failed", err));
+
+    const placeholder: Conversation = { speaker: 'interviewer', text: '' };
+    if (isInitialMessage) {
+      setConversation([placeholder]);
+    } else {
+      setConversation(conv => [...conv, placeholder]);
+    }
+
+    const words = text.split(/\s+/);
+    let accumulatedText = '';
+    const wordStreamTimeouts = words.map((word, index) => {
+      return setTimeout(() => {
+        accumulatedText += (index > 0 ? ' ' : '') + word;
+        setConversation(conv => {
+          const updatedConv = [...conv];
+          if (updatedConv.length > 0) {
+            const lastMessage = updatedConv[updatedConv.length - 1];
+            if (lastMessage.speaker === 'interviewer') {
+              lastMessage.text = accumulatedText;
+            }
+          }
+          return updatedConv;
+        });
+      }, index * 120); // Adjust delay as needed for pacing
+    });
+    timeoutIdsRef.current = wordStreamTimeouts;
+  };
+  
   useEffect(() => {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
       setIsApiKeyDialogOpen(true);
-    } else if (module && level) {
+    } else if (module && level && conversation.length === 0) {
       let questionText = level.question;
       if (level.isSurprise) {
         const regularLevels = module.levels.filter(l => !l.isSurprise && l.id !== level.id);
@@ -68,28 +111,18 @@ export default function InterviewPage() {
           const randomIndex = Math.floor(Math.random() * regularLevels.length);
           questionText = regularLevels[randomIndex].question;
         } else {
-          // Fallback if there are no other regular levels
           questionText = "Tell me about yourself and your experience with data structures.";
         }
       }
       setCurrentQuestion(questionText);
       const initialText = `Hello! Welcome to your interview. Let's start with this question: ${questionText}`;
-      setConversation([{ speaker: 'interviewer', text: initialText }]);
-      textToSpeech(initialText)
-        .then(res => setAudioUrl(res.audioDataUri))
-        .catch(err => console.error("Initial TTS failed", err));
+      streamInterviewerResponse(initialText, true);
     }
   }, [apiKeys, level, module]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
-
-  useEffect(() => {
-    return () => {
-      recognitionRef.current?.stop();
-    };
-  }, []);
   
   const handleToggleRecording = () => {
     if (isRecording) {
@@ -156,7 +189,7 @@ export default function InterviewPage() {
     const newConversation = [...conversation, currentConversation];
     setConversation(newConversation);
 
-    const conversationHistory = newConversation.slice(-6, -1).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
+    const conversationHistory = newConversation.slice(-6).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
 
     try {
         let aiResponse;
@@ -183,17 +216,8 @@ export default function InterviewPage() {
         }
       
       const interviewerText = aiResponse.interviewerResponse;
-      setConversation([...newConversation, { speaker: 'interviewer', text: interviewerText }]);
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
-
-      // TTS - fire and forget
-      textToSpeech(interviewerText)
-        .then(ttsResponse => {
-            setAudioUrl(ttsResponse.audioDataUri);
-        })
-        .catch(ttsError => {
-            console.error('TTS Error:', ttsError);
-        });
+      streamInterviewerResponse(interviewerText);
 
       // Simple logic to end interview or show code editor
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
@@ -295,7 +319,7 @@ export default function InterviewPage() {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex flex-col gap-4">
           <motion.div 
-            className="h-32 max-h-32 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2"
+            className="h-28 max-h-28 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -303,7 +327,7 @@ export default function InterviewPage() {
             <AnimatePresence>
               {conversation.map((c, i) => (
                 <motion.div
-                  key={`${c.speaker}-${i}-${c.text.length}`}
+                  key={i}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
