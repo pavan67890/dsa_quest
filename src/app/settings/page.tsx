@@ -55,7 +55,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-6">
-              DSA Quest uses a Bring-Your-Own-Key (BYOK) model. Your keys are stored securely on your local machine and never sent to our servers.
+              DSA Quest uses a Bring-Your-Own-Key (BYOK) model. Your keys are stored securely on your local machine and never sent to our servers. Get your key from the <a href="https://ai.google.dev/studio" target="_blank" rel="noopener noreferrer" className="underline text-primary">Google AI Studio</a>.
             </p>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -66,7 +66,7 @@ export default function SettingsPage() {
                     <FormItem>
                       <FormLabel className="flex items-center gap-2 text-lg"><KeyRound className="w-5 h-5 text-primary" /> Primary API Key</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your primary key (e.g., Mixtral-8x7b)" {...field} />
+                        <Input type="password" placeholder="Enter your Google AI Studio API key" {...field} />
                       </FormControl>
                       <FormDescription>
                         This key will be used for all AI interactions.
@@ -82,7 +82,7 @@ export default function SettingsPage() {
                     <FormItem>
                       <FormLabel className="flex items-center gap-2 text-lg"><Shield className="w-5 h-5 text-accent" /> Backup API Key</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your backup key (e.g., Gemma 7B)" {...field} />
+                        <Input type="password" placeholder="Enter a different Google AI Studio API key" {...field} />
                       </FormControl>
                       <FormDescription>
                         This key will be used as a fallback if the primary key fails.

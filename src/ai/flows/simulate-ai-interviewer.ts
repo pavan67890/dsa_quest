@@ -58,10 +58,7 @@ const simulateAiInterviewerPrompt = ai.definePrompt({
   - nextQuestion: The next question you should ask the user.
   - conversationSummary: A summary of the current interviewer question and user response.
   - sentiment: The sentiment of the conversation (e.g., positive, neutral, negative) for interviewer image changing.
-
-  {{#if codeReview}}
-  - codeReview: Review the code written by the candidate, provide suggestions and improvements. Only fill this field if the interviewer asks for code.
-  {{/if}}
+  - codeReview: If the user response contains code, review the code written by the candidate, provide suggestions and improvements.
 
   Format your response as a JSON object.
 `,

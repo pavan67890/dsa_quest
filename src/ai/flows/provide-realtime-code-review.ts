@@ -28,7 +28,6 @@ const ProvideRealtimeCodeReviewOutputSchema = z.object({
   feedback: z.string().describe('AI-powered feedback on the code snippet, including correctness, efficiency, and style.'),
   revisedCode: z.string().optional().describe('The revised code snippet with AI-powered code improvement suggestions.'),
   explanation: z.string().optional().describe('Explanation of what each of changes mean and why they were made.'),
-  sentiment: z.string().optional().describe('Overall sentiment of the AI towards the code. Can be used to choose interviewer reaction.'),
 });
 
 export type ProvideRealtimeCodeReviewOutput = z.infer<
@@ -48,7 +47,7 @@ const provideRealtimeCodeReviewPrompt = ai.definePrompt({
   prompt: `You are an expert code reviewer specializing in data structures and algorithms.
 
   You will provide feedback to the user on their code, focusing on correctness, efficiency, and style. 
-  You may also suggest code revisions and provide an explanation for the changes. You will also provide the sentiment on the code.
+  You may also suggest code revisions and provide an explanation for the changes.
   Consider the problem the code is trying to solve when providing feedback.
   Try to suggest using more optimal solutions.
 
