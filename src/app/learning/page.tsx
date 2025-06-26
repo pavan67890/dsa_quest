@@ -1,3 +1,6 @@
+
+'use client';
+
 import Link from 'next/link';
 import { GameHeader } from '@/components/GameHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
