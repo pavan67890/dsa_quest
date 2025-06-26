@@ -15,6 +15,8 @@ const AnalyzeInterviewPerformanceInputSchema = z.object({
   interviewTranscript: z
     .string()
     .describe('The complete transcript of the mock interview.'),
+  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
+  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
 });
 
 export type AnalyzeInterviewPerformanceInput = z.infer<
@@ -63,8 +65,18 @@ const analyzeInterviewPerformanceFlow = ai.defineFlow(
     inputSchema: AnalyzeInterviewPerformanceInputSchema,
     outputSchema: AnalyzeInterviewPerformanceOutputSchema,
   },
-  async input => {
-    const {output} = await analyzeInterviewPerformancePrompt(input);
-    return output!;
+  async (input) => {
+    try {
+      const { output } = await analyzeInterviewPerformancePrompt(input, {
+        auth: input.primaryApiKey,
+      });
+      return output!;
+    } catch (e) {
+      console.warn('Primary API key failed for performance analysis, trying backup key.', e);
+      const { output } = await analyzeInterviewPerformancePrompt(input, {
+        auth: input.backupApiKey,
+      });
+      return output!;
+    }
   }
 );

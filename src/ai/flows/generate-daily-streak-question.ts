@@ -18,6 +18,8 @@ const GenerateDailyStreakQuestionInputSchema = z.object({
   completedLevels: z
     .array(z.string())
     .describe('An array of IDs of the levels the user has completed.'),
+  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
+  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
 });
 export type GenerateDailyStreakQuestionInput = z.infer<
   typeof GenerateDailyStreakQuestionInputSchema
@@ -61,8 +63,14 @@ const generateDailyStreakQuestionFlow = ai.defineFlow(
     inputSchema: GenerateDailyStreakQuestionInputSchema,
     outputSchema: GenerateDailyStreakQuestionOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    try {
+      const { output } = await prompt(input, { auth: input.primaryApiKey });
+      return output!;
+    } catch (e) {
+      console.warn('Primary API key failed for daily question, trying backup key.', e);
+      const { output } = await prompt(input, { auth: input.backupApiKey });
+      return output!;
+    }
   }
 );

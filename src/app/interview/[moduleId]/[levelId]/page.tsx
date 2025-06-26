@@ -67,11 +67,7 @@ export default function InterviewPage() {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition && !recognitionRef.current) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false; // Listen for a single utterance
-      recognition.interimResults = false; // We only want the final result
-      recognition.lang = 'en-US';
-      recognitionRef.current = recognition;
+      recognitionRef.current = new SpeechRecognition();
     }
 
     return () => {
@@ -84,7 +80,11 @@ export default function InterviewPage() {
     timeoutIdsRef.current.forEach(clearTimeout);
     timeoutIdsRef.current = [];
 
-    // textToSpeech(text)
+    // textToSpeech({
+    //   text,
+    //   primaryApiKey: apiKeys.primaryApiKey,
+    //   backupApiKey: apiKeys.backupApiKey,
+    // })
     //   .then(res => setAudioUrl(res.audioDataUri))
     //   .catch(err => console.error("TTS failed", err));
 
@@ -150,25 +150,28 @@ export default function InterviewPage() {
       });
       return;
     }
-
+  
     if (isRecording) {
       recognition.stop();
       setIsRecording(false);
       return;
     }
-
-    setUserInput(''); // Clear previous input before starting a new recording
-    
-    // Assign event handlers fresh each time
+  
+    setUserInput('');
+  
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+  
     recognition.onstart = () => {
       setIsRecording(true);
     };
-
+  
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setUserInput(transcript);
     };
-
+  
     recognition.onerror = (event: any) => {
       if (event.error !== 'no-speech' && event.error !== 'aborted') {
         toast({
@@ -179,11 +182,11 @@ export default function InterviewPage() {
       }
       setIsRecording(false);
     };
-    
+  
     recognition.onend = () => {
       setIsRecording(false);
     };
-    
+  
     recognition.start();
   };
 
@@ -259,7 +262,11 @@ export default function InterviewPage() {
     setIsLoading(true);
     const transcript = conversation.map(c => `${c.speaker}: ${c.text}`).join('\n');
     try {
-        const report = await analyzeInterviewPerformance({ interviewTranscript: transcript });
+        const report = await analyzeInterviewPerformance({ 
+            interviewTranscript: transcript,
+            primaryApiKey: apiKeys.primaryApiKey,
+            backupApiKey: apiKeys.backupApiKey,
+        });
         setFinalReport(report);
         setIsInterviewOver(true);
 

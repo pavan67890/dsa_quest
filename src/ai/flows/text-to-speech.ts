@@ -13,7 +13,11 @@ import {googleAI} from '@genkit-ai/googleai';
 import {z} from 'genkit';
 import wav from 'wav';
 
-const TextToSpeechInputSchema = z.string();
+const TextToSpeechInputSchema = z.object({
+  text: z.string().describe('The text to convert to speech.'),
+  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
+  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
+});
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
 const TextToSpeechOutputSchema = z.object({
@@ -58,8 +62,8 @@ const textToSpeechFlow = ai.defineFlow(
     inputSchema: TextToSpeechInputSchema,
     outputSchema: TextToSpeechOutputSchema,
   },
-  async (text) => {
-    const { media } = await ai.generate({
+  async (input) => {
+    const generateOptions = {
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
       config: {
         responseModalities: ['AUDIO'],
@@ -69,8 +73,24 @@ const textToSpeechFlow = ai.defineFlow(
           },
         },
       },
-      prompt: text,
-    });
+      prompt: input.text,
+    };
+
+    let media;
+    try {
+      const result = await ai.generate(
+        { ...generateOptions },
+        { auth: input.primaryApiKey }
+      );
+      media = result.media;
+    } catch (e) {
+      console.warn('Primary API key failed for TTS, trying backup key.', e);
+      const result = await ai.generate(
+        { ...generateOptions },
+        { auth: input.backupApiKey }
+      );
+      media = result.media;
+    }
 
     if (!media) {
       throw new Error('No audio media returned from TTS model.');

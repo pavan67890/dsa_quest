@@ -68,7 +68,12 @@ export default function DailyStreakPage() {
                 return;
             }
 
-            const questionData = await generateDailyStreakQuestion({ completedModules, completedLevels });
+            const questionData = await generateDailyStreakQuestion({ 
+                completedModules, 
+                completedLevels,
+                primaryApiKey: apiKeys.primaryApiKey,
+                backupApiKey: apiKeys.backupApiKey,
+            });
             setDailyQuestion(questionData);
         } catch (error) {
             toast({
