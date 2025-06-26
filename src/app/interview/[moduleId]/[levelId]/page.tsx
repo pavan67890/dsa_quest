@@ -340,7 +340,7 @@ export default function InterviewPage() {
 
         {/* {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />} */}
 
-        <div className="absolute inset-0 p-4 md:p-8 flex flex-col gap-4">
+        <div className="absolute inset-0 px-4 pt-4 md:px-8 md:pt-8 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversation.map((c) => (
@@ -504,5 +504,3 @@ export default function InterviewPage() {
     </>
   );
 }
-
-    
