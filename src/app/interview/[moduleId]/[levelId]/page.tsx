@@ -323,7 +323,7 @@ export default function InterviewPage() {
                 src={currentImage.src}
                 alt="AI Interviewer"
                 fill
-                className="object-cover"
+                className="object-contain"
                 />
                 <div className="absolute inset-0 bg-black/30"></div>
             </motion.div>
