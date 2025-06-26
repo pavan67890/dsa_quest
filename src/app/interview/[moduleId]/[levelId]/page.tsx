@@ -26,11 +26,11 @@ type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: stri
 type InterviewerImageInfo = { src: string };
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
-  neutral:   { src: '/interviewer/calm.png' },
-  curious:   { src: '/interviewer/confused.png' },
-  satisfied: { src: '/interviewer/happy.png' },
-  happy:     { src: '/interviewer/happy.png' },
-  angry:     { src: '/interviewer/shocked.png' },
+  neutral:   { src: '/hr/calm.png' },
+  curious:   { src: '/hr/confused.png' },
+  satisfied: { src: '/hr/happy.png' },
+  happy:     { src: '/hr/happy.png' },
+  angry:     { src: '/hr/shocked.png' },
 };
 
 export default function InterviewPage() {
@@ -67,25 +67,17 @@ export default function InterviewPage() {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition && !recognitionRef.current) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false; // Listen for a single utterance
+        recognitionRef.current.interimResults = false; // We only want the final result
+        recognitionRef.current.lang = 'en-US';
     }
 
     const recognition = recognitionRef.current;
-    if (recognition) {
+    if(recognition) {
         recognition.onresult = (event: any) => {
-            let interimTranscript = '';
-            let finalTranscript = '';
-            for (let i = 0; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
-                }
-            }
-            setUserInput(finalTranscript + interimTranscript);
+            const transcript = event.results[0][0].transcript;
+            setUserInput(transcript);
         };
         recognition.onerror = (event: any) => {
           if (event.error !== 'no-speech' && event.error !== 'aborted') {
