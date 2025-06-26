@@ -36,9 +36,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const { moduleId: rawModuleId, levelId: rawLevelId } = useParams();
-  const moduleId = Array.isArray(rawModuleId) ? rawModuleId[0] : rawModuleId;
-  const levelId = Array.isArray(rawLevelId) ? rawLevelId[0] : rawLevelId;
+  const params = useParams();
+  const moduleId = String(Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId);
+  const levelId = String(Array.isArray(params.levelId) ? params.levelId[0] : params.levelId);
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
@@ -314,7 +314,7 @@ export default function InterviewPage() {
   return (
     <>
       <ApiKeyDialog isOpen={isApiKeyDialogOpen} />
-      <div className="relative h-screen w-screen overflow-hidden bg-black">
+      <div className="relative h-screen w-screen overflow-hidden bg-black flex flex-col justify-end">
         <AnimatePresence>
             <motion.div
                 key={sentiment}
@@ -340,7 +340,7 @@ export default function InterviewPage() {
 
         {/* {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />} */}
 
-        <div className="absolute inset-x-0 bottom-0 px-4 flex flex-col gap-4">
+        <div className="relative inset-x-0 bottom-0 px-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversation.map((c) => (
@@ -402,7 +402,7 @@ export default function InterviewPage() {
                 <div ref={dialogueEndRef} />
             </div>
 
-          <Card className="bg-background/90 backdrop-blur-sm shrink-0">
+          <Card className="bg-background/90 backdrop-blur-sm shrink-0 mb-4">
             <CardContent className="p-4">
               {showCodeEditor && (
                 <div className="mb-4">
