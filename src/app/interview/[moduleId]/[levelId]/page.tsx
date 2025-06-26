@@ -60,48 +60,21 @@ export default function InterviewPage() {
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      // Speech recognition not supported
-      return;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      recognitionRef.current = recognition;
     }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false; // Stop after first pause
-    recognition.interimResults = false; // Only get final results
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
-      setIsRecording(true);
-    };
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setUserInput(transcript);
-    };
-
-    recognition.onerror = (event: any) => {
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
-         toast({
-          title: 'Speech Recognition Error',
-          description: `Error: ${event.error}`,
-          variant: 'destructive',
-        });
-      }
-      setIsRecording(false);
-    };
-    
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-    
-    recognitionRef.current = recognition;
 
     return () => {
       timeoutIdsRef.current.forEach(clearTimeout);
       recognitionRef.current?.abort();
     };
-  }, [toast]);
+  }, []);
 
   const streamInterviewerResponse = (text: string, isInitialMessage = false) => {
     timeoutIdsRef.current.forEach(clearTimeout);
@@ -166,7 +139,7 @@ export default function InterviewPage() {
   const handleToggleRecording = () => {
     const recognition = recognitionRef.current;
     if (!recognition) {
-       toast({
+      toast({
         title: 'Browser Not Supported',
         description: 'Your browser does not support speech recognition.',
         variant: 'destructive',
@@ -176,10 +149,36 @@ export default function InterviewPage() {
 
     if (isRecording) {
       recognition.stop();
-    } else {
-      setUserInput(''); // Clear previous input.
-      recognition.start();
+      return;
     }
+
+    setUserInput(''); // Clear previous input before starting
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setUserInput(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        toast({
+          title: 'Speech Recognition Error',
+          description: `Error: ${event.error}. Please ensure microphone access is allowed.`,
+          variant: 'destructive',
+        });
+      }
+      setIsRecording(false);
+    };
+    
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+    
+    recognition.start();
   };
 
   const handleSendMessage = async () => {
