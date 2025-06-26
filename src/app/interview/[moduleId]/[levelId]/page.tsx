@@ -298,6 +298,7 @@ export default function InterviewPage() {
                 src={currentImage.src}
                 alt="AI Interviewer"
                 fill
+                unoptimized
                 className="object-cover"
                 data-ai-hint={currentImage.hint}
                 />
