@@ -19,19 +19,15 @@ import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack } fro
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 type ApiKeys = { primaryApiKey: string; backupApiKey: string };
 type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: string };
+type InterviewerImageInfo = { src: string; hint: string };
 
-const interviewerImages = {
-  neutral: '/interviewer-neutral.png',
-  curious: '/interviewer-curious.png',
-  satisfied: '/interviewer-satisfied.png',
-  happy: '/interviewer-happy.png',
-  angry: '/interviewer-angry.png',
+const interviewerImages: Record<string, InterviewerImageInfo> = {
+  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'professional woman office' },
+  curious:   { src: `https://placehold.co/1024x1024.png`, hint: 'curious woman thinking' },
+  satisfied: { src: `https://placehold.co/1024x1024.png`, hint: 'satisfied woman smiling' },
+  happy:     { src: `https://placehold.co/1024x1024.png`, hint: 'happy woman celebrating' },
+  angry:     { src: `https://placehold.co/1024x1024.png`, hint: 'annoyed woman frowning' },
 };
-
-// Placeholder images
-Object.keys(interviewerImages).forEach(key => {
-    interviewerImages[key as keyof typeof interviewerImages] = `https://placehold.co/1024x1024.png`;
-});
 
 export default function InterviewPage() {
   const router = useRouter();
@@ -85,7 +81,7 @@ export default function InterviewPage() {
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
-                previousConversationSummary: conversationHistory.slice(0, -1000), // a summary
+                previousConversationSummary: conversationHistory.slice(-2000), // a summary
                 question: level?.question || '',
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
@@ -95,7 +91,7 @@ export default function InterviewPage() {
              aiResponse = await simulateAiInterviewer({
                 userResponse: userInput,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
-                previousConversationSummary: conversationHistory.slice(0, -1000), // a summary
+                previousConversationSummary: conversationHistory.slice(-2000), // a summary
                 question: conversation[conversation.length - 1].text,
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
@@ -172,11 +168,7 @@ export default function InterviewPage() {
   
   if (!module || !level) return null;
 
-  const getSentimentImage = () => {
-    const s = sentiment.toLowerCase();
-    if(interviewerImages.hasOwnProperty(s)) return interviewerImages[s as keyof typeof interviewerImages];
-    return interviewerImages.neutral;
-  }
+  const currentImage = interviewerImages[sentiment.toLowerCase()] || interviewerImages.neutral;
 
   return (
     <>
@@ -192,11 +184,11 @@ export default function InterviewPage() {
                 className="absolute inset-0"
             >
                 <Image
-                src={getSentimentImage()}
+                src={currentImage.src}
                 alt="AI Interviewer"
-                layout="fill"
-                objectFit="cover"
-                data-ai-hint="professional woman office"
+                fill
+                className="object-cover"
+                data-ai-hint={currentImage.hint}
                 />
                 <div className="absolute inset-0 bg-black/30"></div>
             </motion.div>

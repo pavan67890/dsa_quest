@@ -1,5 +1,3 @@
-// 'use server';
-
 /**
  * @fileOverview This file defines a Genkit flow for providing real-time code review during a DSA interview simulation.
  *
@@ -92,4 +90,3 @@ const provideRealtimeCodeReviewFlow = ai.defineFlow(
     return output!;
   }
 );
-
