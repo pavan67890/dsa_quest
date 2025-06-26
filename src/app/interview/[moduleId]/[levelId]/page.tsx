@@ -2,8 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Editor from '@monaco-editor/react';
@@ -37,8 +36,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const params = useParams<{ moduleId: string; levelId: string }>();
-  const { moduleId, levelId } = params;
+  const params = useParams();
+  const moduleId = String(params.moduleId);
+  const levelId = String(params.levelId);
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
@@ -63,7 +63,7 @@ export default function InterviewPage() {
   const recognitionRef = useRef<any>(null);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isTtsDisabled, setIsTtsDisabled] = useState(false);
-  const [isIcebreakerDone, setIsIcebreakerDone] = useState(false);
+  const [interviewPhase, setInterviewPhase] = useState<'greeting' | 'icebreaker' | 'technical'>('greeting');
 
   const module = dsaModules.find((m) => m.id === moduleId);
   const level = module?.levels.find((l) => l.id.toString() === levelId);
@@ -170,7 +170,7 @@ export default function InterviewPage() {
   useEffect(() => {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
       setIsApiKeyDialogOpen(true);
-    } else if (module && level && conversation.length === 0) {
+    } else if (module && level && conversation.length === 0 && interviewPhase === 'greeting') {
       let questionText = level.question;
       if (level.isSurprise) {
         const regularLevels = module.levels.filter(l => !l.isSurprise && l.id !== level.id);
@@ -183,11 +183,11 @@ export default function InterviewPage() {
         }
       }
       setCurrentQuestion(questionText);
-      const initialText = "Hello! I'm your interviewer for today. Thanks for joining me. Before we dive into the technical problem, could you tell me a bit about yourself and your experience with programming?";
+      const initialText = "Hello! I'm your AI interviewer for today's session. It's great to have you here. Are you ready to begin?";
       
       handleInterviewerResponse(initialText, true);
     }
-  }, [apiKeys.primaryApiKey, apiKeys.backupApiKey, level, module, conversation.length, handleInterviewerResponse]);
+  }, [apiKeys, level, module, conversation.length, handleInterviewerResponse, interviewPhase]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -211,7 +211,20 @@ export default function InterviewPage() {
     try {
         let aiResponse;
         
-        if (!isIcebreakerDone) {
+        if (interviewPhase === 'greeting') {
+            aiResponse = await simulateAiInterviewer({
+                userResponse: userInput,
+                interviewerPrompt: `You are a friendly technical interviewer. The user has just confirmed they are ready to start. Your task is to:
+1. Respond positively (e.g., "Excellent!", "Great to hear!").
+2. Ask the user to briefly introduce themselves and their experience with programming.
+This is an icebreaker question before the main technical problem. Keep your response concise.`,
+                previousConversationSummary: conversationHistory,
+                question: '', // No technical question yet
+                primaryApiKey: apiKeys.primaryApiKey,
+                backupApiKey: apiKeys.backupApiKey,
+            });
+            setInterviewPhase('icebreaker');
+        } else if (interviewPhase === 'icebreaker') {
             aiResponse = await simulateAiInterviewer({
                 userResponse: userInput,
                 interviewerPrompt: `You are a friendly technical interviewer. The user has just introduced themselves. Your task is to:
@@ -224,7 +237,7 @@ The main technical question you must ask is provided in the 'question' field. Af
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
-            setIsIcebreakerDone(true); // The icebreaker is now done.
+            setInterviewPhase('technical');
         } else if(showCodeEditor) {
             const review = await provideRealtimeCodeReview({
               code: userCode,
@@ -245,7 +258,7 @@ The main technical question you must ask is provided in the 'question' field. Af
         } else {
              aiResponse = await simulateAiInterviewer({
                 userResponse: userInput,
-                interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s answer to a technical question.',
+                interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s answer to a technical question. Provide follow-up questions if needed, or hints if the user is stuck.',
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion,
                 primaryApiKey: apiKeys.primaryApiKey,
@@ -373,7 +386,7 @@ The main technical question you must ask is provided in the 'question' field. Af
 
         {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
 
-        <div className="relative mt-auto p-4 flex flex-col gap-4">
+        <div className="relative mt-auto p-4 pb-0 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversationToDisplay.map((c) => (
