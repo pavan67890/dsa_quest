@@ -17,12 +17,12 @@ import { provideRealtimeCodeReview } from '@/ai/flows/provide-realtime-code-revi
 import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-performance';
 // import { textToSpeech } from '@/ai/flows/text-to-speech'; // Temporarily disabled
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
-import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack } from 'lucide-react';
+import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 type ApiKeys = { primaryApiKey: string; backupApiKey: string };
-type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: string };
+type Conversation = { id: number; speaker: 'interviewer' | 'user'; text: string, code?: string };
 type InterviewerImageInfo = { src: string };
 
 // Using local images from public/hr
@@ -49,6 +49,8 @@ export default function InterviewPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [userInput, setUserInput] = useState('');
   const [conversation, setConversation] = useState<Conversation[]>([]);
+  const conversationIdCounter = useRef(0);
+  const [isAiTyping, setIsAiTyping] = useState(false);
   const [sentiment, setSentiment] = useState('neutral');
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [userCode, setUserCode] = useState('');
@@ -66,7 +68,6 @@ export default function InterviewPage() {
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
-    // Initialize SpeechRecognition only once when the component mounts.
     if (typeof window !== 'undefined' && !recognitionRef.current) {
       const SpeechRecognition =
         (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -100,7 +101,6 @@ export default function InterviewPage() {
       return;
     }
 
-    // Set fresh event handlers each time we start recognition
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       setUserInput(transcript);
@@ -124,45 +124,46 @@ export default function InterviewPage() {
     recognition.start();
   };
 
-  const streamInterviewerResponse = (text: string, isInitialMessage = false) => {
-    timeoutIdsRef.current.forEach(clearTimeout);
-    timeoutIdsRef.current = [];
+  const streamInterviewerResponse = (text: string, isInitialMessage = false): Promise<void> => {
+    return new Promise((resolve) => {
+        timeoutIdsRef.current.forEach(clearTimeout);
+        timeoutIdsRef.current = [];
 
-    // textToSpeech call is disabled due to API limits.
-    // textToSpeech({
-    //   text,
-    //   primaryApiKey: apiKeys.primaryApiKey,
-    //   backupApiKey: apiKeys.backupApiKey,
-    // })
-    //   .then(res => setAudioUrl(res.audioDataUri))
-    //   .catch(err => console.error("TTS failed", err));
+        const words = text.trim().split(/\s+/);
+        if (words.length === 0 || text.trim() === '') {
+            resolve();
+            return;
+        }
 
-    const placeholder: Conversation = { speaker: 'interviewer', text: '' };
-    if (isInitialMessage) {
-      setConversation([placeholder]);
-    } else {
-      setConversation(conv => [...conv, placeholder]);
-    }
+        const conversationId = conversationIdCounter.current++;
+        const placeholder: Conversation = { id: conversationId, speaker: 'interviewer', text: '' };
+        if (isInitialMessage) {
+            setConversation([placeholder]);
+        } else {
+            setConversation(conv => [...conv, placeholder]);
+        }
+        
+        let accumulatedText = '';
+        const wordStreamTimeouts = words.map((word, index) => {
+            return setTimeout(() => {
+                accumulatedText += (index > 0 ? ' ' : '') + word;
+                setConversation(conv => {
+                    const updatedConv = [...conv];
+                    const messageIndex = updatedConv.findIndex(c => c.id === conversationId);
+                    if (messageIndex !== -1) {
+                        updatedConv[messageIndex].text = accumulatedText;
+                    }
+                    return updatedConv;
+                });
 
-    const words = text.split(/\s+/);
-    let accumulatedText = '';
-    const wordStreamTimeouts = words.map((word, index) => {
-      return setTimeout(() => {
-        accumulatedText += (index > 0 ? ' ' : '') + word;
-        setConversation(conv => {
-          const updatedConv = [...conv];
-          if (updatedConv.length > 0) {
-            const lastMessage = updatedConv[updatedConv.length - 1];
-            if (lastMessage.speaker === 'interviewer') {
-              lastMessage.text = accumulatedText;
-            }
-          }
-          return updatedConv;
+                if (index === words.length - 1) {
+                    resolve();
+                }
+            }, index * 120); // Adjust delay as needed for pacing
         });
-      }, index * 120); // Adjust delay as needed for pacing
+        timeoutIdsRef.current = wordStreamTimeouts;
     });
-    timeoutIdsRef.current = wordStreamTimeouts;
-  };
+};
   
   useEffect(() => {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
@@ -183,11 +184,11 @@ export default function InterviewPage() {
       const initialText = `Hello! Welcome to your interview. Let's start with this question: ${questionText}`;
       streamInterviewerResponse(initialText, true);
     }
-  }, [apiKeys, level, module, conversation.length]);
+  }, [apiKeys, level, module]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversation]);
+  }, [conversation, isAiTyping]);
 
   const handleSendMessage = async () => {
     if (isRecording) {
@@ -196,11 +197,13 @@ export default function InterviewPage() {
     if (!userInput.trim() && !userCode.trim()) return;
     setIsLoading(true);
 
-    const currentConversation: Conversation = { speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
-    const newConversation = [...conversation, currentConversation];
-    setConversation(newConversation);
+    const currentConversation: Conversation = { id: conversationIdCounter.current++, speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
+    setConversation(conv => [...conv, currentConversation]);
+    setUserInput('');
+    setUserCode('');
+    setIsAiTyping(true);
 
-    const conversationHistory = newConversation.slice(-6).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
+    const conversationHistory = [...conversation, currentConversation].slice(-6).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
 
     try {
         let aiResponse;
@@ -226,15 +229,16 @@ export default function InterviewPage() {
                 userResponse: userInput,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
                 previousConversationSummary: conversationHistory,
-                question: conversation[conversation.length - 2]?.text || currentQuestion,
+                question: conversation[conversation.length - 1]?.text || currentQuestion,
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
         }
       
+      setIsAiTyping(false);
       const interviewerText = aiResponse.interviewerResponse;
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
-      streamInterviewerResponse(interviewerText);
+      await streamInterviewerResponse(interviewerText);
 
       // Simple logic to end interview or show code editor
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
@@ -245,14 +249,13 @@ export default function InterviewPage() {
       }
 
     } catch (error) {
+      setIsAiTyping(false);
       toast({
         title: 'AI Error',
         description: 'Could not get a response from the AI. Check your API keys or try again.',
         variant: 'destructive',
       });
     } finally {
-      setUserInput('');
-      setUserCode('');
       setIsLoading(false);
     }
   };
@@ -338,29 +341,66 @@ export default function InterviewPage() {
         {/* {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />} */}
 
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex flex-col gap-4">
-          <motion.div 
-            className="h-28 max-h-28 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <AnimatePresence>
-              {conversation.map((c, i) => (
-                <motion.div
-                  key={`${i}-${c.speaker}-${c.text.length}`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className={c.speaker === 'user' ? 'text-accent' : ''}
-                >
-                  <strong className="capitalize font-headline">{c.speaker}:</strong> {c.text}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            {isLoading && <Loader className="animate-spin h-5 w-5" />}
-            <div ref={dialogueEndRef} />
-          </motion.div>
+            <div className="h-48 max-h-48 overflow-y-auto space-y-4 pr-4">
+                <AnimatePresence>
+                    {conversation.map((c) => (
+                        <motion.div
+                            key={c.id}
+                            layout
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            className={`flex items-end gap-2 ${c.speaker === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                            {c.speaker === 'interviewer' && (
+                                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                                    <Sparkles className="w-4 h-4 text-primary-foreground" />
+                                </div>
+                            )}
+                            <div
+                                className={`max-w-xl rounded-xl px-4 py-3 shadow-md ${
+                                    c.speaker === 'user'
+                                        ? 'bg-accent text-accent-foreground rounded-br-none'
+                                        : 'bg-black/80 backdrop-blur-sm text-white rounded-bl-none'
+                                }`}
+                            >
+                                <p className="font-body text-base">{c.text}</p>
+                                {c.code && (
+                                    <div className="mt-2 text-xs bg-black/50 p-2 rounded font-code">
+                                        <pre><code>{c.code}</code></pre>
+                                    </div>
+                                )}
+                            </div>
+                            {c.speaker === 'user' && (
+                                <div className="w-8 h-8 rounded-full bg-card flex items-center justify-center shrink-0">
+                                    <User className="w-4 h-4 text-card-foreground" />
+                                </div>
+                            )}
+                        </motion.div>
+                    ))}
+                    {isAiTyping && (
+                        <motion.div
+                            key="typing-indicator"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-end gap-2 justify-start"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                                <Sparkles className="w-4 h-4 text-primary-foreground" />
+                            </div>
+                            <div className="max-w-md rounded-xl px-4 py-3 bg-black/80 backdrop-blur-sm text-white rounded-bl-none shadow-md">
+                                <div className="flex gap-1.5 items-center">
+                                    <span className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                    <span className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                    <span className="h-2 w-2 bg-white rounded-full animate-bounce"></span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                <div ref={dialogueEndRef} />
+            </div>
 
           <Card className="bg-background/90 backdrop-blur-sm">
             <CardContent className="p-4">
