@@ -36,9 +36,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const params = useParams();
-  const moduleId = Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId;
-  const levelId = Array.isArray(params.levelId) ? params.levelId[0] : params.levelId;
+  const { moduleId: rawModuleId, levelId: rawLevelId } = useParams();
+  const moduleId = Array.isArray(rawModuleId) ? rawModuleId[0] : rawModuleId;
+  const levelId = Array.isArray(rawLevelId) ? rawLevelId[0] : rawLevelId;
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
@@ -340,7 +340,7 @@ export default function InterviewPage() {
 
         {/* {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />} */}
 
-        <div className="absolute inset-0 px-4 pt-4 md:px-8 md:pt-8 flex flex-col gap-4">
+        <div className="absolute inset-x-0 bottom-0 px-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversation.map((c) => (
@@ -493,7 +493,7 @@ export default function InterviewPage() {
                         <div><strong className="text-primary">Summary:</strong> {finalReport.summary}</div>
                         <div><strong className="text-primary">Strengths:</strong> {finalReport.strengths}</div>
                         <div><strong className="text-primary">Areas for Improvement:</strong> {finalReport.weaknesses}</div>
-                        <Button onClick={() => router.push(`/learning/${module.id}`)} className="w-full" size="lg">
+                        <Button onClick={() => router.push(`/learning/${moduleId}`)} className="w-full" size="lg">
                             <SkipForward className="mr-2 h-4 w-4" /> Continue
                         </Button>
                     </CardContent>
