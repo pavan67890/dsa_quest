@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { dsaModules } from '@/lib/dsa-modules';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
@@ -23,11 +23,11 @@ type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: stri
 type InterviewerImageInfo = { src: string; hint: string };
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
-  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'professional woman office' },
-  curious:   { src: `https://placehold.co/1024x1024.png`, hint: 'curious woman thinking' },
-  satisfied: { src: `https://placehold.co/1024x1024.png`, hint: 'satisfied woman smiling' },
-  happy:     { src: `https://placehold.co/1024x1024.png`, hint: 'happy woman celebrating' },
-  angry:     { src: `https://placehold.co/1024x1024.png`, hint: 'annoyed woman frowning' },
+  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'anime interviewer' },
+  curious:   { src: `https://placehold.co/1024x1024.png`, hint: 'curious anime' },
+  satisfied: { src: `https://placehold.co/1024x1024.png`, hint: 'satisfied anime' },
+  happy:     { src: `https://placehold.co/1024x1024.png`, hint: 'happy anime' },
+  angry:     { src: `https://placehold.co/1024x1024.png`, hint: 'annoyed anime' },
 };
 
 export default function InterviewPage() {
@@ -143,7 +143,7 @@ export default function InterviewPage() {
     const newConversation = [...conversation, currentConversation];
     setConversation(newConversation);
 
-    const conversationHistory = newConversation.map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
+    const conversationHistory = newConversation.slice(-5).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
 
     try {
         let aiResponse;
@@ -289,7 +289,7 @@ export default function InterviewPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
                   className={c.speaker === 'user' ? 'text-accent' : ''}
                 >
                   <strong className="capitalize font-headline">{c.speaker}:</strong> {c.text}
