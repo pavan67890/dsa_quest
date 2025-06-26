@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -68,6 +68,73 @@ export default function InterviewPage() {
   const dialogueEndRef = useRef<HTMLDivElement>(null);
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
+  const streamInterviewerResponse = useCallback((text: string, isInitialMessage = false): Promise<void> => {
+    return new Promise((resolve) => {
+        timeoutIdsRef.current.forEach(clearTimeout);
+        timeoutIdsRef.current = [];
+
+        const words = text.trim().split(/\s+/);
+        if (words.length === 0 || text.trim() === '') {
+            resolve();
+            return;
+        }
+
+        const conversationId = conversationIdCounter.current++;
+        const placeholder: Conversation = { id: conversationId, speaker: 'interviewer', text: '' };
+        if (isInitialMessage) {
+            setConversation([placeholder]);
+        } else {
+            setConversation(conv => [...conv, placeholder]);
+        }
+        
+        let accumulatedText = '';
+        const wordStreamTimeouts = words.map((word, index) => {
+            return setTimeout(() => {
+                accumulatedText += (index > 0 ? ' ' : '') + word;
+                setConversation(conv => {
+                    const updatedConv = [...conv];
+                    const messageIndex = updatedConv.findIndex(c => c.id === conversationId);
+                    if (messageIndex !== -1) {
+                        updatedConv[messageIndex].text = accumulatedText;
+                    }
+                    return updatedConv;
+                });
+
+                if (index === words.length - 1) {
+                    resolve();
+                }
+            }, index * 120); // Adjust delay as needed for pacing
+        });
+        timeoutIdsRef.current = wordStreamTimeouts;
+    });
+  }, []);
+
+  const handleInterviewerResponse = useCallback((text: string, isInitialMessage = false) => {
+    setIsAiTyping(false);
+
+    // Fetch TTS audio first.
+    textToSpeech({
+        text: text,
+        primaryApiKey: apiKeys.primaryApiKey,
+        backupApiKey: apiKeys.backupApiKey,
+    }).then(ttsResponse => {
+        // Once audio is ready, start text animation and play audio simultaneously.
+        streamInterviewerResponse(text, isInitialMessage);
+        if (ttsResponse.audioDataUri) {
+          setAudioUrl(ttsResponse.audioDataUri);
+        }
+    }).catch(ttsError => {
+        // Fallback if TTS fails, just stream the text.
+        console.error('Text-to-speech failed:', ttsError);
+        streamInterviewerResponse(text, isInitialMessage);
+        toast({
+          title: 'Audio Error',
+          description: 'Could not generate audio for the interviewer response.',
+          variant: 'destructive',
+        });
+    });
+  }, [apiKeys, streamInterviewerResponse, toast]);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && !recognitionRef.current) {
       const SpeechRecognition =
@@ -124,52 +191,12 @@ export default function InterviewPage() {
     setIsRecording(true);
     recognition.start();
   };
-
-  const streamInterviewerResponse = (text: string, isInitialMessage = false): Promise<void> => {
-    return new Promise((resolve) => {
-        timeoutIdsRef.current.forEach(clearTimeout);
-        timeoutIdsRef.current = [];
-
-        const words = text.trim().split(/\s+/);
-        if (words.length === 0 || text.trim() === '') {
-            resolve();
-            return;
-        }
-
-        const conversationId = conversationIdCounter.current++;
-        const placeholder: Conversation = { id: conversationId, speaker: 'interviewer', text: '' };
-        if (isInitialMessage) {
-            setConversation([placeholder]);
-        } else {
-            setConversation(conv => [...conv, placeholder]);
-        }
-        
-        let accumulatedText = '';
-        const wordStreamTimeouts = words.map((word, index) => {
-            return setTimeout(() => {
-                accumulatedText += (index > 0 ? ' ' : '') + word;
-                setConversation(conv => {
-                    const updatedConv = [...conv];
-                    const messageIndex = updatedConv.findIndex(c => c.id === conversationId);
-                    if (messageIndex !== -1) {
-                        updatedConv[messageIndex].text = accumulatedText;
-                    }
-                    return updatedConv;
-                });
-
-                if (index === words.length - 1) {
-                    resolve();
-                }
-            }, index * 120); // Adjust delay as needed for pacing
-        });
-        timeoutIdsRef.current = wordStreamTimeouts;
-    });
-};
   
   useEffect(() => {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (module && level && conversation.length === 0) {
+      setIsAiTyping(true); // Show typing indicator for initial message
       let questionText = level.question;
       if (level.isSurprise) {
         const regularLevels = module.levels.filter(l => !l.isSurprise && l.id !== level.id);
@@ -183,9 +210,10 @@ export default function InterviewPage() {
       }
       setCurrentQuestion(questionText);
       const initialText = `Hello! Welcome to your interview. Let's start with this question: ${questionText}`;
-      streamInterviewerResponse(initialText, true);
+      
+      handleInterviewerResponse(initialText, true);
     }
-  }, [apiKeys, level, module]);
+  }, [apiKeys, level, module, conversation.length, handleInterviewerResponse]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -237,28 +265,10 @@ export default function InterviewPage() {
             });
         }
       
-      setIsAiTyping(false);
       const interviewerText = aiResponse.interviewerResponse;
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
       
-      // Start text streaming and TTS concurrently
-      streamInterviewerResponse(interviewerText);
-      textToSpeech({
-        text: interviewerText,
-        primaryApiKey: apiKeys.primaryApiKey,
-        backupApiKey: apiKeys.backupApiKey,
-      }).then(ttsResponse => {
-        if (ttsResponse.audioDataUri) {
-          setAudioUrl(ttsResponse.audioDataUri);
-        }
-      }).catch(ttsError => {
-        console.error('Text-to-speech failed:', ttsError);
-        toast({
-          title: 'Audio Error',
-          description: 'Could not generate audio for the interviewer response.',
-          variant: 'destructive',
-        });
-      });
+      handleInterviewerResponse(interviewerText);
 
       // Simple logic to end interview or show code editor
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
