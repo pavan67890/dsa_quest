@@ -51,6 +51,7 @@ export default function InterviewPage() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const finalTranscriptRef = useRef('');
   const [currentQuestion, setCurrentQuestion] = useState('');
 
   const module = dsaModules.find((m) => m.id === params.moduleId);
@@ -59,11 +60,52 @@ export default function InterviewPage() {
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
+    // Initialize SpeechRecognition
+    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      const recognition = recognitionRef.current;
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setIsRecording(true);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.onerror = (event: any) => {
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          toast({
+            title: 'Speech Recognition Error',
+            description: `An error occurred: ${event.error}`,
+            variant: 'destructive',
+          });
+        }
+      };
+
+      recognition.onresult = (event: any) => {
+        let interim_transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript_piece = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscriptRef.current += transcript_piece;
+          } else {
+            interim_transcript += transcript_piece;
+          }
+        }
+        setUserInput(finalTranscriptRef.current + interim_transcript);
+      };
+    }
+
     return () => {
       timeoutIdsRef.current.forEach(clearTimeout);
       recognitionRef.current?.abort();
     };
-  }, []);
+  }, [toast]);
 
   const streamInterviewerResponse = (text: string, isInitialMessage = false) => {
     timeoutIdsRef.current.forEach(clearTimeout);
@@ -125,14 +167,8 @@ export default function InterviewPage() {
   }, [conversation]);
   
   const handleToggleRecording = () => {
-    if (isRecording) {
-      recognitionRef.current?.stop();
-      return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast({
+    if (!recognitionRef.current) {
+       toast({
         title: 'Browser Not Supported',
         description: 'Your browser does not support speech recognition.',
         variant: 'destructive',
@@ -140,39 +176,13 @@ export default function InterviewPage() {
       return;
     }
 
-    recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = true;
-    recognitionRef.current.lang = 'en-US';
-
-    recognitionRef.current.onstart = () => {
-      setIsRecording(true);
-    };
-
-    recognitionRef.current.onend = () => {
-      setIsRecording(false);
-    };
-
-    recognitionRef.current.onerror = (event: any) => {
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        toast({
-          title: 'Speech Recognition Error',
-          description: `An error occurred: ${event.error}`,
-          variant: 'destructive',
-        });
-      }
-    };
-
-    recognitionRef.current.onresult = (event: any) => {
-      const transcript = Array.from(event.results)
-        .map((result: any) => result[0])
-        .map((result) => result.transcript)
-        .join('');
-      setUserInput(transcript);
-    };
-    
-    setUserInput('');
-    recognitionRef.current.start();
+    if (isRecording) {
+      recognitionRef.current.stop();
+    } else {
+      finalTranscriptRef.current = '';
+      setUserInput('');
+      recognitionRef.current.start();
+    }
   };
 
   const handleSendMessage = async () => {
@@ -185,6 +195,7 @@ export default function InterviewPage() {
     const currentConversation: Conversation = { speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
     const newConversation = [...conversation, currentConversation];
     setConversation(newConversation);
+    finalTranscriptRef.current = '';
 
     const conversationHistory = newConversation.slice(-6).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
 
@@ -324,7 +335,7 @@ export default function InterviewPage() {
             <AnimatePresence>
               {conversation.map((c, i) => (
                 <motion.div
-                  key={`${i}-${c.speaker}`}
+                  key={`${i}-${c.speaker}-${c.text.length}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
