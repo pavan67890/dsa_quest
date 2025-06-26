@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -98,9 +99,9 @@ export default function InterviewPage() {
     timeoutIdsRef.current.forEach(clearTimeout);
     timeoutIdsRef.current = [];
 
-    textToSpeech(text)
-      .then(res => setAudioUrl(res.audioDataUri))
-      .catch(err => console.error("TTS failed", err));
+    // textToSpeech(text)
+    //   .then(res => setAudioUrl(res.audioDataUri))
+    //   .catch(err => console.error("TTS failed", err));
 
     const placeholder: Conversation = { speaker: 'interviewer', text: '' };
     if (isInitialMessage) {
