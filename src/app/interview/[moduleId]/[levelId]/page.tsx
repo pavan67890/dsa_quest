@@ -37,8 +37,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 export default function InterviewPage() {
   const router = useRouter();
   const params = useParams();
-  const moduleId = String(params.moduleId ?? '');
-  const levelId = String(params.levelId ?? '');
+  const moduleId = Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId;
+  const levelId = Array.isArray(params.levelId) ? params.levelId[0] : params.levelId;
+
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
@@ -239,25 +240,25 @@ export default function InterviewPage() {
       setIsAiTyping(false);
       const interviewerText = aiResponse.interviewerResponse;
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
-      await streamInterviewerResponse(interviewerText);
-
-      try {
-        const ttsResponse = await textToSpeech({
-          text: interviewerText,
-          primaryApiKey: apiKeys.primaryApiKey,
-          backupApiKey: apiKeys.backupApiKey,
-        });
+      
+      // Start text streaming and TTS concurrently
+      streamInterviewerResponse(interviewerText);
+      textToSpeech({
+        text: interviewerText,
+        primaryApiKey: apiKeys.primaryApiKey,
+        backupApiKey: apiKeys.backupApiKey,
+      }).then(ttsResponse => {
         if (ttsResponse.audioDataUri) {
           setAudioUrl(ttsResponse.audioDataUri);
         }
-      } catch (ttsError) {
+      }).catch(ttsError => {
         console.error('Text-to-speech failed:', ttsError);
         toast({
           title: 'Audio Error',
           description: 'Could not generate audio for the interviewer response.',
           variant: 'destructive',
         });
-      }
+      });
 
       // Simple logic to end interview or show code editor
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
