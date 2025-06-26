@@ -383,7 +383,7 @@ export default function InterviewPage() {
                   </div>
                   <Card className="overflow-hidden border-accent">
                       <Editor
-                          height="30vh"
+                          height="20vh"
                           language={language}
                           value={userCode}
                           theme="vs-dark"
