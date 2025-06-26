@@ -1,15 +1,25 @@
 'use client';
 
+import type { LucideProps } from 'lucide-react';
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { GameHeader } from '@/components/GameHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Medal, ShieldCheck, Star } from 'lucide-react';
 
-const allBadges = [
-  { id: 'arrays', name: 'Array Alchemist', icon: <Star className="h-8 w-8 text-yellow-400" />, description: 'Mastered the Arrays module.' },
-  { id: 'strings', name: 'String Sensei', icon: <Medal className="h-8 w-8 text-orange-400" />, description: 'Mastered the Strings module.' },
-  { id: 'recursion', name: 'Recursion Ruler', icon: <ShieldCheck className="h-8 w-8 text-purple-400" />, description: 'Mastered the Recursion module.' },
+type BadgeInfo = {
+  id: string;
+  name: string;
+  Icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
+  className: string;
+  description: string;
+};
+
+const allBadges: BadgeInfo[] = [
+  { id: 'arrays', name: 'Array Alchemist', Icon: Star, className: 'text-yellow-400', description: 'Mastered the Arrays module.' },
+  { id: 'strings', name: 'String Sensei', Icon: Medal, className: 'text-orange-400', description: 'Mastered the Strings module.' },
+  { id: 'recursion', name: 'Recursion Ruler', Icon: ShieldCheck, className: 'text-purple-400', description: 'Mastered the Recursion module.' },
 ];
 
 export default function AchievementsPage() {
@@ -30,20 +40,22 @@ export default function AchievementsPage() {
                 </p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {allBadges.map((badge) => {
-                    const hasBadge = earnedBadges.includes(badge.id);
+                {allBadges.map(({ id, name, Icon, className, description }) => {
+                    const hasBadge = earnedBadges.includes(id);
                     return (
                     <div
-                        key={badge.id}
+                        key={id}
                         className={`p-6 rounded-lg border-2 flex flex-col items-center justify-center text-center transition-all duration-300 ${
                         hasBadge
                             ? 'border-primary bg-primary/10 shadow-lg'
                             : 'border-dashed bg-muted/50 filter grayscale opacity-60'
                         }`}
                     >
-                        <div className="mb-4">{badge.icon}</div>
-                        <h3 className="text-lg font-bold font-headline">{badge.name}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">{badge.description}</p>
+                        <div className="mb-4">
+                            <Icon className={`h-8 w-8 ${className}`} />
+                        </div>
+                        <h3 className="text-lg font-bold font-headline">{name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{description}</p>
                         {hasBadge && (
                             <Badge variant="default" className="mt-4 bg-primary">Unlocked</Badge>
                         )}
