@@ -61,33 +61,41 @@ export default function InterviewPage() {
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      const recognition = recognitionRef.current;
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => setIsRecording(true);
-      recognition.onend = () => setIsRecording(false);
-      recognition.onerror = (event: any) => {
-        if (event.error !== 'no-speech' && event.error !== 'aborted') {
-          toast({
-            title: 'Speech Recognition Error',
-            description: `An error occurred: ${event.error}`,
-            variant: 'destructive',
-          });
-        }
-      };
-
-      recognition.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result) => result.transcript)
-          .join('');
-        setUserInput(transcript);
-      };
+    if (!SpeechRecognition) {
+      // Speech recognition not supported
+      return;
     }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false; // Stop after first pause
+    recognition.interimResults = false; // Only get final results
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setUserInput(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+         toast({
+          title: 'Speech Recognition Error',
+          description: `Error: ${event.error}`,
+          variant: 'destructive',
+        });
+      }
+      setIsRecording(false);
+    };
+    
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+    
+    recognitionRef.current = recognition;
 
     return () => {
       timeoutIdsRef.current.forEach(clearTimeout);
@@ -156,7 +164,8 @@ export default function InterviewPage() {
   }, [conversation]);
   
   const handleToggleRecording = () => {
-    if (!recognitionRef.current) {
+    const recognition = recognitionRef.current;
+    if (!recognition) {
        toast({
         title: 'Browser Not Supported',
         description: 'Your browser does not support speech recognition.',
@@ -166,10 +175,10 @@ export default function InterviewPage() {
     }
 
     if (isRecording) {
-      recognitionRef.current.stop();
+      recognition.stop();
     } else {
-      setUserInput('');
-      recognitionRef.current.start();
+      setUserInput(''); // Clear previous input.
+      recognition.start();
     }
   };
 
