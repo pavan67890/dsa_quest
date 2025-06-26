@@ -23,11 +23,11 @@ type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: stri
 type InterviewerImageInfo = { src: string; hint: string };
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
-  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'anime interviewer neutral' },
-  curious:   { src: `https://placehold.co/1024x1024.png`, hint: 'curious anime' },
-  satisfied: { src: `https://placehold.co/1024x1024.png`, hint: 'satisfied anime' },
-  happy:     { src: `https://placehold.co/1024x1024.png`, hint: 'happy anime' },
-  angry:     { src: `https://placehold.co/1024x1024.png`, hint: 'annoyed anime' },
+  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'anime woman office' },
+  curious:   { src: `https://placehold.co/1024x1024.png`, hint: 'curious anime woman' },
+  satisfied: { src: `https://placehold.co/1024x1024.png`, hint: 'satisfied anime woman' },
+  happy:     { src: `https://placehold.co/1024x1024.png`, hint: 'happy anime woman' },
+  angry:     { src: `https://placehold.co/1024x1024.png`, hint: 'annoyed anime woman' },
 };
 
 export default function InterviewPage() {
@@ -67,14 +67,8 @@ export default function InterviewPage() {
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
-      recognition.onstart = () => {
-        setIsRecording(true);
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-      };
-
+      recognition.onstart = () => setIsRecording(true);
+      recognition.onend = () => setIsRecording(false);
       recognition.onerror = (event: any) => {
         if (event.error !== 'no-speech' && event.error !== 'aborted') {
           toast({
@@ -142,9 +136,10 @@ export default function InterviewPage() {
       let questionText = level.question;
       if (level.isSurprise) {
         const regularLevels = module.levels.filter(l => !l.isSurprise && l.id !== level.id);
-        if (regularLevels.length > 0) {
-          const randomIndex = Math.floor(Math.random() * regularLevels.length);
-          questionText = regularLevels[randomIndex].question;
+        const availableQuestions = regularLevels.map(l => l.question).filter(Boolean);
+        if (availableQuestions.length > 0) {
+          const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+          questionText = availableQuestions[randomIndex];
         } else {
           questionText = "Tell me about yourself and your experience with data structures.";
         }
@@ -208,7 +203,7 @@ export default function InterviewPage() {
                 userResponse: userInput,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
                 previousConversationSummary: conversationHistory,
-                question: conversation[conversation.length - 1].text,
+                question: conversation[conversation.length - 2]?.text || currentQuestion,
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
