@@ -203,7 +203,13 @@ export default function InterviewPage() {
     try {
         let aiResponse;
         if(showCodeEditor) {
-            const review = await provideRealtimeCodeReview({ code: userCode, language: language, problemDescription: currentQuestion });
+            const review = await provideRealtimeCodeReview({
+              code: userCode,
+              language: language,
+              problemDescription: currentQuestion,
+              primaryApiKey: apiKeys.primaryApiKey,
+              backupApiKey: apiKeys.backupApiKey,
+            });
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',

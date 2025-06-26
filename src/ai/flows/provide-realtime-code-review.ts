@@ -16,6 +16,8 @@ const ProvideRealtimeCodeReviewInputSchema = z.object({
   language: z.string().describe('The programming language of the code snippet.'),
   problemDescription: z.string().describe('A brief description of the problem the code is trying to solve.'),
   previousFeedback: z.string().optional().describe('Previous feedback provided to the user on their code. Useful for maintaining context.'),
+  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
+  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
 });
 
 export type ProvideRealtimeCodeReviewInput = z.infer<
@@ -85,8 +87,18 @@ const provideRealtimeCodeReviewFlow = ai.defineFlow(
     inputSchema: ProvideRealtimeCodeReviewInputSchema,
     outputSchema: ProvideRealtimeCodeReviewOutputSchema,
   },
-  async input => {
-    const {output} = await provideRealtimeCodeReviewPrompt(input);
-    return output!;
+  async (input) => {
+    try {
+      const { output } = await provideRealtimeCodeReviewPrompt(input, {
+        auth: input.primaryApiKey,
+      });
+      return output!;
+    } catch (e) {
+      console.warn('Primary API key failed for code review, trying backup key.', e);
+      const { output } = await provideRealtimeCodeReviewPrompt(input, {
+        auth: input.backupApiKey,
+      });
+      return output!;
+    }
   }
 );

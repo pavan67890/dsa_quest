@@ -12,20 +12,20 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SimulateAiInterviewerInputSchema = z.object({
-  userResponse: z.string().describe('The user\'s response to the interviewer\'s question.'),
+  userResponse: z.string().describe("The user's response to the interviewer's question."),
   interviewerPrompt: z.string().describe('The initial prompt or role for the AI interviewer.'),
   previousConversationSummary: z
     .string()
     .describe('A short summary of the previous conversation to maintain context.'),
   question: z.string().describe('The current question asked by the interviewer.'),
-  primaryApiKey: z.string().describe('The user\'s primary API key for the AI model.'),
-  backupApiKey: z.string().describe('The user\'s backup API key for the AI model.'),
+  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
+  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
 });
 
 export type SimulateAiInterviewerInput = z.infer<typeof SimulateAiInterviewerInputSchema>;
 
 const SimulateAiInterviewerOutputSchema = z.object({
-  interviewerResponse: z.string().describe('The AI interviewer\'s response to the user.'),
+  interviewerResponse: z.string().describe("The AI interviewer's response to the user."),
   nextQuestion: z.string().describe('The next question from the AI interviewer.'),
   conversationSummary:
     z.string()
@@ -46,14 +46,14 @@ const simulateAiInterviewerPrompt = ai.definePrompt({
   name: 'simulateAiInterviewerPrompt',
   input: {schema: SimulateAiInterviewerInputSchema},
   output: {schema: SimulateAiInterviewerOutputSchema},
-  prompt: `You are an AI interviewer conducting a mock interview. Your role is to ask relevant questions, provide feedback, and assess the candidate\'s performance.
+  prompt: `You are an AI interviewer conducting a mock interview. Your role is to ask relevant questions, provide feedback, and assess the candidate's performance.
 
   Interviewer Prompt: {{{interviewerPrompt}}}
   Previous Conversation Summary: {{{previousConversationSummary}}}
   Interviewer Question: {{{question}}}
   User Response: {{{userResponse}}}
 
-  Based on the user\'s response, generate:
+  Based on the user's response, generate:
   - interviewerResponse: Your response to the user.
   - nextQuestion: The next question you should ask the user.
   - conversationSummary: A summary of the current interviewer question and user response.
@@ -73,8 +73,18 @@ const simulateAiInterviewerFlow = ai.defineFlow(
     inputSchema: SimulateAiInterviewerInputSchema,
     outputSchema: SimulateAiInterviewerOutputSchema,
   },
-  async input => {
-    const {output} = await simulateAiInterviewerPrompt(input);
-    return output!;
+  async (input) => {
+    try {
+      const { output } = await simulateAiInterviewerPrompt(input, {
+        auth: input.primaryApiKey,
+      });
+      return output!;
+    } catch (e) {
+      console.warn('Primary API key failed for interviewer simulation, trying backup key.', e);
+      const { output } = await simulateAiInterviewerPrompt(input, {
+        auth: input.backupApiKey,
+      });
+      return output!;
+    }
   }
 );
