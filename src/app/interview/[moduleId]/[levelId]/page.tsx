@@ -311,7 +311,7 @@ export default function InterviewPage() {
             <ArrowLeft className="mr-2 h-4 w-4"/> Back to Levels
         </Button>
 
-        {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
+        {/* {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />} */}
 
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex flex-col gap-4">
           <motion.div 
