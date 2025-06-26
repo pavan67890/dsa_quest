@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
 import { provideRealtimeCodeReview } from '@/ai/flows/provide-realtime-code-review';
 import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-performance';
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack } from 'lucide-react';
 
@@ -47,22 +48,34 @@ export default function InterviewPage() {
   const [userCode, setUserCode] = useState('');
   const [isInterviewOver, setIsInterviewOver] = useState(false);
   const [finalReport, setFinalReport] = useState<any>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const module = dsaModules.find((m) => m.id === params.moduleId);
   const level = module?.levels.find((l) => l.id.toString() === params.levelId);
   const dialogueEndRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (level) {
-      setConversation([{ speaker: 'interviewer', text: `Hello! Welcome to your interview. Let's start with this question: ${level.question}` }]);
+      const initialText = `Hello! Welcome to your interview. Let's start with this question: ${level.question}`;
+      setConversation([{ speaker: 'interviewer', text: initialText }]);
+      textToSpeech(initialText)
+        .then(res => setAudioUrl(res.audioDataUri))
+        .catch(err => console.error("Initial TTS failed", err));
     }
   }, [apiKeys, level]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
+
+  useEffect(() => {
+    if (audioUrl && audioRef.current) {
+      audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+    }
+  }, [audioUrl]);
   
   const handleSendMessage = async () => {
     if (!userInput.trim() && !userCode.trim()) return;
@@ -81,7 +94,7 @@ export default function InterviewPage() {
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
-                previousConversationSummary: conversationHistory.slice(-2000), // a summary
+                previousConversationSummary: conversationHistory,
                 question: level?.question || '',
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
@@ -91,15 +104,25 @@ export default function InterviewPage() {
              aiResponse = await simulateAiInterviewer({
                 userResponse: userInput,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
-                previousConversationSummary: conversationHistory.slice(-2000), // a summary
+                previousConversationSummary: conversationHistory,
                 question: conversation[conversation.length - 1].text,
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
         }
       
-      setConversation([...newConversation, { speaker: 'interviewer', text: aiResponse.interviewerResponse }]);
+      const interviewerText = aiResponse.interviewerResponse;
+      setConversation([...newConversation, { speaker: 'interviewer', text: interviewerText }]);
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
+
+      // TTS - fire and forget
+      textToSpeech(interviewerText)
+        .then(ttsResponse => {
+            setAudioUrl(ttsResponse.audioDataUri);
+        })
+        .catch(ttsError => {
+            console.error('TTS Error:', ttsError);
+        });
 
       // Simple logic to end interview or show code editor
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
@@ -152,7 +175,6 @@ export default function InterviewPage() {
             const newLives = currentModuleProgress.lives - 1;
             let newProgress;
             if (newLives <= 0) {
-                // Reset progress
                 newProgress = { ...progress, [module!.id]: { unlockedLevel: 1, lives: module!.initialLives }};
             } else {
                 newProgress = { ...progress, [module!.id]: { ...currentModuleProgress, lives: newLives } };
@@ -198,14 +220,25 @@ export default function InterviewPage() {
             <ArrowLeft className="mr-2 h-4 w-4"/> Back to Levels
         </Button>
 
+        <audio ref={audioRef} src={audioUrl || ''} />
+
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex flex-col gap-4">
-          <div className="h-48 max-h-48 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2">
-            {conversation.map((c, i) => (
-              <div key={i} className={c.speaker === 'user' ? 'text-accent' : ''}>
-                <strong className="capitalize font-headline">{c.speaker}:</strong> {c.text}
-              </div>
-            ))}
-             {isLoading && <Loader className="animate-spin h-5 w-5" />}
+          <div className="h-40 max-h-40 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2">
+            <AnimatePresence>
+              {conversation.map((c, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={c.speaker === 'user' ? 'text-accent' : ''}
+                >
+                  <strong className="capitalize font-headline">{c.speaker}:</strong> {c.text}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {isLoading && <Loader className="animate-spin h-5 w-5" />}
             <div ref={dialogueEndRef} />
           </div>
 
