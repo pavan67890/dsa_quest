@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
 import { provideRealtimeCodeReview } from '@/ai/flows/provide-realtime-code-review';
 import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-performance';
-import { textToSpeech } from '@/ai/flows/text-to-speech';
+// import { textToSpeech } from '@/ai/flows/text-to-speech'; // Temporarily disabled
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,6 +25,7 @@ type ApiKeys = { primaryApiKey: string; backupApiKey: string };
 type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: string };
 type InterviewerImageInfo = { src: string };
 
+// Using local images from public/hr
 const interviewerImages: Record<string, InterviewerImageInfo> = {
   neutral:   { src: '/hr/calm.png' },
   curious:   { src: '/hr/confused.png' },
@@ -63,42 +64,23 @@ export default function InterviewPage() {
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
-    // Initialize SpeechRecognition only once
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition && !recognitionRef.current) {
+    // Initialize SpeechRecognition only once when the component mounts.
+    if (typeof window !== 'undefined' && !recognitionRef.current) {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
         recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = false; // Listen for a single utterance
-        recognitionRef.current.interimResults = false; // We only want the final result
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
         recognitionRef.current.lang = 'en-US';
-    }
-
-    const recognition = recognitionRef.current;
-    if(recognition) {
-        recognition.onresult = (event: any) => {
-            const transcript = event.results[0][0].transcript;
-            setUserInput(transcript);
-        };
-        recognition.onerror = (event: any) => {
-          if (event.error !== 'no-speech' && event.error !== 'aborted') {
-            toast({
-              title: 'Speech Recognition Error',
-              description: `Error: ${event.error}. Please ensure microphone access is allowed.`,
-              variant: 'destructive',
-            });
-          }
-          setIsRecording(false);
-        };
-        recognition.onend = () => {
-            setIsRecording(false);
-        };
+      }
     }
 
     return () => {
       timeoutIdsRef.current.forEach(clearTimeout);
-      recognition?.abort();
+      recognitionRef.current?.abort();
     };
-  }, [toast]);
+  }, []);
   
   const handleToggleRecording = () => {
     const recognition = recognitionRef.current;
@@ -113,18 +95,38 @@ export default function InterviewPage() {
   
     if (isRecording) {
       recognition.stop();
-      setIsRecording(false);
-    } else {
-      setUserInput('');
-      recognition.start();
-      setIsRecording(true);
+      return;
     }
+
+    // Set fresh event handlers each time we start recognition
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setUserInput(transcript);
+    };
+    recognition.onerror = (event: any) => {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        toast({
+          title: 'Speech Recognition Error',
+          description: `Error: ${event.error}. Please ensure microphone access is allowed.`,
+          variant: 'destructive',
+        });
+      }
+      setIsRecording(false);
+    };
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    setUserInput('');
+    setIsRecording(true);
+    recognition.start();
   };
 
   const streamInterviewerResponse = (text: string, isInitialMessage = false) => {
     timeoutIdsRef.current.forEach(clearTimeout);
     timeoutIdsRef.current = [];
 
+    // textToSpeech call is disabled due to API limits.
     // textToSpeech({
     //   text,
     //   primaryApiKey: apiKeys.primaryApiKey,
@@ -179,7 +181,7 @@ export default function InterviewPage() {
       const initialText = `Hello! Welcome to your interview. Let's start with this question: ${questionText}`;
       streamInterviewerResponse(initialText, true);
     }
-  }, [apiKeys, level, module]);
+  }, [apiKeys, level, module, conversation.length]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
