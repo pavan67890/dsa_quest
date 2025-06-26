@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { use } from 'react';
+import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Editor from '@monaco-editor/react';
@@ -37,9 +37,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const params = useParams();
-  const moduleId = Array.isArray(params.moduleId) ? params.moduleId[0] : params.moduleId;
-  const levelId = Array.isArray(params.levelId) ? params.levelId[0] : params.levelId;
+  const rawParams = useParams();
+  const moduleId = Array.isArray(rawParams.moduleId) ? rawParams.moduleId[0] : rawParams.moduleId;
+  const levelId = Array.isArray(rawParams.levelId) ? rawParams.levelId[0] : rawParams.levelId;
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
@@ -68,90 +68,48 @@ export default function InterviewPage() {
   const module = dsaModules.find((m) => m.id === moduleId);
   const level = module?.levels.find((l) => l.id.toString() === levelId);
   const dialogueEndRef = useRef<HTMLDivElement>(null);
-  const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
-
-  const streamInterviewerResponse = useCallback((text: string, isInitialMessage = false): Promise<void> => {
-    return new Promise((resolve) => {
-        timeoutIdsRef.current.forEach(clearTimeout);
-        timeoutIdsRef.current = [];
-
-        const words = text.trim().split(/\s+/);
-        if (words.length === 0 || text.trim() === '') {
-            resolve();
-            return;
-        }
-
-        const conversationId = conversationIdCounter.current++;
-        const placeholder: Conversation = { id: conversationId, speaker: 'interviewer', text: '' };
-        if (isInitialMessage) {
-            setConversation([placeholder]);
-        } else {
-            setConversation(conv => [...conv, placeholder]);
-        }
-        
-        let accumulatedText = '';
-        const wordStreamTimeouts = words.map((word, index) => {
-            return setTimeout(() => {
-                accumulatedText += (index > 0 ? ' ' : '') + word;
-                setConversation(conv => {
-                    const updatedConv = [...conv];
-                    const messageIndex = updatedConv.findIndex(c => c.id === conversationId);
-                    if (messageIndex !== -1) {
-                        updatedConv[messageIndex].text = accumulatedText;
-                    }
-                    return updatedConv;
-                });
-
-                if (index === words.length - 1) {
-                    resolve();
-                }
-            }, 120); // Adjust delay as needed for pacing
-        });
-        timeoutIdsRef.current = wordStreamTimeouts;
-    });
-  }, []);
 
   const handleInterviewerResponse = useCallback((text: string, isInitialMessage = false) => {
-    // When the AI has a response, it's no longer "typing". Start streaming text immediately.
-    setIsAiTyping(false); 
-    streamInterviewerResponse(text, isInitialMessage);
+    setIsAiTyping(true);
 
-    if (isTtsDisabled) return;
+    const ttsPromise = isTtsDisabled
+      ? Promise.resolve(null)
+      : textToSpeech({
+          text: text,
+          primaryApiKey: apiKeys.primaryApiKey,
+          backupApiKey: apiKeys.backupApiKey,
+        }).catch(ttsError => {
+          console.error('Text-to-speech failed:', ttsError);
+          const errorMessage = ttsError instanceof Error ? ttsError.message : String(ttsError);
+          if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
+              toast({
+                title: 'Audio Quota Exceeded',
+                description: 'You have used up your daily free limit for text-to-speech. Audio will be disabled for this session.',
+                variant: 'destructive',
+              });
+              setIsTtsDisabled(true);
+          } else {
+              toast({
+                title: 'Audio Error',
+                description: 'Could not generate audio for the response.',
+                variant: 'destructive',
+              });
+          }
+          return null;
+        });
+    
+    ttsPromise.then(ttsResponse => {
+        setIsAiTyping(false);
+        const conversationId = conversationIdCounter.current++;
+        const newConversation: Conversation = { id: conversationId, speaker: 'interviewer', text };
+        setConversation(conv => [...conv, newConversation]);
 
-    // In parallel, start fetching the audio for the response.
-    textToSpeech({
-      text: text,
-      primaryApiKey: apiKeys.primaryApiKey,
-      backupApiKey: apiKeys.backupApiKey,
-    })
-      .then(ttsResponse => {
-        // Once the audio is fetched, set the URL to play it.
-        if (ttsResponse.audioDataUri) {
+        if (ttsResponse?.audioDataUri) {
           setAudioUrl(ttsResponse.audioDataUri);
         }
-      })
-      .catch(ttsError => {
-        // If TTS fails, log the error and show a non-blocking toast. The chat can continue.
-        console.error('Text-to-speech failed:', ttsError);
-        const errorMessage = ttsError instanceof Error ? ttsError.message : String(ttsError);
+    });
 
-        // Check for quota-specific errors
-        if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-            toast({
-              title: 'Audio Quota Exceeded',
-              description: 'You have used up your daily free limit for text-to-speech. Audio will be disabled for this session.',
-              variant: 'destructive',
-            });
-            setIsTtsDisabled(true); // Disable TTS for the remainder of the session
-        } else {
-            toast({
-              title: 'Audio Error',
-              description: 'Could not generate audio for the response.',
-              variant: 'destructive',
-            });
-        }
-      });
-  }, [apiKeys, streamInterviewerResponse, toast, isTtsDisabled]);
+  }, [apiKeys, toast, isTtsDisabled]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !recognitionRef.current) {
@@ -166,7 +124,6 @@ export default function InterviewPage() {
     }
 
     return () => {
-      timeoutIdsRef.current.forEach(clearTimeout);
       recognitionRef.current?.abort();
     };
   }, []);
@@ -214,7 +171,6 @@ export default function InterviewPage() {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (module && level && conversation.length === 0) {
-      setIsAiTyping(true); // Show typing indicator for initial message
       let questionText = level.question;
       if (level.isSurprise) {
         const regularLevels = module.levels.filter(l => !l.isSurprise && l.id !== level.id);
@@ -231,7 +187,7 @@ export default function InterviewPage() {
       
       handleInterviewerResponse(initialText, true);
     }
-  }, [apiKeys, level, module, conversation.length, handleInterviewerResponse]);
+  }, [apiKeys.primaryApiKey, apiKeys.backupApiKey, level, module, conversation.length, handleInterviewerResponse]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -358,6 +314,18 @@ export default function InterviewPage() {
 
   const currentImage = interviewerImages[sentiment.toLowerCase()] || interviewerImages.neutral;
 
+  const lastUserMessageIndex = conversation.map(c => c.speaker).lastIndexOf('user');
+  const lastInterviewerMessageIndex = conversation.map(c => c.speaker).lastIndexOf('interviewer');
+
+  const conversationToDisplay = conversation.filter((c, index) => {
+    // If it's the first message from the interviewer, show it.
+    if (lastUserMessageIndex === -1 && index === lastInterviewerMessageIndex) {
+      return true;
+    }
+    // Otherwise, show only the last message from user and interviewer.
+    return index === lastUserMessageIndex || index === lastInterviewerMessageIndex;
+  });
+
   return (
     <>
       <ApiKeyDialog isOpen={isApiKeyDialogOpen} />
@@ -390,7 +358,7 @@ export default function InterviewPage() {
         <div className="relative mt-auto px-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
-                    {conversation.map((c) => (
+                    {conversationToDisplay.map((c) => (
                         <motion.div
                             key={c.id}
                             layout
