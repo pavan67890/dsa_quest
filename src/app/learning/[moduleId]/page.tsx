@@ -2,7 +2,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { dsaModules } from '@/lib/dsa-modules';
+import type { Module } from '@/lib/dsa-modules';
 import { GameHeader } from '@/components/GameHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -17,7 +17,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 
@@ -25,10 +26,50 @@ export default function ModulePage() {
   const router = useRouter();
   const { moduleId: rawModuleId } = useParams();
   const moduleId = String(rawModuleId);
-  const module = dsaModules.find((m) => m.id === moduleId);
   
+  const [module, setModule] = useState<Module | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  useEffect(() => {
+    fetch('/dsa-modules.json')
+      .then((res) => res.json())
+      .then((data: Module[]) => {
+        const foundModule = data.find((m) => m.id === moduleId);
+        setModule(foundModule);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to load module data:', error);
+        setIsLoading(false);
+      });
+  }, [moduleId]);
+
+  if (isLoading) {
+    return (
+      <div>
+        <GameHeader />
+        <main className="container mx-auto max-w-5xl px-4 py-24">
+          <div className="flex justify-between items-center mb-8">
+              <div>
+                  <Skeleton className="h-12 w-80 mb-2" />
+                  <Skeleton className="h-6 w-96" />
+              </div>
+              <Skeleton className="h-14 w-32" />
+          </div>
+          <Card>
+            <CardContent className="p-8">
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                {[...Array(20)].map((_, i) => <Skeleton key={i} className="aspect-square rounded-lg" />)}
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   if (!module) {
     return (

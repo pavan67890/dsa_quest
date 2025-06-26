@@ -9,7 +9,7 @@ import Editor from '@monaco-editor/react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { dsaModules } from '@/lib/dsa-modules';
+import type { Module, Level } from '@/lib/dsa-modules';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
 import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
@@ -27,7 +27,6 @@ type Conversation = { id: number; speaker: 'interviewer' | 'user'; text: string,
 type InterviewerImageInfo = { src: string };
 type CodeOutput = { output: string; isError: boolean } | null;
 
-// Using local images from public/hr
 const interviewerImages: Record<string, InterviewerImageInfo> = {
   neutral:   { src: '/hr/calm.png' },
   curious:   { src: '/hr/confused.png' },
@@ -48,6 +47,10 @@ export default function InterviewPage() {
   const [xp, setXp] = useLocalStorage('user-xp', 0);
   const [earnedBadges, setEarnedBadges] = useLocalStorage<string[]>('earned-badges', []);
   
+  const [module, setModule] = useState<Module | null>(null);
+  const [level, setLevel] = useState<Level | null>(null);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
   const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userInput, setUserInput] = useState('');
@@ -69,9 +72,23 @@ export default function InterviewPage() {
   const [isRunningCode, setIsRunningCode] = useState(false);
   const [codeOutput, setCodeOutput] = useState<CodeOutput>(null);
 
-  const module = dsaModules.find((m) => m.id === moduleId);
-  const level = module?.levels.find((l) => l.id.toString() === levelId);
   const dialogueEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!moduleId || !levelId) return;
+    setIsDataLoading(true);
+    fetch('/dsa-modules.json')
+      .then((res) => res.json())
+      .then((data: Module[]) => {
+        const foundModule = data.find((m) => m.id === moduleId);
+        const foundLevel = foundModule?.levels.find((l) => l.id.toString() === levelId);
+        setModule(foundModule || null);
+        setLevel(foundLevel || null);
+      })
+      .catch((error) => console.error('Failed to load module data:', error))
+      .finally(() => setIsDataLoading(false));
+  }, [moduleId, levelId]);
+
 
   const handleInterviewerResponse = useCallback((text: string) => {
     setIsAiTyping(true);
@@ -171,6 +188,7 @@ export default function InterviewPage() {
   };
   
   useEffect(() => {
+    if (isDataLoading) return;
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (module && level && conversation.length === 0 && interviewPhase === 'greeting') {
@@ -190,7 +208,7 @@ export default function InterviewPage() {
       
       handleInterviewerResponse(initialText);
     }
-  }, [apiKeys, level, module, conversation.length, handleInterviewerResponse, interviewPhase]);
+  }, [apiKeys, level, module, conversation.length, handleInterviewerResponse, interviewPhase, isDataLoading]);
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -222,7 +240,7 @@ export default function InterviewPage() {
 2. Ask the user to briefly introduce themselves and their experience with programming.
 This is an icebreaker question before the main technical problem. Keep your response concise.`,
                 previousConversationSummary: conversationHistory,
-                question: '', // No technical question yet
+                question: '', 
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
@@ -236,7 +254,7 @@ This is an icebreaker question before the main technical problem. Keep your resp
 3. State the main technical question clearly.
 The main technical question you must ask is provided in the 'question' field. After asking, set the nextQuestion to be an empty string to signify you are waiting for their answer.`,
                 previousConversationSummary: conversationHistory,
-                question: currentQuestion, // This is the stored technical question
+                question: currentQuestion, 
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
@@ -274,7 +292,6 @@ The main technical question you must ask is provided in the 'question' field. Af
       
       handleInterviewerResponse(interviewerText);
 
-      // Simple logic to end interview or show code editor
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
         setShowCodeEditor(true);
       }
@@ -309,7 +326,6 @@ The main technical question you must ask is provided in the 'question' field. Af
         setFinalReport(report);
         setIsInterviewOver(true);
 
-        // Logic for pass/fail
         const passed = report.xpPoints > 50;
         const currentModuleProgress = progress[module!.id] || { unlockedLevel: 1, lives: module!.initialLives };
         
@@ -344,10 +360,6 @@ The main technical question you must ask is provided in the 'question' field. Af
     setIsLoading(false);
   };
   
-  if (!module || !level) return null;
-
-  const currentImage = interviewerImages[sentiment.toLowerCase()] || interviewerImages.neutral;
-
   const handleRunCode = async () => {
     if (!userCode.trim()) return;
     setIsRunningCode(true);
@@ -374,15 +386,32 @@ The main technical question you must ask is provided in the 'question' field. Af
     }
   };
 
+  if (isDataLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen w-screen bg-black text-white">
+        <Loader className="h-10 w-10 animate-spin" />
+        <p className="ml-4 text-xl">Loading Interview...</p>
+      </div>
+    );
+  }
+  
+  if (!module || !level) {
+      return (
+        <div className="flex items-center justify-center h-screen w-screen bg-black text-white">
+            <p className="text-xl">Interview level not found.</p>
+        </div>
+      )
+  }
+
+  const currentImage = interviewerImages[sentiment.toLowerCase()] || interviewerImages.neutral;
+
   const lastUserMessageIndex = conversation.map(c => c.speaker).lastIndexOf('user');
   const lastInterviewerMessageIndex = conversation.map(c => c.speaker).lastIndexOf('interviewer');
 
   const conversationToDisplay = conversation.filter((c, index) => {
-    // If it's the first message from the interviewer, show it.
     if (lastUserMessageIndex === -1 && index === lastInterviewerMessageIndex) {
       return true;
     }
-    // Otherwise, show only the last message from user and interviewer.
     return index === lastUserMessageIndex || index === lastInterviewerMessageIndex;
   });
 

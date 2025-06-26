@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,7 +12,6 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
 import { generateDailyStreakQuestion } from '@/ai/flows/generate-daily-streak-question';
 import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
-import { dsaModules } from '@/lib/dsa-modules';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
