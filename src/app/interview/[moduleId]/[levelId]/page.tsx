@@ -220,7 +220,7 @@ export default function InterviewPage() {
             <ArrowLeft className="mr-2 h-4 w-4"/> Back to Levels
         </Button>
 
-        <audio ref={audioRef} src={audioUrl || ''} />
+        {audioUrl && <audio ref={audioRef} src={audioUrl} />}
 
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex flex-col gap-4">
           <div className="h-40 max-h-40 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2">
