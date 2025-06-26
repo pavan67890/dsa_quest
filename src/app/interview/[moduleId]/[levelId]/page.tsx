@@ -23,11 +23,11 @@ type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: stri
 type InterviewerImageInfo = { src: string; hint: string };
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
-  neutral:   { src: `https://placehold.co/1024x1024.png`, hint: 'anime woman office' },
-  curious:   { src: `https://placehold.co/1024x1024.png`, hint: 'curious anime woman' },
-  satisfied: { src: `https://placehold.co/1024x1024.png`, hint: 'satisfied anime woman' },
-  happy:     { src: `https://placehold.co/1024x1024.png`, hint: 'happy anime woman' },
-  angry:     { src: `https://placehold.co/1024x1024.png`, hint: 'annoyed anime woman' },
+  neutral:   { src: `https://placehold.co/1024x1024/9ca3af/ffffff.png`, hint: 'anime woman office' },
+  curious:   { src: `https://placehold.co/1024x1024/60a5fa/ffffff.png`, hint: 'curious anime woman' },
+  satisfied: { src: `https://placehold.co/1024x1024/4ade80/ffffff.png`, hint: 'satisfied anime woman' },
+  happy:     { src: `https://placehold.co/1024x1024/facc15/ffffff.png`, hint: 'happy anime woman' },
+  angry:     { src: `https://placehold.co/1024x1024/f87171/ffffff.png`, hint: 'annoyed anime woman' },
 };
 
 export default function InterviewPage() {
