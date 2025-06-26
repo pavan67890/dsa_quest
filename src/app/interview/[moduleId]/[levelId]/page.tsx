@@ -53,7 +53,6 @@ export default function InterviewPage() {
   const module = dsaModules.find((m) => m.id === params.moduleId);
   const level = module?.levels.find((l) => l.id.toString() === params.levelId);
   const dialogueEndRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
@@ -70,12 +69,6 @@ export default function InterviewPage() {
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
-
-  useEffect(() => {
-    if (audioUrl && audioRef.current) {
-      audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
-    }
-  }, [audioUrl]);
   
   const handleSendMessage = async () => {
     if (!userInput.trim() && !userCode.trim()) return;
@@ -220,18 +213,18 @@ export default function InterviewPage() {
             <ArrowLeft className="mr-2 h-4 w-4"/> Back to Levels
         </Button>
 
-        {audioUrl && <audio ref={audioRef} src={audioUrl} />}
+        {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
 
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 flex flex-col gap-4">
-          <div className="h-40 max-h-40 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2">
+          <div className="h-32 max-h-32 overflow-y-auto p-4 rounded-lg bg-black/70 backdrop-blur-sm text-white font-body text-lg space-y-2">
             <AnimatePresence>
               {conversation.map((c, i) => (
                 <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
+                  key={`${c.speaker}-${i}`}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.5 }}
                   className={c.speaker === 'user' ? 'text-accent' : ''}
                 >
                   <strong className="capitalize font-headline">{c.speaker}:</strong> {c.text}
