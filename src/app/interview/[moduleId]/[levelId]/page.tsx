@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { use } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Editor from '@monaco-editor/react';
@@ -34,11 +35,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
   angry:     { src: '/hr/shocked.png' },
 };
 
-export default function InterviewPage() {
+export default function InterviewPage({ params }: { params: { moduleId: string, levelId: string }}) {
   const router = useRouter();
-  const params = useParams();
-  const moduleId = Array.isArray(params.moduleId) ? params.moduleId[0] : String(params.moduleId);
-  const levelId = Array.isArray(params.levelId) ? params.levelId[0] : String(params.levelId);
+  const { moduleId, levelId } = params;
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
@@ -62,6 +61,7 @@ export default function InterviewPage() {
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
   const [currentQuestion, setCurrentQuestion] = useState('');
+  const [isTtsDisabled, setIsTtsDisabled] = useState(false);
 
   const module = dsaModules.find((m) => m.id === moduleId);
   const level = module?.levels.find((l) => l.id.toString() === levelId);
@@ -114,6 +114,8 @@ export default function InterviewPage() {
     setIsAiTyping(false); 
     streamInterviewerResponse(text, isInitialMessage);
 
+    if (isTtsDisabled) return;
+
     // In parallel, start fetching the audio for the response.
     textToSpeech({
       text: text,
@@ -129,13 +131,25 @@ export default function InterviewPage() {
       .catch(ttsError => {
         // If TTS fails, log the error and show a non-blocking toast. The chat can continue.
         console.error('Text-to-speech failed:', ttsError);
-        toast({
-          title: 'Audio Error',
-          description: 'Could not generate audio for the response.',
-          variant: 'destructive',
-        });
+        const errorMessage = ttsError instanceof Error ? ttsError.message : String(ttsError);
+
+        // Check for quota-specific errors
+        if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
+            toast({
+              title: 'Audio Quota Exceeded',
+              description: 'You have used up your daily free limit for text-to-speech. Audio will be disabled for this session.',
+              variant: 'destructive',
+            });
+            setIsTtsDisabled(true); // Disable TTS for the remainder of the session
+        } else {
+            toast({
+              title: 'Audio Error',
+              description: 'Could not generate audio for the response.',
+              variant: 'destructive',
+            });
+        }
       });
-  }, [apiKeys, streamInterviewerResponse, toast]);
+  }, [apiKeys, streamInterviewerResponse, toast, isTtsDisabled]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !recognitionRef.current) {
@@ -232,7 +246,6 @@ export default function InterviewPage() {
     const currentConversation: Conversation = { id: conversationIdCounter.current++, speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
     setConversation(conv => [...conv, currentConversation]);
     setUserInput('');
-    setUserCode('');
     setIsAiTyping(true);
 
     const conversationHistory = [...conversation, currentConversation].slice(-6).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
