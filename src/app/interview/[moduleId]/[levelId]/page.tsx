@@ -49,6 +49,8 @@ export default function InterviewPage() {
   const [isInterviewOver, setIsInterviewOver] = useState(false);
   const [finalReport, setFinalReport] = useState<any>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const module = dsaModules.find((m) => m.id === params.moduleId);
   const level = module?.levels.find((l) => l.id.toString() === params.levelId);
@@ -69,8 +71,72 @@ export default function InterviewPage() {
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
   
+  const handleToggleRecording = () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast({
+        title: 'Browser Not Supported',
+        description: 'Your browser does not support speech recognition.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.continuous = false;
+    recognitionRef.current.interimResults = true;
+    recognitionRef.current.lang = 'en-US';
+
+    recognitionRef.current.onstart = () => {
+      setUserInput('');
+      setIsRecording(true);
+    };
+
+    recognitionRef.current.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current.onerror = (event: any) => {
+      console.error('Speech recognition error', event.error);
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        toast({
+          title: 'Speech Recognition Error',
+          description: `An error occurred: ${event.error}`,
+          variant: 'destructive',
+        });
+      }
+      setIsRecording(false);
+    };
+
+    recognitionRef.current.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((result: any) => result[0])
+        .map((result) => result.transcript)
+        .join('');
+      setUserInput(transcript);
+    };
+
+    recognitionRef.current.start();
+  };
+
   const handleSendMessage = async () => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+    }
     if (!userInput.trim() && !userCode.trim()) return;
     setIsLoading(true);
 
@@ -220,8 +286,8 @@ export default function InterviewPage() {
             <AnimatePresence>
               {conversation.map((c, i) => (
                 <motion.div
-                  key={`${c.speaker}-${i}`}
-                  initial={{ opacity: 0, y: 20 }}
+                  key={`${c.speaker}-${i}-${c.text.length}`}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
@@ -252,7 +318,7 @@ export default function InterviewPage() {
                 <Textarea
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Type your response here..."
+                  placeholder="Type your response here or use the mic..."
                   className="flex-grow"
                   disabled={isLoading}
                 />
@@ -261,7 +327,9 @@ export default function InterviewPage() {
                     {isLoading ? <Loader className="animate-spin" /> : <Send />}
                   </Button>
                   {!showCodeEditor && <Button variant="outline" onClick={() => setShowCodeEditor(true)} size="icon"><Code/></Button>}
-                  <Button variant="outline" onClick={() => {}} size="icon" disabled><Mic/></Button>
+                  <Button variant={isRecording ? 'destructive' : 'outline'} onClick={handleToggleRecording} size="icon" disabled={isLoading}>
+                    <Mic className={isRecording ? 'animate-pulse' : ''} />
+                  </Button>
                 </div>
               </div>
             </CardContent>
