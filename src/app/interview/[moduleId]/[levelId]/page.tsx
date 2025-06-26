@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,8 +33,9 @@ Object.keys(interviewerImages).forEach(key => {
     interviewerImages[key as keyof typeof interviewerImages] = `https://placehold.co/1024x1024.png`;
 });
 
-export default function InterviewPage({ params }: { params: { moduleId: string; levelId: string } }) {
+export default function InterviewPage() {
   const router = useRouter();
+  const params = useParams() as { moduleId: string; levelId: string };
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
