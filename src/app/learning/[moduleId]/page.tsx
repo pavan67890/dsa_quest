@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { dsaModules } from '@/lib/dsa-modules';
 import { GameHeader } from '@/components/GameHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,7 +10,6 @@ import { Heart, Lock, Sparkles, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -21,9 +20,11 @@ import { useState } from 'react';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 
-export default function ModulePage({ params }: { params: { moduleId: string } }) {
+export default function ModulePage() {
   const router = useRouter();
-  const module = dsaModules.find((m) => m.id === params.moduleId);
+  const params = useParams();
+  const moduleId = params.moduleId as string;
+  const module = dsaModules.find((m) => m.id === moduleId);
   
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
   const [showResetConfirm, setShowResetConfirm] = useState(false);
