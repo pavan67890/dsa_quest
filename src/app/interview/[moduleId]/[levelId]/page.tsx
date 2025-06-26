@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
 import { provideRealtimeCodeReview } from '@/ai/flows/provide-realtime-code-review';
 import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-performance';
-// import { textToSpeech } from '@/ai/flows/text-to-speech'; // Temporarily disabled
+import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -36,9 +36,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const { moduleId: rawModuleId, levelId: rawLevelId } = useParams();
-  const moduleId = String(rawModuleId);
-  const levelId = String(rawLevelId);
+  const params = useParams();
+  const moduleId = String(params.moduleId ?? '');
+  const levelId = String(params.levelId ?? '');
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
@@ -196,6 +196,7 @@ export default function InterviewPage() {
     }
     if (!userInput.trim() && !userCode.trim()) return;
     setIsLoading(true);
+    setAudioUrl(null);
 
     const currentConversation: Conversation = { id: conversationIdCounter.current++, speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
     setConversation(conv => [...conv, currentConversation]);
@@ -239,6 +240,24 @@ export default function InterviewPage() {
       const interviewerText = aiResponse.interviewerResponse;
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
       await streamInterviewerResponse(interviewerText);
+
+      try {
+        const ttsResponse = await textToSpeech({
+          text: interviewerText,
+          primaryApiKey: apiKeys.primaryApiKey,
+          backupApiKey: apiKeys.backupApiKey,
+        });
+        if (ttsResponse.audioDataUri) {
+          setAudioUrl(ttsResponse.audioDataUri);
+        }
+      } catch (ttsError) {
+        console.error('Text-to-speech failed:', ttsError);
+        toast({
+          title: 'Audio Error',
+          description: 'Could not generate audio for the interviewer response.',
+          variant: 'destructive',
+        });
+      }
 
       // Simple logic to end interview or show code editor
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
@@ -338,7 +357,7 @@ export default function InterviewPage() {
             <ArrowLeft className="mr-2 h-4 w-4"/> Back to Levels
         </Button>
 
-        {/* {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />} */}
+        {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
 
         <div className="relative inset-x-0 bottom-0 px-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
