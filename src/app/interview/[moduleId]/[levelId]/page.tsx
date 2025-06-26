@@ -23,14 +23,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 type ApiKeys = { primaryApiKey: string; backupApiKey: string };
 type Conversation = { speaker: 'interviewer' | 'user'; text: string, code?: string };
-type InterviewerImageInfo = { src: string; hint: string };
+type InterviewerImageInfo = { src: string };
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
-  neutral:   { src: `https://placehold.co/1024x1024/9ca3af/ffffff.png`, hint: 'anime woman office' },
-  curious:   { src: `https://placehold.co/1024x1024/60a5fa/ffffff.png`, hint: 'curious anime woman' },
-  satisfied: { src: `https://placehold.co/1024x1024/4ade80/ffffff.png`, hint: 'satisfied anime woman' },
-  happy:     { src: `https://placehold.co/1024x1024/facc15/ffffff.png`, hint: 'happy anime woman' },
-  angry:     { src: `https://placehold.co/1024x1024/f87171/ffffff.png`, hint: 'annoyed anime woman' },
+  neutral:   { src: '/interviewer/calm.png' },
+  curious:   { src: '/interviewer/confused.png' },
+  satisfied: { src: '/interviewer/happy.png' },
+  happy:     { src: '/interviewer/happy.png' },
+  angry:     { src: '/interviewer/shocked.png' },
 };
 
 export default function InterviewPage() {
@@ -68,13 +68,66 @@ export default function InterviewPage() {
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition && !recognitionRef.current) {
       recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = 'en-US';
+    }
+
+    const recognition = recognitionRef.current;
+    if (recognition) {
+        recognition.onresult = (event: any) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+            for (let i = 0; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            setUserInput(finalTranscript + interimTranscript);
+        };
+        recognition.onerror = (event: any) => {
+          if (event.error !== 'no-speech' && event.error !== 'aborted') {
+            toast({
+              title: 'Speech Recognition Error',
+              description: `Error: ${event.error}. Please ensure microphone access is allowed.`,
+              variant: 'destructive',
+            });
+          }
+          setIsRecording(false);
+        };
+        recognition.onend = () => {
+            setIsRecording(false);
+        };
     }
 
     return () => {
       timeoutIdsRef.current.forEach(clearTimeout);
-      recognitionRef.current?.abort();
+      recognition?.abort();
     };
-  }, []);
+  }, [toast]);
+  
+  const handleToggleRecording = () => {
+    const recognition = recognitionRef.current;
+    if (!recognition) {
+      toast({
+        title: 'Browser Not Supported',
+        description: 'Your browser does not support speech recognition.',
+        variant: 'destructive',
+      });
+      return;
+    }
+  
+    if (isRecording) {
+      recognition.stop();
+      setIsRecording(false);
+    } else {
+      setUserInput('');
+      recognition.start();
+      setIsRecording(true);
+    }
+  };
 
   const streamInterviewerResponse = (text: string, isInitialMessage = false) => {
     timeoutIdsRef.current.forEach(clearTimeout);
@@ -139,56 +192,6 @@ export default function InterviewPage() {
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversation]);
-  
-  const handleToggleRecording = () => {
-    const recognition = recognitionRef.current;
-    if (!recognition) {
-      toast({
-        title: 'Browser Not Supported',
-        description: 'Your browser does not support speech recognition.',
-        variant: 'destructive',
-      });
-      return;
-    }
-  
-    if (isRecording) {
-      recognition.stop();
-      setIsRecording(false);
-      return;
-    }
-  
-    setUserInput('');
-  
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-  
-    recognition.onstart = () => {
-      setIsRecording(true);
-    };
-  
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setUserInput(transcript);
-    };
-  
-    recognition.onerror = (event: any) => {
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        toast({
-          title: 'Speech Recognition Error',
-          description: `Error: ${event.error}. Please ensure microphone access is allowed.`,
-          variant: 'destructive',
-        });
-      }
-      setIsRecording(false);
-    };
-  
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-  
-    recognition.start();
-  };
 
   const handleSendMessage = async () => {
     if (isRecording) {
@@ -326,9 +329,7 @@ export default function InterviewPage() {
                 src={currentImage.src}
                 alt="AI Interviewer"
                 fill
-                unoptimized
                 className="object-cover"
-                data-ai-hint={currentImage.hint}
                 />
                 <div className="absolute inset-0 bg-black/30"></div>
             </motion.div>
