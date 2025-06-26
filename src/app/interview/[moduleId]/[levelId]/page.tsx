@@ -36,7 +36,9 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const params = useParams() as { moduleId: string; levelId: string };
+  const params = useParams();
+  const moduleId = params.moduleId as string;
+  const levelId = params.levelId as string;
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
@@ -58,8 +60,8 @@ export default function InterviewPage() {
   const recognitionRef = useRef<any>(null);
   const [currentQuestion, setCurrentQuestion] = useState('');
 
-  const module = dsaModules.find((m) => m.id === params.moduleId);
-  const level = module?.levels.find((l) => l.id.toString() === params.levelId);
+  const module = dsaModules.find((m) => m.id === moduleId);
+  const level = module?.levels.find((l) => l.id.toString() === levelId);
   const dialogueEndRef = useRef<HTMLDivElement>(null);
   const timeoutIdsRef = useRef<NodeJS.Timeout[]>([]);
 
