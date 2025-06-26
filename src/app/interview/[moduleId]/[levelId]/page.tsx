@@ -61,7 +61,7 @@ export default function InterviewPage() {
   useEffect(() => {
     return () => {
       timeoutIdsRef.current.forEach(clearTimeout);
-      recognitionRef.current?.stop();
+      recognitionRef.current?.abort();
     };
   }, []);
 
@@ -127,7 +127,6 @@ export default function InterviewPage() {
   const handleToggleRecording = () => {
     if (isRecording) {
       recognitionRef.current?.stop();
-      setIsRecording(false);
       return;
     }
 
@@ -142,12 +141,11 @@ export default function InterviewPage() {
     }
 
     recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = false;
+    recognitionRef.current.continuous = true;
     recognitionRef.current.interimResults = true;
     recognitionRef.current.lang = 'en-US';
 
     recognitionRef.current.onstart = () => {
-      setUserInput('');
       setIsRecording(true);
     };
 
@@ -163,7 +161,6 @@ export default function InterviewPage() {
           variant: 'destructive',
         });
       }
-      setIsRecording(false);
     };
 
     recognitionRef.current.onresult = (event: any) => {
@@ -173,14 +170,14 @@ export default function InterviewPage() {
         .join('');
       setUserInput(transcript);
     };
-
+    
+    setUserInput('');
     recognitionRef.current.start();
   };
 
   const handleSendMessage = async () => {
     if (isRecording) {
       recognitionRef.current?.stop();
-      setIsRecording(false);
     }
     if (!userInput.trim() && !userCode.trim()) return;
     setIsLoading(true);
@@ -327,11 +324,11 @@ export default function InterviewPage() {
             <AnimatePresence>
               {conversation.map((c, i) => (
                 <motion.div
-                  key={i}
+                  key={`${i}-${c.speaker}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
                   className={c.speaker === 'user' ? 'text-accent' : ''}
                 >
                   <strong className="capitalize font-headline">{c.speaker}:</strong> {c.text}
