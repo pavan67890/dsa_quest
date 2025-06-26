@@ -340,8 +340,8 @@ export default function InterviewPage() {
 
         {/* {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />} */}
 
-        <div className="absolute inset-0 p-4 md:p-8 flex flex-col justify-end gap-4">
-            <div className="h-48 max-h-48 overflow-y-auto space-y-4 pr-4">
+        <div className="absolute inset-0 p-4 md:p-8 flex flex-col gap-4">
+            <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversation.map((c) => (
                         <motion.div
@@ -402,7 +402,7 @@ export default function InterviewPage() {
                 <div ref={dialogueEndRef} />
             </div>
 
-          <Card className="bg-background/90 backdrop-blur-sm">
+          <Card className="bg-background/90 backdrop-blur-sm shrink-0">
             <CardContent className="p-4">
               {showCodeEditor && (
                 <div className="mb-4">
@@ -423,7 +423,7 @@ export default function InterviewPage() {
                   </div>
                   <Card className="overflow-hidden border-accent">
                       <Editor
-                          height="20vh"
+                          height="15vh"
                           language={language}
                           value={userCode}
                           theme="vs-dark"
