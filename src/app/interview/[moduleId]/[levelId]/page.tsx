@@ -16,6 +16,7 @@ import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
 import { provideRealtimeCodeReview } from '@/ai/flows/provide-realtime-code-review';
 import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-performance';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
+import { executeCode } from '@/ai/flows/execute-code';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User, Play, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,6 +25,7 @@ type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } }
 type ApiKeys = { primaryApiKey: string; backupApiKey: string };
 type Conversation = { id: number; speaker: 'interviewer' | 'user'; text: string, code?: string };
 type InterviewerImageInfo = { src: string };
+type CodeOutput = { output: string; isError: boolean } | null;
 
 // Using local images from public/hr
 const interviewerImages: Record<string, InterviewerImageInfo> = {
@@ -64,6 +66,8 @@ export default function InterviewPage() {
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isTtsDisabled, setIsTtsDisabled] = useState(false);
   const [interviewPhase, setInterviewPhase] = useState<'greeting' | 'icebreaker' | 'technical'>('greeting');
+  const [isRunningCode, setIsRunningCode] = useState(false);
+  const [codeOutput, setCodeOutput] = useState<CodeOutput>(null);
 
   const module = dsaModules.find((m) => m.id === moduleId);
   const level = module?.levels.find((l) => l.id.toString() === levelId);
@@ -71,46 +75,43 @@ export default function InterviewPage() {
 
   const handleInterviewerResponse = useCallback((text: string) => {
     setIsAiTyping(true);
-    const conversationId = conversationIdCounter.current++;
-    const newConversation: Conversation = { id: conversationId, speaker: 'interviewer', text };
-    setConversation(conv => [...conv, newConversation]);
+    setConversation(conv => [...conv, { id: conversationIdCounter.current++, speaker: 'interviewer', text }]);
     
-    if (!isTtsDisabled) {
-      textToSpeech({
+    if (isTtsDisabled) {
+        setIsAiTyping(false);
+        return;
+    }
+
+    textToSpeech({
         text: text,
         primaryApiKey: apiKeys.primaryApiKey,
         backupApiKey: apiKeys.backupApiKey,
-      })
-      .then(ttsResponse => {
+    })
+    .then(ttsResponse => {
         if (ttsResponse?.audioDataUri) {
-          setAudioUrl(ttsResponse.audioDataUri);
-          setIsAiTyping(false); // Only stop typing when audio is ready
-        } else {
-          setIsAiTyping(false);
+            setAudioUrl(ttsResponse.audioDataUri);
         }
-      })
-      .catch(ttsError => {
-        setIsAiTyping(false);
+    })
+    .catch(ttsError => {
         console.error('Text-to-speech failed:', ttsError);
         const errorMessage = ttsError instanceof Error ? ttsError.message : String(ttsError);
         if (errorMessage.includes('429') || errorMessage.toLowerCase().includes('quota')) {
-          toast({
-            title: 'Audio Quota Exceeded',
-            description: 'You have used up your daily free limit. Audio will be disabled for this session.',
-            variant: 'destructive',
-          });
-          setIsTtsDisabled(true);
+            toast({
+                title: 'Audio Quota Exceeded',
+                description: 'You have used up your daily free limit. Audio will be disabled for this session.',
+                variant: 'destructive',
+            });
+            setIsTtsDisabled(true);
         } else {
-          toast({
-            title: 'Audio Error',
-            description: 'Could not generate audio for the response.',
-            variant: 'destructive',
-          });
+            toast({
+                title: 'Audio Error',
+                description: 'Could not generate audio for the response.',
+                variant: 'destructive',
+            });
         }
-      });
-    } else {
-      setIsAiTyping(false); // If TTS is disabled, stop typing immediately
-    }
+    }).finally(() => {
+        setIsAiTyping(false);
+    });
   }, [apiKeys, toast, isTtsDisabled]);
 
   useEffect(() => {
@@ -347,11 +348,30 @@ The main technical question you must ask is provided in the 'question' field. Af
 
   const currentImage = interviewerImages[sentiment.toLowerCase()] || interviewerImages.neutral;
 
-  const handleRunCode = () => {
-    toast({
-      title: 'Running Code',
-      description: 'Code execution is a planned feature and not yet implemented.',
-    });
+  const handleRunCode = async () => {
+    if (!userCode.trim()) return;
+    setIsRunningCode(true);
+    setCodeOutput(null);
+    try {
+      const result = await executeCode({
+        code: userCode,
+        language,
+        problemDescription: currentQuestion,
+        primaryApiKey: apiKeys.primaryApiKey,
+        backupApiKey: apiKeys.backupApiKey,
+      });
+      setCodeOutput(result);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      setCodeOutput({ output: errorMessage, isError: true });
+      toast({
+        title: 'Execution Error',
+        description: 'Could not simulate code execution. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRunningCode(false);
+    }
   };
 
   const lastUserMessageIndex = conversation.map(c => c.speaker).lastIndexOf('user');
@@ -393,7 +413,7 @@ The main technical question you must ask is provided in the 'question' field. Af
             <ArrowLeft className="mr-2 h-4 w-4"/> Back to Levels
         </Button>
 
-        {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
+        {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" onEnded={() => setAudioUrl(null)} />}
 
         <div className="relative mt-auto p-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
@@ -464,8 +484,8 @@ The main technical question you must ask is provided in the 'question' field. Af
                   <div className="flex justify-between items-center mb-2">
                     <label className="font-bold font-code text-lg">Your Code:</label>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={handleRunCode}>
-                            <Play className="mr-2 h-4 w-4" />
+                        <Button variant="outline" size="sm" onClick={handleRunCode} disabled={isRunningCode}>
+                           {isRunningCode ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
                             Run
                         </Button>
                         <Select value={language} onValueChange={setLanguage}>
@@ -491,7 +511,10 @@ The main technical question you must ask is provided in the 'question' field. Af
                           language={language}
                           value={userCode}
                           theme="vs-dark"
-                          onChange={(value) => setUserCode(value || '')}
+                          onChange={(value) => {
+                            setUserCode(value || '');
+                            setCodeOutput(null);
+                          }}
                           options={{
                               fontSize: 14,
                               minimap: { enabled: false },
@@ -501,6 +524,14 @@ The main technical question you must ask is provided in the 'question' field. Af
                           }}
                       />
                   </Card>
+                   {codeOutput && (
+                    <div className="mt-4">
+                      <label className="font-bold font-code text-base">Output</label>
+                      <Card className={`mt-2 font-code text-sm p-3 bg-black/50 ${codeOutput.isError ? 'border-red-500/50 text-red-400' : 'border-green-500/50 text-white'}`}>
+                          <pre className="whitespace-pre-wrap">{codeOutput.output}</pre>
+                      </Card>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="flex gap-4">
