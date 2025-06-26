@@ -110,7 +110,6 @@ export default function InterviewPage() {
     };
 
     recognitionRef.current.onerror = (event: any) => {
-      console.error('Speech recognition error', event.error);
       if (event.error !== 'no-speech' && event.error !== 'aborted') {
         toast({
           title: 'Speech Recognition Error',
