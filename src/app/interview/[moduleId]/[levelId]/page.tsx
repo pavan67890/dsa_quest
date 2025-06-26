@@ -37,9 +37,8 @@ const interviewerImages: Record<string, InterviewerImageInfo> = {
 
 export default function InterviewPage() {
   const router = useRouter();
-  const rawParams = useParams();
-  const moduleId = Array.isArray(rawParams.moduleId) ? rawParams.moduleId[0] : rawParams.moduleId;
-  const levelId = Array.isArray(rawParams.levelId) ? rawParams.levelId[0] : rawParams.levelId;
+  const params = useParams<{ moduleId: string; levelId: string }>();
+  const { moduleId, levelId } = params;
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
@@ -64,6 +63,7 @@ export default function InterviewPage() {
   const recognitionRef = useRef<any>(null);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isTtsDisabled, setIsTtsDisabled] = useState(false);
+  const [isIcebreakerDone, setIsIcebreakerDone] = useState(false);
 
   const module = dsaModules.find((m) => m.id === moduleId);
   const level = module?.levels.find((l) => l.id.toString() === levelId);
@@ -183,7 +183,7 @@ export default function InterviewPage() {
         }
       }
       setCurrentQuestion(questionText);
-      const initialText = `Hello! Welcome to your interview. Let's start with this question: ${questionText}`;
+      const initialText = "Hello! I'm your interviewer for today. Thanks for joining me. Before we dive into the technical problem, could you tell me a bit about yourself and your experience with programming?";
       
       handleInterviewerResponse(initialText, true);
     }
@@ -210,7 +210,22 @@ export default function InterviewPage() {
 
     try {
         let aiResponse;
-        if(showCodeEditor) {
+        
+        if (!isIcebreakerDone) {
+            aiResponse = await simulateAiInterviewer({
+                userResponse: userInput,
+                interviewerPrompt: `You are a friendly technical interviewer. The user has just introduced themselves. Your task is to:
+1. Briefly and positively acknowledge their introduction (e.g., "Thanks for sharing," "That's an interesting background.").
+2. Smoothly transition to the main technical question.
+3. State the main technical question clearly.
+The main technical question you must ask is provided in the 'question' field. After asking, set the nextQuestion to be an empty string to signify you are waiting for their answer.`,
+                previousConversationSummary: conversationHistory,
+                question: currentQuestion, // This is the stored technical question
+                primaryApiKey: apiKeys.primaryApiKey,
+                backupApiKey: apiKeys.backupApiKey,
+            });
+            setIsIcebreakerDone(true); // The icebreaker is now done.
+        } else if(showCodeEditor) {
             const review = await provideRealtimeCodeReview({
               code: userCode,
               language: language,
@@ -220,7 +235,7 @@ export default function InterviewPage() {
             });
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
-                interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
+                interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s code submission and follow-up explanation.',
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion,
                 primaryApiKey: apiKeys.primaryApiKey,
@@ -230,9 +245,9 @@ export default function InterviewPage() {
         } else {
              aiResponse = await simulateAiInterviewer({
                 userResponse: userInput,
-                interviewerPrompt: 'You are a friendly but sharp technical interviewer.',
+                interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s answer to a technical question.',
                 previousConversationSummary: conversationHistory,
-                question: conversation[conversation.length - 1]?.text || currentQuestion,
+                question: currentQuestion,
                 primaryApiKey: apiKeys.primaryApiKey,
                 backupApiKey: apiKeys.backupApiKey,
             });
@@ -253,9 +268,12 @@ export default function InterviewPage() {
 
     } catch (error) {
       setIsAiTyping(false);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast({
         title: 'AI Error',
-        description: 'Could not get a response from the AI. Check your API keys or try again.',
+        description: errorMessage.includes('429') 
+          ? 'You have exceeded your API quota. Please check your plan and billing details.'
+          : 'Could not get a response from the AI. Check your API keys or try again.',
         variant: 'destructive',
       });
     } finally {
@@ -355,7 +373,7 @@ export default function InterviewPage() {
 
         {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" />}
 
-        <div className="relative mt-auto px-4 flex flex-col gap-4">
+        <div className="relative mt-auto p-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
                     {conversationToDisplay.map((c) => (
