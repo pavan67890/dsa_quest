@@ -88,9 +88,15 @@ export default function SettingsPage() {
               return credential.accessToken;
           }
           return null;
-      } catch (error) {
+      } catch (error: any) {
           console.error("Google Sign-In Error", error);
-          toast({ title: 'Sign-In Failed', description: 'Could not sign in with Google. Please try again.', variant: 'destructive' });
+          let description = 'Could not sign in with Google. Please try again.';
+          if (error.code === 'auth/invalid-api-key' || error.message.includes('API key not valid') || error.message.includes('api-key-expired')) {
+            description = 'Your Firebase API key is invalid or expired. Please generate a new one, add it to your .env file, and restart the server.';
+          } else if (error.code === 'auth/popup-closed-by-user') {
+            description = 'The sign-in window was closed before completing. Please try again.';
+          }
+          toast({ title: 'Sign-In Failed', description, variant: 'destructive' });
           return null;
       }
   };
