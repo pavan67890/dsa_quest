@@ -12,28 +12,57 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SimulateAiInterviewerInputSchema = z.object({
-  userResponse: z.string().describe("The user's response to the interviewer's question."),
-  interviewerPrompt: z.string().describe('The initial prompt or role for the AI interviewer.'),
+  userResponse: z
+    .string()
+    .describe("The user's response to the interviewer's question."),
+  interviewerPrompt: z
+    .string()
+    .describe('The initial prompt or role for the AI interviewer.'),
   previousConversationSummary: z
     .string()
-    .describe('A short summary of the previous conversation to maintain context.'),
+    .describe(
+      'A short summary of the previous conversation to maintain context.'
+    ),
   question: z.string().describe('The current question asked by the interviewer.'),
-  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
+  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
+  secondaryApiKey: z
+    .string()
+    .optional()
+    .describe("The user's secondary/fallback OpenRouter API key."),
 });
 
-export type SimulateAiInterviewerInput = z.infer<typeof SimulateAiInterviewerInputSchema>;
+export type SimulateAiInterviewerInput = z.infer<
+  typeof SimulateAiInterviewerInputSchema
+>;
 
 const SimulateAiInterviewerOutputSchema = z.object({
-  interviewerResponse: z.string().describe("The AI interviewer's response to the user."),
-  nextQuestion: z.string().describe('The next question from the AI interviewer.'),
-  conversationSummary:
-    z.string()
-      .describe('A summary of the current interviewer question and user response.'),
-  sentiment: z.string().describe('The sentiment of the conversation for interviewer image changing.'),
-  codeReview: z.string().optional().describe('The AI code review and suggestions if applicable'),
+  interviewerResponse: z
+    .string()
+    .describe("The AI interviewer's response to the user."),
+  nextQuestion: z
+    .string()
+    .describe('The next question from the AI interviewer.'),
+  conversationSummary: z
+    .string()
+    .describe(
+      'A summary of the current interviewer question and user response.'
+    ),
+  sentiment: z
+    .string()
+    .describe(
+      'The sentiment of the conversation for interviewer image changing.'
+    ),
+  codeReview: z
+    .string()
+    .optional()
+    .describe(
+      'The AI code review and suggestions if applicable'
+    ),
 });
 
-export type SimulateAiInterviewerOutput = z.infer<typeof SimulateAiInterviewerOutputSchema>;
+export type SimulateAiInterviewerOutput = z.infer<
+  typeof SimulateAiInterviewerOutputSchema
+>;
 
 export async function simulateAiInterviewer(
   input: SimulateAiInterviewerInput
@@ -70,9 +99,25 @@ const simulateAiInterviewerFlow = ai.defineFlow(
     outputSchema: SimulateAiInterviewerOutputSchema,
   },
   async (input) => {
-    const { output } = await simulateAiInterviewerPrompt(input, {
-      auth: input.openRouterApiKey,
-    });
-    return output!;
+    try {
+      const {output} = await simulateAiInterviewerPrompt(input, {
+        auth: input.primaryApiKey,
+      });
+      return output!;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        input.secondaryApiKey &&
+        (errorMessage.includes('429') ||
+          errorMessage.toLowerCase().includes('quota'))
+      ) {
+        const {output} = await simulateAiInterviewerPrompt(input, {
+          auth: input.secondaryApiKey,
+        });
+        return output!;
+      }
+      throw error;
+    }
   }
 );

@@ -17,7 +17,11 @@ const ExecuteCodeInputSchema = z.object({
   problemDescription: z
     .string()
     .describe('A brief description of the problem the code is trying to solve.'),
-  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
+  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
+  secondaryApiKey: z
+    .string()
+    .optional()
+    .describe("The user's secondary/fallback OpenRouter API key."),
 });
 
 export type ExecuteCodeInput = z.infer<typeof ExecuteCodeInputSchema>;
@@ -72,9 +76,25 @@ const executeCodeFlow = ai.defineFlow(
     outputSchema: ExecuteCodeOutputSchema,
   },
   async (input) => {
-    const { output } = await executeCodePrompt(input, {
-      auth: input.openRouterApiKey,
-    });
-    return output!;
+    try {
+      const {output} = await executeCodePrompt(input, {
+        auth: input.primaryApiKey,
+      });
+      return output!;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        input.secondaryApiKey &&
+        (errorMessage.includes('429') ||
+          errorMessage.toLowerCase().includes('quota'))
+      ) {
+        const {output} = await executeCodePrompt(input, {
+          auth: input.secondaryApiKey,
+        });
+        return output!;
+      }
+      throw error;
+    }
   }
 );

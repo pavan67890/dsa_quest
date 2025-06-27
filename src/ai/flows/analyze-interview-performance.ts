@@ -15,7 +15,11 @@ const AnalyzeInterviewPerformanceInputSchema = z.object({
   interviewTranscript: z
     .string()
     .describe('The complete transcript of the mock interview.'),
-  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
+  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
+  secondaryApiKey: z
+    .string()
+    .optional()
+    .describe("The user's secondary/fallback OpenRouter API key."),
 });
 
 export type AnalyzeInterviewPerformanceInput = z.infer<
@@ -24,14 +28,20 @@ export type AnalyzeInterviewPerformanceInput = z.infer<
 
 const AnalyzeInterviewPerformanceOutputSchema = z.object({
   summary: z.string().describe('A summary of the interview performance.'),
-  strengths: z.string().describe('Key strengths demonstrated during the interview.'),
-  weaknesses: z.string().describe('Areas where the interviewee needs improvement.'),
+  strengths: z
+    .string()
+    .describe('Key strengths demonstrated during the interview.'),
+  weaknesses: z
+    .string()
+    .describe('Areas where the interviewee needs improvement.'),
   improvementAreas: z
     .string()
     .describe('Specific actions the interviewee can take to improve.'),
   xpPoints: z
     .number()
-    .describe('The amount of experience points earned based on interview performance.'),
+    .describe(
+      'The amount of experience points earned based on interview performance.'
+    ),
 });
 
 export type AnalyzeInterviewPerformanceOutput = z.infer<
@@ -65,9 +75,25 @@ const analyzeInterviewPerformanceFlow = ai.defineFlow(
     outputSchema: AnalyzeInterviewPerformanceOutputSchema,
   },
   async (input) => {
-    const { output } = await analyzeInterviewPerformancePrompt(input, {
-      auth: input.openRouterApiKey,
-    });
-    return output!;
+    try {
+      const {output} = await analyzeInterviewPerformancePrompt(input, {
+        auth: input.primaryApiKey,
+      });
+      return output!;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        input.secondaryApiKey &&
+        (errorMessage.includes('429') ||
+          errorMessage.toLowerCase().includes('quota'))
+      ) {
+        const {output} = await analyzeInterviewPerformancePrompt(input, {
+          auth: input.secondaryApiKey,
+        });
+        return output!;
+      }
+      throw error;
+    }
   }
 );

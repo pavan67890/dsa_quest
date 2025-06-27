@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Shield, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle } from 'lucide-react';
+import { KeyRound, Shield, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle, GitBranch } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
@@ -29,13 +29,15 @@ import { saveProgress, loadProgress } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const formSchema = z.object({
-  openRouterApiKey: z.string().min(1, 'OpenRouter API key is required.'),
+  primaryApiKey: z.string().min(1, 'A primary OpenRouter API key is required.'),
+  secondaryApiKey: z.string().optional(),
   googleApiKey: z.string().optional(),
 });
 
 export default function SettingsPage() {
   const [apiKeys, setApiKeys] = useLocalStorage('api-keys', {
-    openRouterApiKey: '',
+    primaryApiKey: '',
+    secondaryApiKey: '',
     googleApiKey: '',
   });
   const { toast } = useToast();
@@ -178,18 +180,18 @@ export default function SettingsPage() {
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Bring-Your-Own-Key (BYOK) Model</AlertTitle>
                 <AlertDescription>
-                This app uses your personal OpenRouter API key to access powerful language models like Mixtral, Llama3, and Gemma. Your key is stored only in your browser.
+                This app uses your personal OpenRouter API keys to access powerful language models like Mixtral, Llama3, and Gemma. Your keys are stored only in your browser.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
-                  name="openRouterApiKey"
+                  name="primaryApiKey"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2 text-lg">
-                        <KeyRound className="w-5 h-5 text-primary" /> OpenRouter API Key
+                        <KeyRound className="w-5 h-5 text-primary" /> Primary OpenRouter API Key
                         <Sheet>
                           <SheetTrigger asChild>
                             <Button variant="link" className="p-0 h-auto text-sm">(How to get a key?)</Button>
@@ -215,10 +217,28 @@ export default function SettingsPage() {
                         </Sheet>
                       </FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your OpenRouter API key" {...field} />
+                        <Input type="password" placeholder="Enter your primary OpenRouter API key" {...field} />
                       </FormControl>
                       <FormDescription>
-                        Used for all core AI interactions.
+                        Used for all core AI interactions with models like Mixtral, Llama3, and Gemma.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="secondaryApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-lg">
+                        <GitBranch className="w-5 h-5 text-accent" /> Secondary API Key (Fallback)
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter your secondary/fallback API key" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Optional. This key will be used automatically if your primary key fails (e.g., due to rate limits).
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

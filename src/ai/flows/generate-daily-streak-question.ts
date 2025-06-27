@@ -14,8 +14,14 @@ import {z} from 'genkit';
 const GenerateDailyStreakQuestionInputSchema = z.object({
   completedModules: z
     .array(z.string())
-    .describe('An array of names of the modules the user has fully completed.'),
-  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
+    .describe(
+      'An array of names of the modules the user has fully completed.'
+    ),
+  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
+  secondaryApiKey: z
+    .string()
+    .optional()
+    .describe("The user's secondary/fallback OpenRouter API key."),
 });
 export type GenerateDailyStreakQuestionInput = z.infer<
   typeof GenerateDailyStreakQuestionInputSchema
@@ -24,7 +30,11 @@ export type GenerateDailyStreakQuestionInput = z.infer<
 const GenerateDailyStreakQuestionOutputSchema = z.object({
   question: z.string().describe('The generated daily streak question.'),
   module: z.string().describe('The module the question is from.'),
-  level: z.string().describe("The conceptual difficulty of the question (e.g., 'Easy', 'Medium', 'Hard')."),
+  level: z
+    .string()
+    .describe(
+      "The conceptual difficulty of the question (e.g., 'Easy', 'Medium', 'Hard')."
+    ),
 });
 export type GenerateDailyStreakQuestionOutput = z.infer<
   typeof GenerateDailyStreakQuestionOutputSchema
@@ -62,7 +72,21 @@ const generateDailyStreakQuestionFlow = ai.defineFlow(
     outputSchema: GenerateDailyStreakQuestionOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input, { auth: input.openRouterApiKey });
-    return output!;
+    try {
+      const {output} = await prompt(input, {auth: input.primaryApiKey});
+      return output!;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        input.secondaryApiKey &&
+        (errorMessage.includes('429') ||
+          errorMessage.toLowerCase().includes('quota'))
+      ) {
+        const {output} = await prompt(input, {auth: input.secondaryApiKey});
+        return output!;
+      }
+      throw error;
+    }
   }
 );

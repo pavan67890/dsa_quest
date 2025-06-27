@@ -14,9 +14,20 @@ import {z} from 'genkit';
 const ProvideRealtimeCodeReviewInputSchema = z.object({
   code: z.string().describe('The code snippet to be reviewed.'),
   language: z.string().describe('The programming language of the code snippet.'),
-  problemDescription: z.string().describe('A brief description of the problem the code is trying to solve.'),
-  previousFeedback: z.string().optional().describe('Previous feedback provided to the user on their code. Useful for maintaining context.'),
-  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
+  problemDescription: z
+    .string()
+    .describe('A brief description of the problem the code is trying to solve.'),
+  previousFeedback: z
+    .string()
+    .optional()
+    .describe(
+      'Previous feedback provided to the user on their code. Useful for maintaining context.'
+    ),
+  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
+  secondaryApiKey: z
+    .string()
+    .optional()
+    .describe("The user's secondary/fallback OpenRouter API key."),
 });
 
 export type ProvideRealtimeCodeReviewInput = z.infer<
@@ -24,9 +35,23 @@ export type ProvideRealtimeCodeReviewInput = z.infer<
 >;
 
 const ProvideRealtimeCodeReviewOutputSchema = z.object({
-  feedback: z.string().describe('AI-powered feedback on the code snippet, including correctness, efficiency, and style.'),
-  revisedCode: z.string().optional().describe('The revised code snippet with AI-powered code improvement suggestions.'),
-  explanation: z.string().optional().describe('Explanation of what each of changes mean and why they were made.'),
+  feedback: z
+    .string()
+    .describe(
+      'AI-powered feedback on the code snippet, including correctness, efficiency, and style.'
+    ),
+  revisedCode: z
+    .string()
+    .optional()
+    .describe(
+      'The revised code snippet with AI-powered code improvement suggestions.'
+    ),
+  explanation: z
+    .string()
+    .optional()
+    .describe(
+      'Explanation of what each of changes mean and why they were made.'
+    ),
 });
 
 export type ProvideRealtimeCodeReviewOutput = z.infer<
@@ -86,9 +111,25 @@ const provideRealtimeCodeReviewFlow = ai.defineFlow(
     outputSchema: ProvideRealtimeCodeReviewOutputSchema,
   },
   async (input) => {
-    const { output } = await provideRealtimeCodeReviewPrompt(input, {
-      auth: input.openRouterApiKey,
-    });
-    return output!;
+    try {
+      const {output} = await provideRealtimeCodeReviewPrompt(input, {
+        auth: input.primaryApiKey,
+      });
+      return output!;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        input.secondaryApiKey &&
+        (errorMessage.includes('429') ||
+          errorMessage.toLowerCase().includes('quota'))
+      ) {
+        const {output} = await provideRealtimeCodeReviewPrompt(input, {
+          auth: input.secondaryApiKey,
+        });
+        return output!;
+      }
+      throw error;
+    }
   }
 );
