@@ -1,12 +1,32 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Flame } from 'lucide-react';
+import { ArrowRight, BookOpen, Flame, Lock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GameHeader } from '@/components/GameHeader';
 import { motion } from 'framer-motion';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import type { Module } from '@/lib/dsa-modules';
+import { useState, useEffect } from 'react';
 
 export default function HomePage() {
+  const [progress] = useLocalStorage('user-progress', {});
+  const [hasCompletedModule, setHasCompletedModule] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/dsa-modules.json')
+      .then((res) => res.json())
+      .then((data: Module[]) => {
+        const completed = data.some(module => {
+            const moduleProgress = progress[module.id];
+            return moduleProgress && moduleProgress.unlockedLevel > module.levels.length;
+        });
+        setHasCompletedModule(completed);
+        setIsLoading(false);
+      });
+  }, [progress]);
+
   return (
     <div className="min-h-screen w-full">
       <GameHeader />
@@ -44,17 +64,17 @@ export default function HomePage() {
           </motion.div>
 
           <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-            <Link href="/daily-streak" className="block group">
-              <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-accent/20">
+            <Link href={hasCompletedModule && !isLoading ? "/daily-streak" : "#"} className={`block group ${!hasCompletedModule && 'cursor-not-allowed'}`}>
+              <Card className={`h-full transform transition-all duration-300 ${!hasCompletedModule ? 'bg-muted/50 filter grayscale' : 'hover:scale-105 hover:shadow-2xl hover:shadow-accent/20'}`}>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-2xl font-headline font-bold text-accent">Daily Streak</CardTitle>
-                  <Flame className="h-8 w-8 text-accent" />
+                  <CardTitle className={`text-2xl font-headline font-bold ${!hasCompletedModule ? 'text-muted-foreground' : 'text-accent'}`}>Daily Streak</CardTitle>
+                  {isLoading ? <Flame className="h-8 w-8 animate-spin" /> : !hasCompletedModule ? <Lock className="h-8 w-8 text-muted-foreground" /> : <Flame className="h-8 w-8 text-accent" />}
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    Test your knowledge with a surprise daily question from topics you've completed. Keep the fire going!
+                    {isLoading ? 'Loading...' : !hasCompletedModule ? 'Complete an entire module to unlock the Daily Streak challenge.' : 'Test your knowledge with a surprise daily question from topics you\'ve completed. Keep the fire going!'}
                   </p>
-                  <div className="mt-4 flex items-center text-accent font-semibold">
+                  <div className={`mt-4 flex items-center font-semibold ${!hasCompletedModule ? 'text-muted-foreground' : 'text-accent'}`}>
                     Take the Challenge <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </div>
                 </CardContent>
