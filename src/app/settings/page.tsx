@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Shield, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader } from 'lucide-react';
+import { KeyRound, Shield, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
@@ -50,6 +50,10 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
+    if (!auth) {
+        setIsAuthLoading(false);
+        return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setIsAuthLoading(false);
@@ -66,6 +70,13 @@ export default function SettingsPage() {
   }
 
   const getFreshToken = async (silent = false): Promise<string | null> => {
+      if (!auth || !googleProvider) {
+          if (!silent) {
+            toast({ title: 'Cloud Sync Is Not Configured', description: 'Firebase API keys are missing. Please add them to your environment variables to enable this feature.', variant: 'destructive' });
+          }
+          return null;
+      }
+
       try {
           const result = await signInWithPopup(auth, googleProvider);
           const credential = GoogleAuthProvider.credentialFromResult(result);
@@ -85,6 +96,7 @@ export default function SettingsPage() {
   };
 
   const handleSignOut = async () => {
+    if (!auth) return;
     await signOut(auth);
     setUser(null);
     setOauthToken(null);
@@ -96,7 +108,9 @@ export default function SettingsPage() {
         token = await getFreshToken();
       }
       if (!token) {
-        toast({ title: 'Authentication Error', description: 'Could not get authentication token. Please sign in.', variant: 'destructive' });
+        if (auth && googleProvider) {
+            toast({ title: 'Authentication Error', description: 'Could not get authentication token. Please sign in.', variant: 'destructive' });
+        }
         return;
       }
 
@@ -123,7 +137,9 @@ export default function SettingsPage() {
         token = await getFreshToken();
       }
        if (!token) {
-          toast({ title: 'Authentication Error', description: 'Could not get authentication token. Please sign in.', variant: 'destructive' });
+          if (auth && googleProvider) {
+            toast({ title: 'Authentication Error', description: 'Could not get authentication token. Please sign in.', variant: 'destructive' });
+          }
           return;
       }
 
@@ -210,37 +226,48 @@ export default function SettingsPage() {
                 <h3 className="text-xl font-headline flex items-center gap-2">
                     <Cloud className="w-6 h-6 text-primary"/> Cloud Sync
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                    Sign in with your Google account to save and load your progress to your private Google Drive app folder.
-                </p>
-                {isAuthLoading ? (
-                    <div className="flex items-center justify-center h-20">
-                        <Loader className="animate-spin" />
-                    </div>
-                ) : user ? (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
-                            <p className="font-semibold">Signed in as {user.displayName || user.email}</p>
-                            <Button variant="outline" onClick={handleSignOut}><LogOut />Sign Out</Button>
-                        </div>
-                        <div className="flex gap-4">
-                            <Button onClick={handleSaveToDrive} className="w-full" disabled={isSyncing}>
-                                {isSyncing ? <Loader className="animate-spin" /> : <UploadCloud />}
-                                Save to Drive
-                            </Button>
-                            <Button onClick={handleLoadFromDrive} className="w-full" variant="outline" disabled={isSyncing}>
-                                {isSyncing ? <Loader className="animate-spin" /> : <DownloadCloud />}
-                                Load from Drive
-                            </Button>
-                        </div>
-                    </div>
+                {!auth || !googleProvider ? (
+                    <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertTitle>Cloud Sync Is Not Configured</AlertTitle>
+                        <AlertDescription>
+                            Firebase environment variables are missing. Please add them to your project to enable saving your progress to the cloud.
+                        </AlertDescription>
+                    </Alert>
                 ) : (
-                    <Button onClick={() => getFreshToken(false)} className="w-full" size="lg">
-                        <LogIn /> Sign in with Google
-                    </Button>
+                    <>
+                        <p className="text-sm text-muted-foreground">
+                            Sign in with your Google account to save and load your progress to your private Google Drive app folder.
+                        </p>
+                        {isAuthLoading ? (
+                            <div className="flex items-center justify-center h-20">
+                                <Loader className="animate-spin" />
+                            </div>
+                        ) : user ? (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                                    <p className="font-semibold">Signed in as {user.displayName || user.email}</p>
+                                    <Button variant="outline" onClick={handleSignOut}><LogOut />Sign Out</Button>
+                                </div>
+                                <div className="flex gap-4">
+                                    <Button onClick={handleSaveToDrive} className="w-full" disabled={isSyncing}>
+                                        {isSyncing ? <Loader className="animate-spin" /> : <UploadCloud />}
+                                        Save to Drive
+                                    </Button>
+                                    <Button onClick={handleLoadFromDrive} className="w-full" variant="outline" disabled={isSyncing}>
+                                        {isSyncing ? <Loader className="animate-spin" /> : <DownloadCloud />}
+                                        Load from Drive
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <Button onClick={() => getFreshToken(false)} className="w-full" size="lg">
+                                <LogIn /> Sign in with Google
+                            </Button>
+                        )}
+                    </>
                 )}
             </div>
-
           </CardContent>
         </Card>
       </main>
