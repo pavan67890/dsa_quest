@@ -277,7 +277,7 @@ export default function SettingsPage() {
                         <AlertTriangle className="h-4 w-4" />
                         <AlertTitle>Cloud Sync Is Not Configured</AlertTitle>
                         <AlertDescription>
-                            Firebase environment variables are missing. Please add them to your project to enable saving your progress to the cloud.
+                            Firebase configuration not detected. Please ensure your keys are in a `.env.local` file and that you have restarted your development server to enable cloud sync.
                         </AlertDescription>
                     </Alert>
                 ) : (
