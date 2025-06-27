@@ -17,8 +17,7 @@ const ExecuteCodeInputSchema = z.object({
   problemDescription: z
     .string()
     .describe('A brief description of the problem the code is trying to solve.'),
-  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
-  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
+  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
 });
 
 export type ExecuteCodeInput = z.infer<typeof ExecuteCodeInputSchema>;
@@ -73,17 +72,9 @@ const executeCodeFlow = ai.defineFlow(
     outputSchema: ExecuteCodeOutputSchema,
   },
   async (input) => {
-    try {
-      const { output } = await executeCodePrompt(input, {
-        auth: input.primaryApiKey,
-      });
-      return output!;
-    } catch (e) {
-      console.warn('Primary API key failed for code execution, trying backup key.', e);
-      const { output } = await executeCodePrompt(input, {
-        auth: input.backupApiKey,
-      });
-      return output!;
-    }
+    const { output } = await executeCodePrompt(input, {
+      auth: input.openRouterApiKey,
+    });
+    return output!;
   }
 );

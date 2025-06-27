@@ -22,7 +22,7 @@ import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Spar
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { primaryApiKey: string; backupApiKey: string };
+type ApiKeys = { openRouterApiKey: string; googleApiKey: string };
 type Conversation = { id: number; speaker: 'interviewer' | 'user'; text: string, code?: string };
 type InterviewerImageInfo = { src: string };
 type CodeOutput = { output: string; isError: boolean } | null;
@@ -42,7 +42,7 @@ export default function InterviewPage() {
   const levelId = params.levelId as string;
 
   const { toast } = useToast();
-  const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
+  const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { openRouterApiKey: '', googleApiKey: '' });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
   const [xp, setXp] = useLocalStorage('user-xp', 0);
   const [earnedBadges, setEarnedBadges] = useLocalStorage<string[]>('earned-badges', []);
@@ -94,15 +94,14 @@ export default function InterviewPage() {
     setIsAiTyping(true);
     setConversation(conv => [...conv, { id: conversationIdCounter.current++, speaker: 'interviewer', text }]);
     
-    if (isTtsDisabled) {
+    if (isTtsDisabled || !apiKeys.googleApiKey) {
         setIsAiTyping(false);
         return;
     }
 
     textToSpeech({
         text: text,
-        primaryApiKey: apiKeys.primaryApiKey,
-        backupApiKey: apiKeys.backupApiKey,
+        googleApiKey: apiKeys.googleApiKey,
     })
     .then(ttsResponse => {
         if (ttsResponse?.audioDataUri) {
@@ -189,7 +188,7 @@ export default function InterviewPage() {
   
   useEffect(() => {
     if (isDataLoading) return;
-    if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
+    if (!apiKeys.openRouterApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (module && level && conversation.length === 0 && interviewPhase === 'greeting') {
       let questionText = level.question;
@@ -241,8 +240,7 @@ export default function InterviewPage() {
 This is an icebreaker question before the main technical problem. Keep your response concise.`,
                 previousConversationSummary: conversationHistory,
                 question: '', 
-                primaryApiKey: apiKeys.primaryApiKey,
-                backupApiKey: apiKeys.backupApiKey,
+                openRouterApiKey: apiKeys.openRouterApiKey,
             });
             setInterviewPhase('icebreaker');
         } else if (interviewPhase === 'icebreaker') {
@@ -255,8 +253,7 @@ This is an icebreaker question before the main technical problem. Keep your resp
 The main technical question you must ask is provided in the 'question' field. After asking, set the nextQuestion to be an empty string to signify you are waiting for their answer.`,
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion, 
-                primaryApiKey: apiKeys.primaryApiKey,
-                backupApiKey: apiKeys.backupApiKey,
+                openRouterApiKey: apiKeys.openRouterApiKey,
             });
             setInterviewPhase('technical');
         } else if(showCodeEditor) {
@@ -264,16 +261,14 @@ The main technical question you must ask is provided in the 'question' field. Af
               code: userCode,
               language: language,
               problemDescription: currentQuestion,
-              primaryApiKey: apiKeys.primaryApiKey,
-              backupApiKey: apiKeys.backupApiKey,
+              openRouterApiKey: apiKeys.openRouterApiKey,
             });
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s code submission and follow-up explanation.',
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                primaryApiKey: apiKeys.primaryApiKey,
-                backupApiKey: apiKeys.backupApiKey,
+                openRouterApiKey: apiKeys.openRouterApiKey,
             });
             aiResponse.interviewerResponse = `${review.feedback}\n\n${aiResponse.interviewerResponse}`;
         } else {
@@ -282,8 +277,7 @@ The main technical question you must ask is provided in the 'question' field. Af
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s answer to a technical question. Provide follow-up questions if needed, or hints if the user is stuck.',
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                primaryApiKey: apiKeys.primaryApiKey,
-                backupApiKey: apiKeys.backupApiKey,
+                openRouterApiKey: apiKeys.openRouterApiKey,
             });
         }
       
@@ -320,8 +314,7 @@ The main technical question you must ask is provided in the 'question' field. Af
     try {
         const report = await analyzeInterviewPerformance({ 
             interviewTranscript: transcript,
-            primaryApiKey: apiKeys.primaryApiKey,
-            backupApiKey: apiKeys.backupApiKey,
+            openRouterApiKey: apiKeys.openRouterApiKey,
         });
         setFinalReport(report);
         setIsInterviewOver(true);
@@ -369,8 +362,7 @@ The main technical question you must ask is provided in the 'question' field. Af
         code: userCode,
         language,
         problemDescription: currentQuestion,
-        primaryApiKey: apiKeys.primaryApiKey,
-        backupApiKey: apiKeys.backupApiKey,
+        openRouterApiKey: apiKeys.openRouterApiKey,
       });
       setCodeOutput(result);
     } catch (error) {

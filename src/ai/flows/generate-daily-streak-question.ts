@@ -15,8 +15,7 @@ const GenerateDailyStreakQuestionInputSchema = z.object({
   completedModules: z
     .array(z.string())
     .describe('An array of names of the modules the user has fully completed.'),
-  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
-  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
+  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
 });
 export type GenerateDailyStreakQuestionInput = z.infer<
   typeof GenerateDailyStreakQuestionInputSchema
@@ -63,13 +62,7 @@ const generateDailyStreakQuestionFlow = ai.defineFlow(
     outputSchema: GenerateDailyStreakQuestionOutputSchema,
   },
   async (input) => {
-    try {
-      const { output } = await prompt(input, { auth: input.primaryApiKey });
-      return output!;
-    } catch (e) {
-      console.warn('Primary API key failed for daily question, trying backup key.', e);
-      const { output } = await prompt(input, { auth: input.backupApiKey });
-      return output!;
-    }
+    const { output } = await prompt(input, { auth: input.openRouterApiKey });
+    return output!;
   }
 );

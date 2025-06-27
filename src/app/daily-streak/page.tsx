@@ -16,7 +16,7 @@ import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import type { Module } from '@/lib/dsa-modules';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { primaryApiKey: string; backupApiKey: string };
+type ApiKeys = { openRouterApiKey: string; googleApiKey: string };
 type DailyQuestion = {
   question: string;
   module: string;
@@ -30,7 +30,7 @@ type Feedback = {
 export default function DailyStreakPage() {
     const { toast } = useToast();
     const [progress] = useLocalStorage<Progress>('user-progress', {});
-    const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { primaryApiKey: '', backupApiKey: '' });
+    const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', { openRouterApiKey: '', googleApiKey: '' });
     const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
     
     const [dailyQuestion, setDailyQuestion] = useState<DailyQuestion>(null);
@@ -47,7 +47,7 @@ export default function DailyStreakPage() {
     }, []);
 
     useEffect(() => {
-        if (!apiKeys.primaryApiKey || !apiKeys.backupApiKey) {
+        if (!apiKeys.openRouterApiKey) {
           setIsApiKeyDialogOpen(true);
         } else if (allModules.length > 0) {
             fetchDailyQuestion();
@@ -73,8 +73,7 @@ export default function DailyStreakPage() {
 
             const questionData = await generateDailyStreakQuestion({ 
                 completedModules,
-                primaryApiKey: apiKeys.primaryApiKey,
-                backupApiKey: apiKeys.backupApiKey,
+                openRouterApiKey: apiKeys.openRouterApiKey,
             });
             setDailyQuestion(questionData);
         } catch (error) {
@@ -99,8 +98,7 @@ export default function DailyStreakPage() {
                 interviewerPrompt: "You are an AI assistant evaluating a user's answer to a daily data structure and algorithm question. Provide concise feedback on the correctness and quality of their answer. Be encouraging.",
                 previousConversationSummary: '',
                 question: dailyQuestion.question,
-                primaryApiKey: apiKeys.primaryApiKey,
-                backupApiKey: apiKeys.backupApiKey,
+                openRouterApiKey: apiKeys.openRouterApiKey,
             });
             setFeedback({
                 interviewerResponse: response.interviewerResponse,

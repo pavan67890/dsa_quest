@@ -18,8 +18,7 @@ const SimulateAiInterviewerInputSchema = z.object({
     .string()
     .describe('A short summary of the previous conversation to maintain context.'),
   question: z.string().describe('The current question asked by the interviewer.'),
-  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
-  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
+  openRouterApiKey: z.string().describe("The user's OpenRouter API key."),
 });
 
 export type SimulateAiInterviewerInput = z.infer<typeof SimulateAiInterviewerInputSchema>;
@@ -71,17 +70,9 @@ const simulateAiInterviewerFlow = ai.defineFlow(
     outputSchema: SimulateAiInterviewerOutputSchema,
   },
   async (input) => {
-    try {
-      const { output } = await simulateAiInterviewerPrompt(input, {
-        auth: input.primaryApiKey,
-      });
-      return output!;
-    } catch (e) {
-      console.warn('Primary API key failed for interviewer simulation, trying backup key.', e);
-      const { output } = await simulateAiInterviewerPrompt(input, {
-        auth: input.backupApiKey,
-      });
-      return output!;
-    }
+    const { output } = await simulateAiInterviewerPrompt(input, {
+      auth: input.openRouterApiKey,
+    });
+    return output!;
   }
 );

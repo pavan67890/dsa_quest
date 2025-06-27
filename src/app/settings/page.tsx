@@ -26,16 +26,17 @@ import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, type User, GoogleAuthProvider } from 'firebase/auth';
 import { saveProgress, loadProgress } from '@/services/driveService';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const formSchema = z.object({
-  primaryApiKey: z.string().min(1, 'Primary API key is required.'),
-  backupApiKey: z.string().min(1, 'Backup API key is required.'),
+  openRouterApiKey: z.string().min(1, 'OpenRouter API key is required.'),
+  googleApiKey: z.string().optional(),
 });
 
 export default function SettingsPage() {
   const [apiKeys, setApiKeys] = useLocalStorage('api-keys', {
-    primaryApiKey: '',
-    backupApiKey: '',
+    openRouterApiKey: '',
+    googleApiKey: '',
   });
   const { toast } = useToast();
 
@@ -177,22 +178,47 @@ export default function SettingsPage() {
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Bring-Your-Own-Key (BYOK) Model</AlertTitle>
                 <AlertDescription>
-                This app uses your personal Google AI API keys. They are stored only in your browser. To check your usage, please visit your <a href="https://ai.google.dev/studio" target="_blank" rel="noopener noreferrer" className="underline text-primary font-semibold">Google AI Studio dashboard</a>.
+                This app uses your personal OpenRouter API key to access powerful language models like Mixtral, Llama3, and Gemma. Your key is stored only in your browser.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
-                  name="primaryApiKey"
+                  name="openRouterApiKey"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-lg"><KeyRound className="w-5 h-5 text-primary" /> Primary API Key</FormLabel>
+                      <FormLabel className="flex items-center gap-2 text-lg">
+                        <KeyRound className="w-5 h-5 text-primary" /> OpenRouter API Key
+                        <Sheet>
+                          <SheetTrigger asChild>
+                            <Button variant="link" className="p-0 h-auto text-sm">(How to get a key?)</Button>
+                          </SheetTrigger>
+                          <SheetContent>
+                            <SheetHeader>
+                              <SheetTitle>Getting your OpenRouter API Key</SheetTitle>
+                              <SheetDescription>
+                                Follow these steps to get your free API key from OpenRouter, which provides access to many different AI models.
+                              </SheetDescription>
+                            </SheetHeader>
+                            <div className="py-4 space-y-4">
+                              <ol className="list-decimal list-inside space-y-2">
+                                <li>Go to <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="underline text-primary">openrouter.ai</a> and sign up or log in.</li>
+                                <li>Click your profile icon in the top-right and select <strong>Keys</strong>.</li>
+                                <li>Click the <strong>+ Create Key</strong> button.</li>
+                                <li>Give your key a name (e.g., "DSA-Quest") and click <strong>Create</strong>.</li>
+                                <li>Copy the key that starts with `sk-or-` and paste it into the input field on the settings page.</li>
+                              </ol>
+                              <p className="text-sm text-muted-foreground">OpenRouter provides a generous free tier to get started with various AI models.</p>
+                            </div>
+                          </SheetContent>
+                        </Sheet>
+                      </FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your Google AI Studio API key" {...field} />
+                        <Input type="password" placeholder="Enter your OpenRouter API key" {...field} />
                       </FormControl>
                       <FormDescription>
-                        This key will be used for all AI interactions.
+                        Used for all core AI interactions.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -200,15 +226,15 @@ export default function SettingsPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="backupApiKey"
+                  name="googleApiKey"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-lg"><Shield className="w-5 h-5 text-accent" /> Backup API Key</FormLabel>
+                      <FormLabel className="flex items-center gap-2 text-lg"><Shield className="w-5 h-5 text-accent" /> Google AI API Key (for Audio)</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter a different Google AI Studio API key" {...field} />
+                        <Input type="password" placeholder="Enter a Google AI Studio API key" {...field} />
                       </FormControl>
                       <FormDescription>
-                        This key will be used as a fallback if the primary key fails.
+                        Optional. This key is only used for the text-to-speech audio feature.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

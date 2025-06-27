@@ -15,8 +15,7 @@ import wav from 'wav';
 
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to convert to speech.'),
-  primaryApiKey: z.string().describe("The user's primary API key for the AI model."),
-  backupApiKey: z.string().describe("The user's backup API key for the AI model."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key for TTS."),
 });
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
@@ -63,6 +62,10 @@ const textToSpeechFlow = ai.defineFlow(
     outputSchema: TextToSpeechOutputSchema,
   },
   async (input) => {
+    if (!input.googleApiKey) {
+      throw new Error('Google AI API Key for audio is not provided.');
+    }
+
     const generateOptions = {
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
       config: {
@@ -76,22 +79,11 @@ const textToSpeechFlow = ai.defineFlow(
       prompt: input.text,
     };
 
-    let media;
-    try {
-      const result = await ai.generate(
-        { ...generateOptions },
-        { auth: input.primaryApiKey }
-      );
-      media = result.media;
-    } catch (e) {
-      console.warn('Primary API key failed for TTS, trying backup key.', e);
-      const result = await ai.generate(
-        { ...generateOptions },
-        { auth: input.backupApiKey }
-      );
-      media = result.media;
-    }
-
+    const { media } = await ai.generate(
+      { ...generateOptions },
+      { auth: input.googleApiKey }
+    );
+    
     if (!media) {
       throw new Error('No audio media returned from TTS model.');
     }
