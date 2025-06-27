@@ -3,7 +3,16 @@ const APP_FILE_NAME = 'dsa-quest-progress.json';
 const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
 
+/**
+ * Finds the unique ID of the application's data file within the user's hidden appDataFolder.
+ * This ensures the app only interacts with its own sandboxed data in the user's drive.
+ * @param accessToken The user's Google OAuth2 access token.
+ * @returns The file ID if it exists, otherwise null.
+ */
 async function getAppFileId(accessToken: string): Promise<string | null> {
+  // The `spaces=appDataFolder` query parameter is crucial. It restricts the search
+  // to the special, hidden folder in the user's Google Drive that is only
+  // accessible to this application. This is the core of the privacy model.
   const response = await fetch(`${DRIVE_API_URL}?spaces=appDataFolder&fields=files(id,name)`, {
     headers: { 'Authorization': `Bearer ${accessToken}` }
   });
@@ -17,6 +26,12 @@ async function getAppFileId(accessToken: string): Promise<string | null> {
   return existingFile ? existingFile.id : null;
 }
 
+/**
+ * Saves the user's progress to a file in their personal Google Drive's appDataFolder.
+ * If the file doesn't exist, it creates it.
+ * @param accessToken The user's Google OAuth2 access token.
+ * @param progressData The user's progress data to save.
+ */
 export async function saveProgress(accessToken: string, progressData: object): Promise<void> {
     let fileId = await getAppFileId(accessToken);
 
@@ -26,6 +41,9 @@ export async function saveProgress(accessToken: string, progressData: object): P
     };
 
     if (!fileId) {
+        // If the file doesn't exist, create it within the `appDataFolder`.
+        // The `parents: ['appDataFolder']` property ensures the file is created in the
+        // correct, sandboxed location, remaining private to the user and this app.
         const createResponse = await fetch(DRIVE_API_URL, {
             method: 'POST',
             headers: {
@@ -41,6 +59,7 @@ export async function saveProgress(accessToken: string, progressData: object): P
         fileId = newFile.id;
     }
 
+    // Upload/update the file content.
     const uploadUrl = `${DRIVE_UPLOAD_URL}/${fileId}?uploadType=media`;
     const uploadResponse = await fetch(uploadUrl, {
         method: 'PATCH',
@@ -56,12 +75,18 @@ export async function saveProgress(accessToken: string, progressData: object): P
     }
 }
 
+/**
+ * Loads the user's progress from their personal Google Drive's appDataFolder.
+ * @param accessToken The user's Google OAuth2 access token.
+ * @returns The user's progress data, or null if no data is found.
+ */
 export async function loadProgress(accessToken: string): Promise<object | null> {
     const fileId = await getAppFileId(accessToken);
     if (!fileId) {
         return null;
     }
 
+    // Download the file's content directly using its ID.
     const response = await fetch(`${DRIVE_API_URL}/${fileId}?alt=media`, {
         headers: { 'Authorization': `Bearer ${accessToken}` },
     });
