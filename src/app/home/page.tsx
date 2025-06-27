@@ -8,13 +8,22 @@ import { motion } from 'framer-motion';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import type { Module } from '@/lib/dsa-modules';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
+  const router = useRouter();
   const [progress] = useLocalStorage('user-progress', {});
+  const [loginMethod] = useLocalStorage('login-method', '');
   const [hasCompletedModule, setHasCompletedModule] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Redirect if user lands here without choosing a login method
+    if (!loginMethod) {
+      router.replace('/login');
+      return;
+    }
+
     fetch('/dsa-modules.json')
       .then((res) => res.json())
       .then((data: Module[]) => {
@@ -25,7 +34,12 @@ export default function HomePage() {
         setHasCompletedModule(completed);
         setIsLoading(false);
       });
-  }, [progress]);
+  }, [progress, loginMethod, router]);
+
+  // Render nothing while redirecting
+  if (!loginMethod) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen w-full">

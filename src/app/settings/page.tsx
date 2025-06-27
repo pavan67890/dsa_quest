@@ -43,9 +43,9 @@ export default function SettingsPage() {
   const { toast } = useToast();
 
   const [user, setUser] = useState<User | null>(null);
-  const [oauthToken, setOauthToken] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [, setLoginMethod] = useLocalStorage('login-method', 'guest');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,28 +72,25 @@ export default function SettingsPage() {
     });
   }
 
-  const getFreshToken = async (silent = false): Promise<string | null> => {
+  const getFreshToken = async (): Promise<string | null> => {
       if (!auth || !googleProvider) {
-          if (!silent) {
-            toast({ title: 'Cloud Sync Is Not Configured', description: 'Firebase API keys are missing. Please add them to your environment variables to enable this feature.', variant: 'destructive' });
-          }
-          return null;
+        toast({ title: 'Cloud Sync Is Not Configured', description: 'Firebase configuration not detected. Please ensure your keys are in a `.env.local` file and that you have restarted your development server to enable cloud sync.', variant: 'destructive' });
+        return null;
       }
 
       try {
           const result = await signInWithPopup(auth, googleProvider);
           const credential = GoogleAuthProvider.credentialFromResult(result);
           if (credential?.accessToken) {
-              setOauthToken(credential.accessToken);
               setUser(result.user);
+              setLoginMethod('google');
+              toast({ title: 'Sync Enabled!', description: 'Your progress will now be synced with your Google Drive.' });
               return credential.accessToken;
           }
           return null;
       } catch (error) {
-          if (!silent) {
-            console.error("Google Sign-In Error", error);
-            toast({ title: 'Sign-In Failed', description: 'Could not sign in with Google. Please try again.', variant: 'destructive' });
-          }
+          console.error("Google Sign-In Error", error);
+          toast({ title: 'Sign-In Failed', description: 'Could not sign in with Google. Please try again.', variant: 'destructive' });
           return null;
       }
   };
@@ -102,20 +99,13 @@ export default function SettingsPage() {
     if (!auth) return;
     await signOut(auth);
     setUser(null);
-    setOauthToken(null);
+    setLoginMethod('guest');
+    toast({ title: "Signed Out", description: "You are now in guest mode. Your progress will only be saved in this browser." });
   };
 
   const handleSaveToDrive = async () => {
-      let token = oauthToken;
-      if (!token) {
-        token = await getFreshToken();
-      }
-      if (!token) {
-        if (auth && googleProvider) {
-            toast({ title: 'Authentication Error', description: 'Could not get authentication token. Please sign in.', variant: 'destructive' });
-        }
-        return;
-      }
+      const token = await getFreshToken();
+      if (!token) return;
 
       setIsSyncing(true);
       try {
@@ -135,16 +125,8 @@ export default function SettingsPage() {
   };
 
   const handleLoadFromDrive = async () => {
-       let token = oauthToken;
-      if (!token) {
-        token = await getFreshToken();
-      }
-       if (!token) {
-          if (auth && googleProvider) {
-            toast({ title: 'Authentication Error', description: 'Could not get authentication token. Please sign in.', variant: 'destructive' });
-          }
-          return;
-      }
+      const token = await getFreshToken();
+      if (!token) return;
 
       setIsSyncing(true);
       try {
@@ -307,8 +289,8 @@ export default function SettingsPage() {
                                 </div>
                             </div>
                         ) : (
-                            <Button onClick={() => getFreshToken(false)} className="w-full" size="lg">
-                                <LogIn /> Sign in with Google
+                            <Button onClick={getFreshToken} className="w-full" size="lg">
+                                <LogIn /> Sign in with Google to Enable Sync
                             </Button>
                         )}
                     </>

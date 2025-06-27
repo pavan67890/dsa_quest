@@ -10,7 +10,7 @@ export default function WelcomePage() {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === 'Enter') {
-        router.push('/home');
+        router.push('/login');
       }
     };
 

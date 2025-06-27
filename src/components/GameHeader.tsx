@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Settings, Trophy, Sparkles } from 'lucide-react';
+import { Settings, Trophy, Sparkles, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import useLocalStorage from '@/hooks/useLocalStorage';
@@ -14,6 +14,7 @@ import {
 
 export function GameHeader() {
   const [xp] = useLocalStorage('user-xp', 0);
+  const [loginMethod] = useLocalStorage('login-method', 'guest');
   const level = Math.floor(xp / 100) + 1;
   const progress = (xp % 100);
 
@@ -42,6 +43,24 @@ export function GameHeader() {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        {loginMethod === 'guest' && (
+           <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-yellow-500 hover:text-yellow-400 hover:bg-yellow-500/10" asChild>
+                    <Link href="/settings">
+                        <AlertTriangle className="h-5 w-5" />
+                        <span className="sr-only">Guest Mode Warning</span>
+                    </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs border-yellow-500/50 bg-background text-foreground">
+                <p>You are playing as a guest. Your progress is saved only in this browser and could be lost.</p>
+                <p className="font-semibold">Go to Settings to sync with Google Drive.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         <TooltipProvider>
             <Tooltip>
                 <TooltipTrigger asChild>
