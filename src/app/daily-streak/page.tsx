@@ -96,7 +96,7 @@ export default function DailyStreakPage() {
         try {
             const response = await simulateAiInterviewer({
                 userResponse: userAnswer,
-                interviewerPrompt: 'You are an AI assistant evaluating a user\\'s answer to a daily data structure and algorithm question. Provide concise feedback on the correctness and quality of their answer. Be encouraging.',
+                interviewerPrompt: "You are an AI assistant evaluating a user's answer to a daily data structure and algorithm question. Provide concise feedback on the correctness and quality of their answer. Be encouraging.",
                 previousConversationSummary: '',
                 question: dailyQuestion.question,
                 primaryApiKey: apiKeys.primaryApiKey,
