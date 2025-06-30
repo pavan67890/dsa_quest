@@ -101,17 +101,17 @@ const simulateAiInterviewerFlow = ai.defineFlow(
     const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
     const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
 
-    if (primaryGoogleApiKey && primaryGoogleApiKey.trim()) {
+    if (primaryGoogleApiKey?.trim()) {
       keys.push({ name: 'primary', value: primaryGoogleApiKey });
     }
-    if (secondaryGoogleApiKey && secondaryGoogleApiKey.trim()) {
+    if (secondaryGoogleApiKey?.trim()) {
       keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
     }
 
     if (keys.length === 0) {
       // The Genkit plugin throws FAILED_PRECONDITION when no key is provided.
       // We throw a more user-friendly error message here to be caught by the client.
-      throw new Error('An API key is required. Please go to Settings to add your key.');
+      throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
     }
 
     let lastError: any = null;
