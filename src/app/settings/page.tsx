@@ -195,7 +195,7 @@ export default function SettingsPage() {
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Bring-Your-Own-Key (BYOK) with Fallback</AlertTitle>
                 <AlertDescription>
-                This app uses your personal AI API keys. For the best experience, we recommend using a key for Mixtral-8x7b as your primary key, and a key for Gemma 7B as your secondary (fallback) key. If the primary key fails, the app will automatically try the secondary key.
+                  This app uses your personal Google AI API keys. Provide a primary and a secondary key. If the primary key fails due to quota limits, the app will automatically fall back to the secondary key.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
@@ -212,10 +212,10 @@ export default function SettingsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-lg">
-                            <KeyRound className="w-5 h-5 text-primary" /> Primary API Key (e.g., for Mixtral-8x7b)
+                            <KeyRound className="w-5 h-5 text-primary" /> Primary Google AI API Key
                           </FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Enter your primary API key" {...field} />
+                            <Input type="password" placeholder="Enter your primary Google AI key" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -238,10 +238,10 @@ export default function SettingsPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 text-lg">
-                            <KeyRound className="w-5 h-5 text-secondary" /> Secondary API Key (e.g., for Gemma 7B)
+                            <KeyRound className="w-5 h-5 text-secondary" /> Secondary Google AI API Key
                           </FormLabel>
                           <FormControl>
-                            <Input type="password" placeholder="Enter your secondary API key" {...field} />
+                            <Input type="password" placeholder="Enter your secondary Google AI key" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -262,24 +262,24 @@ export default function SettingsPage() {
                     <p className="text-sm text-muted-foreground">Need a key?</p>
                     <Sheet>
                         <SheetTrigger asChild>
-                        <Button variant="link" className="p-0 h-auto text-sm">How to get an AI API key</Button>
+                        <Button variant="link" className="p-0 h-auto text-sm">How to get a Google AI API key</Button>
                         </SheetTrigger>
                         <SheetContent>
                         <SheetHeader>
-                            <SheetTitle>Getting your AI API Key</SheetTitle>
+                            <SheetTitle>Getting your Google AI API Key</SheetTitle>
                             <SheetDescription>
-                            Follow these steps to get an API key from a provider like OpenRouter or a similar service that supports various models.
+                             Follow these steps to get a free API key from Google AI Studio to use with models like Gemini.
                             </SheetDescription>
                         </SheetHeader>
                         <div className="py-4 space-y-4">
                             <ol className="list-decimal list-inside space-y-2">
-                            <li>Go to a provider like <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline text-primary">OpenRouter.ai</a> and create an account.</li>
-                            <li>Navigate to your account settings and find the API Keys section.</li>
-                            <li>Create a new key. You might need to add credits to your account.</li>
-                            <li>Copy the generated key and paste it into the input field on the settings page.</li>
-                            <li>You can create and use different keys for the primary and secondary slots.</li>
+                            <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline text-primary">Google AI Studio</a>.</li>
+                            <li>Log in with your Google account.</li>
+                            <li>Click the "Create API key" button.</li>
+                            <li>Copy your new API key and paste it into the appropriate field on the settings page.</li>
+                            <li>You can create and use different keys for the primary and secondary slots if you wish.</li>
                             </ol>
-                            <p className="text-sm text-muted-foreground">Using a service like OpenRouter allows you to access models from different providers with a single API key.</p>
+                            <p className="text-sm text-muted-foreground">Your API keys are stored only in your browser and are never shared.</p>
                         </div>
                         </SheetContent>
                     </Sheet>
