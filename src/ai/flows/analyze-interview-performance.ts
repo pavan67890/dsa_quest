@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -15,7 +16,8 @@ const AnalyzeInterviewPerformanceInputSchema = z.object({
   interviewTranscript: z
     .string()
     .describe('The complete transcript of the mock interview.'),
-  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
+  primaryGoogleApiKey: z.string().optional().describe("The user's primary Google AI API key."),
+  secondaryGoogleApiKey: z.string().optional().describe("The user's secondary Google AI API key."),
 });
 
 export type AnalyzeInterviewPerformanceInput = z.infer<
@@ -38,6 +40,7 @@ const AnalyzeInterviewPerformanceOutputSchema = z.object({
     .describe(
       'The amount of experience points earned based on interview performance.'
     ),
+  usedKey: z.enum(['primary', 'secondary']),
 });
 
 export type AnalyzeInterviewPerformanceOutput = z.infer<
@@ -52,8 +55,8 @@ export async function analyzeInterviewPerformance(
 
 const analyzeInterviewPerformancePrompt = ai.definePrompt({
   name: 'analyzeInterviewPerformancePrompt',
-  input: {schema: AnalyzeInterviewPerformanceInputSchema},
-  output: {schema: AnalyzeInterviewPerformanceOutputSchema},
+  input: {schema: AnalyzeInterviewPerformanceInputSchema.omit({ primaryGoogleApiKey: true, secondaryGoogleApiKey: true })},
+  output: {schema: AnalyzeInterviewPerformanceOutputSchema.omit({ usedKey: true })},
   prompt: `You are an AI-powered interview performance analyzer. You will receive the transcript of a mock interview and provide a detailed analysis of the candidate's performance.
 
   Based on the interview transcript, provide a summary of the candidate's performance, highlighting their key strengths and weaknesses. Also, suggest specific actions the candidate can take to improve their skills.
@@ -71,12 +74,26 @@ const analyzeInterviewPerformanceFlow = ai.defineFlow(
     outputSchema: AnalyzeInterviewPerformanceOutputSchema,
   },
   async (input) => {
-    if (!input.googleApiKey) {
-      throw new Error('Google AI API Key is not provided.');
+    const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
+    const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
+    if (primaryGoogleApiKey) keys.push({ name: 'primary', value: primaryGoogleApiKey });
+    if (secondaryGoogleApiKey) keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
+
+    if (keys.length === 0) throw new Error('No API key provided.');
+
+    let lastError: any = null;
+    for (const key of keys) {
+        try {
+            const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: key.value });
+            return { ...output!, usedKey: key.name };
+        } catch (e: any) {
+            lastError = e;
+            const isQuotaError = e.message?.includes('429') || e.status === 'RESOURCE_EXHAUSTED' || e.details?.includes('quota');
+            if (!isQuotaError) {
+                break;
+            }
+        }
     }
-    const {output} = await analyzeInterviewPerformancePrompt(input, {
-      auth: input.googleApiKey,
-    });
-    return output!;
+    throw lastError || new Error('AI flow failed for an unknown reason.');
   }
 );

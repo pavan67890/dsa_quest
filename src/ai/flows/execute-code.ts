@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -17,7 +18,8 @@ const ExecuteCodeInputSchema = z.object({
   problemDescription: z
     .string()
     .describe('A brief description of the problem the code is trying to solve.'),
-  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
+  primaryGoogleApiKey: z.string().optional().describe("The user's primary Google AI API key."),
+  secondaryGoogleApiKey: z.string().optional().describe("The user's secondary Google AI API key."),
 });
 
 export type ExecuteCodeInput = z.infer<typeof ExecuteCodeInputSchema>;
@@ -31,6 +33,7 @@ const ExecuteCodeOutputSchema = z.object({
   isError: z
     .boolean()
     .describe('Whether the simulated execution resulted in an error.'),
+  usedKey: z.enum(['primary', 'secondary']),
 });
 
 export type ExecuteCodeOutput = z.infer<typeof ExecuteCodeOutputSchema>;
@@ -43,8 +46,8 @@ export async function executeCode(
 
 const executeCodePrompt = ai.definePrompt({
   name: 'executeCodePrompt',
-  input: {schema: ExecuteCodeInputSchema},
-  output: {schema: ExecuteCodeOutputSchema},
+  input: {schema: ExecuteCodeInputSchema.omit({ primaryGoogleApiKey: true, secondaryGoogleApiKey: true })},
+  output: {schema: ExecuteCodeOutputSchema.omit({ usedKey: true })},
   prompt: `You are a code execution simulator. Your task is to analyze the provided code snippet, written to solve a specific problem, and simulate its execution.
 
   Do not just review the code. ACT as if you are the compiler/interpreter. Run the code in your "mind" and determine what its output would be.
@@ -72,12 +75,26 @@ const executeCodeFlow = ai.defineFlow(
     outputSchema: ExecuteCodeOutputSchema,
   },
   async (input) => {
-    if (!input.googleApiKey) {
-      throw new Error('Google AI API Key is not provided.');
+    const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
+    const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
+    if (primaryGoogleApiKey) keys.push({ name: 'primary', value: primaryGoogleApiKey });
+    if (secondaryGoogleApiKey) keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
+
+    if (keys.length === 0) throw new Error('No API key provided.');
+
+    let lastError: any = null;
+    for (const key of keys) {
+        try {
+            const { output } = await executeCodePrompt(promptInput, { auth: key.value });
+            return { ...output!, usedKey: key.name };
+        } catch (e: any) {
+            lastError = e;
+            const isQuotaError = e.message?.includes('429') || e.status === 'RESOURCE_EXHAUSTED' || e.details?.includes('quota');
+            if (!isQuotaError) {
+                break;
+            }
+        }
     }
-    const {output} = await executeCodePrompt(input, {
-      auth: input.googleApiKey,
-    });
-    return output!;
+    throw lastError || new Error('AI flow failed for an unknown reason.');
   }
 );

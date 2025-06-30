@@ -9,33 +9,45 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle } from 'lucide-react';
+import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle, BarChart } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, type User, GoogleAuthProvider } from 'firebase/auth';
 import { saveProgress, loadProgress } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const formSchema = z.object({
-  googleApiKey: z.string().min(1, 'A Google AI API key is required.'),
+  primaryGoogleApiKey: z.string().optional(),
+  secondaryGoogleApiKey: z.string().optional(),
 });
 
+type ApiKeys = {
+  primaryGoogleApiKey?: string;
+  secondaryGoogleApiKey?: string;
+};
+
+type KeyStats = {
+  [apiKey: string]: {
+    calls: number;
+    date: string;
+  };
+};
+
 export default function SettingsPage() {
-  const [apiKeys, setApiKeys] = useLocalStorage('api-keys', {
-    googleApiKey: '',
-  });
+  const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
+  const [keyStats] = useLocalStorage<KeyStats>('key-stats', {});
   const { toast } = useToast();
 
   const [user, setUser] = useState<User | null>(null);
@@ -45,8 +57,18 @@ export default function SettingsPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: apiKeys,
+    defaultValues: {
+        primaryGoogleApiKey: apiKeys.primaryGoogleApiKey || '',
+        secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey || '',
+    },
   });
+  
+  useEffect(() => {
+    form.reset({
+        primaryGoogleApiKey: apiKeys.primaryGoogleApiKey || '',
+        secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey || '',
+    });
+  }, [apiKeys, form]);
 
   useEffect(() => {
     if (!auth) {
@@ -64,7 +86,7 @@ export default function SettingsPage() {
     setApiKeys(values);
     toast({
       title: 'Settings Saved!',
-      description: 'Your API key has been updated locally.',
+      description: 'Your API keys have been updated locally.',
     });
   }
 
@@ -150,6 +172,15 @@ export default function SettingsPage() {
       }
   };
 
+  const getTodaysCalls = (apiKey?: string) => {
+    if (!apiKey || !keyStats[apiKey]) return 0;
+    const today = new Date().toISOString().split('T')[0];
+    if (keyStats[apiKey].date === today) {
+        return keyStats[apiKey].calls;
+    }
+    return 0;
+  };
+
   return (
     <div className="min-h-screen">
       <GameHeader />
@@ -159,57 +190,101 @@ export default function SettingsPage() {
             <CardTitle className="font-headline text-3xl">Settings</CardTitle>
           </CardHeader>
           <CardContent>
-            <h3 className="text-xl font-headline flex items-center gap-2 mb-4">API Key</h3>
+            <h3 className="text-xl font-headline flex items-center gap-2 mb-4">API Keys</h3>
             <Alert className="mb-6">
                 <Terminal className="h-4 w-4" />
-                <AlertTitle>Bring-Your-Own-Key (BYOK) Model</AlertTitle>
+                <AlertTitle>Bring-Your-Own-Key (BYOK) with Fallback</AlertTitle>
                 <AlertDescription>
-                This app uses your personal Google AI API key to access powerful language models like Gemini. Your key is stored only in your browser.
+                This app uses your personal Google AI API keys. Provide a primary and a secondary key. If the primary key fails due to quota limits, the app will automatically fall back to the secondary key.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                  control={form.control}
-                  name="googleApiKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-lg">
-                        <KeyRound className="w-5 h-5 text-primary" /> Google AI API Key
-                        <Sheet>
-                          <SheetTrigger asChild>
-                            <Button variant="link" className="p-0 h-auto text-sm">(How to get a key?)</Button>
-                          </SheetTrigger>
-                          <SheetContent>
-                            <SheetHeader>
-                              <SheetTitle>Getting your Google AI API Key</SheetTitle>
-                              <SheetDescription>
-                                Follow these steps to get your free API key from Google AI Studio, which provides access to Gemini models.
-                              </SheetDescription>
-                            </SheetHeader>
-                            <div className="py-4 space-y-4">
-                              <ol className="list-decimal list-inside space-y-2">
-                                <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline text-primary">aistudio.google.com</a> and sign in with your Google account.</li>
-                                <li>Click the <strong>Create API key</strong> button.</li>
-                                <li>Copy the generated key and paste it into the input field on the settings page.</li>
-                              </ol>
-                              <p className="text-sm text-muted-foreground">Google provides a generous free tier to get started with the Gemini API.</p>
-                            </div>
-                          </SheetContent>
-                        </Sheet>
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter your Google AI API key" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Used for all AI features, including interviews, feedback, and text-to-speech.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <Tabs defaultValue="primary" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="primary">Primary Key</TabsTrigger>
+                    <TabsTrigger value="secondary">Secondary Key</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="primary" className="space-y-4 pt-4">
+                    <FormField
+                      control={form.control}
+                      name="primaryGoogleApiKey"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-lg">
+                            <KeyRound className="w-5 h-5 text-primary" /> Primary Google AI Key
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="Enter your primary Google AI key" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-base font-medium flex items-center gap-2"><BarChart/> Key Statistics</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{getTodaysCalls(apiKeys.primaryGoogleApiKey)}</div>
+                        <p className="text-xs text-muted-foreground">API calls made today with this key</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                  <TabsContent value="secondary" className="space-y-4 pt-4">
+                     <FormField
+                      control={form.control}
+                      name="secondaryGoogleApiKey"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 text-lg">
+                            <KeyRound className="w-5 h-5 text-secondary" /> Secondary Google AI Key (Fallback)
+                          </FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="Enter your secondary Google AI key" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                     <Card>
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-base font-medium flex items-center gap-2"><BarChart/> Key Statistics</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                         <div className="text-2xl font-bold">{getTodaysCalls(apiKeys.secondaryGoogleApiKey)}</div>
+                        <p className="text-xs text-muted-foreground">API calls made today with this key</p>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+                <div className="flex items-center gap-2">
+                    <p className="text-sm text-muted-foreground">Need a key?</p>
+                    <Sheet>
+                        <SheetTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto text-sm">How to get a Google AI API key</Button>
+                        </SheetTrigger>
+                        <SheetContent>
+                        <SheetHeader>
+                            <SheetTitle>Getting your Google AI API Key</SheetTitle>
+                            <SheetDescription>
+                            Follow these steps to get your free API key from Google AI Studio, which provides access to Gemini models.
+                            </SheetDescription>
+                        </SheetHeader>
+                        <div className="py-4 space-y-4">
+                            <ol className="list-decimal list-inside space-y-2">
+                            <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline text-primary">aistudio.google.com</a> and sign in with your Google account.</li>
+                            <li>Click the <strong>Create API key</strong> button.</li>
+                            <li>Copy the generated key and paste it into the input field on the settings page.</li>
+                            <li>You can create multiple keys to use as primary and secondary.</li>
+                            </ol>
+                            <p className="text-sm text-muted-foreground">Google provides a generous free tier to get started with the Gemini API.</p>
+                        </div>
+                        </SheetContent>
+                    </Sheet>
+                </div>
                 <Button type="submit" className="w-full" size="lg">
-                  <Save className="mr-2 h-4 w-4" /> Save API Key
+                  <Save className="mr-2 h-4 w-4" /> Save API Keys
                 </Button>
               </form>
             </Form>
