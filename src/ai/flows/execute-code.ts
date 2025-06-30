@@ -77,10 +77,19 @@ const executeCodeFlow = ai.defineFlow(
   async (input) => {
     const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
     const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
-    if (primaryGoogleApiKey) keys.push({ name: 'primary', value: primaryGoogleApiKey });
-    if (secondaryGoogleApiKey) keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
 
-    if (keys.length === 0) throw new Error('No API key provided.');
+    if (primaryGoogleApiKey && primaryGoogleApiKey.trim()) {
+      keys.push({ name: 'primary', value: primaryGoogleApiKey });
+    }
+    if (secondaryGoogleApiKey && secondaryGoogleApiKey.trim()) {
+      keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
+    }
+
+    if (keys.length === 0) {
+      // The Genkit plugin throws FAILED_PRECONDITION when no key is provided.
+      // We throw a more user-friendly error message here to be caught by the client.
+      throw new Error('An API key is required. Please go to Settings to add your key.');
+    }
 
     let lastError: any = null;
     for (const key of keys) {
