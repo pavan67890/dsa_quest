@@ -15,11 +15,7 @@ const AnalyzeInterviewPerformanceInputSchema = z.object({
   interviewTranscript: z
     .string()
     .describe('The complete transcript of the mock interview.'),
-  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
-  secondaryApiKey: z
-    .string()
-    .optional()
-    .describe("The user's secondary/fallback OpenRouter API key."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
 });
 
 export type AnalyzeInterviewPerformanceInput = z.infer<
@@ -75,25 +71,12 @@ const analyzeInterviewPerformanceFlow = ai.defineFlow(
     outputSchema: AnalyzeInterviewPerformanceOutputSchema,
   },
   async (input) => {
-    try {
-      const {output} = await analyzeInterviewPerformancePrompt(input, {
-        auth: input.primaryApiKey,
-      });
-      return output!;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      if (
-        input.secondaryApiKey &&
-        (errorMessage.includes('429') ||
-          errorMessage.toLowerCase().includes('quota'))
-      ) {
-        const {output} = await analyzeInterviewPerformancePrompt(input, {
-          auth: input.secondaryApiKey,
-        });
-        return output!;
-      }
-      throw error;
+    if (!input.googleApiKey) {
+      throw new Error('Google AI API Key is not provided.');
     }
+    const {output} = await analyzeInterviewPerformancePrompt(input, {
+      auth: input.googleApiKey,
+    });
+    return output!;
   }
 );

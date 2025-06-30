@@ -17,11 +17,7 @@ const ExecuteCodeInputSchema = z.object({
   problemDescription: z
     .string()
     .describe('A brief description of the problem the code is trying to solve.'),
-  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
-  secondaryApiKey: z
-    .string()
-    .optional()
-    .describe("The user's secondary/fallback OpenRouter API key."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
 });
 
 export type ExecuteCodeInput = z.infer<typeof ExecuteCodeInputSchema>;
@@ -76,25 +72,12 @@ const executeCodeFlow = ai.defineFlow(
     outputSchema: ExecuteCodeOutputSchema,
   },
   async (input) => {
-    try {
-      const {output} = await executeCodePrompt(input, {
-        auth: input.primaryApiKey,
-      });
-      return output!;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      if (
-        input.secondaryApiKey &&
-        (errorMessage.includes('429') ||
-          errorMessage.toLowerCase().includes('quota'))
-      ) {
-        const {output} = await executeCodePrompt(input, {
-          auth: input.secondaryApiKey,
-        });
-        return output!;
-      }
-      throw error;
+    if (!input.googleApiKey) {
+      throw new Error('Google AI API Key is not provided.');
     }
+    const {output} = await executeCodePrompt(input, {
+      auth: input.googleApiKey,
+    });
+    return output!;
   }
 );

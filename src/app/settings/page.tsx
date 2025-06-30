@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Shield, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle, GitBranch } from 'lucide-react';
+import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
@@ -29,15 +29,11 @@ import { saveProgress, loadProgress } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const formSchema = z.object({
-  primaryApiKey: z.string().min(1, 'A primary OpenRouter API key is required.'),
-  secondaryApiKey: z.string().optional(),
-  googleApiKey: z.string().optional(),
+  googleApiKey: z.string().min(1, 'A Google AI API key is required.'),
 });
 
 export default function SettingsPage() {
   const [apiKeys, setApiKeys] = useLocalStorage('api-keys', {
-    primaryApiKey: '',
-    secondaryApiKey: '',
     googleApiKey: '',
   });
   const { toast } = useToast();
@@ -68,7 +64,7 @@ export default function SettingsPage() {
     setApiKeys(values);
     toast({
       title: 'Settings Saved!',
-      description: 'Your API keys have been updated locally.',
+      description: 'Your API key has been updated locally.',
     });
   }
 
@@ -163,93 +159,57 @@ export default function SettingsPage() {
             <CardTitle className="font-headline text-3xl">Settings</CardTitle>
           </CardHeader>
           <CardContent>
-            <h3 className="text-xl font-headline flex items-center gap-2 mb-4">API Keys</h3>
+            <h3 className="text-xl font-headline flex items-center gap-2 mb-4">API Key</h3>
             <Alert className="mb-6">
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Bring-Your-Own-Key (BYOK) Model</AlertTitle>
                 <AlertDescription>
-                This app uses your personal OpenRouter API keys to access powerful language models like Mixtral, Llama3, and Gemma. Your keys are stored only in your browser.
+                This app uses your personal Google AI API key to access powerful language models like Gemini. Your key is stored only in your browser.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                   control={form.control}
-                  name="primaryApiKey"
+                  name="googleApiKey"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2 text-lg">
-                        <KeyRound className="w-5 h-5 text-primary" /> Primary OpenRouter API Key
+                        <KeyRound className="w-5 h-5 text-primary" /> Google AI API Key
                         <Sheet>
                           <SheetTrigger asChild>
                             <Button variant="link" className="p-0 h-auto text-sm">(How to get a key?)</Button>
                           </SheetTrigger>
                           <SheetContent>
                             <SheetHeader>
-                              <SheetTitle>Getting your OpenRouter API Key</SheetTitle>
+                              <SheetTitle>Getting your Google AI API Key</SheetTitle>
                               <SheetDescription>
-                                Follow these steps to get your free API key from OpenRouter, which provides access to many different AI models.
+                                Follow these steps to get your free API key from Google AI Studio, which provides access to Gemini models.
                               </SheetDescription>
                             </SheetHeader>
                             <div className="py-4 space-y-4">
                               <ol className="list-decimal list-inside space-y-2">
-                                <li>Go to <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="underline text-primary">openrouter.ai</a> and sign up or log in.</li>
-                                <li>Click your profile icon in the top-right and select <strong>Keys</strong>.</li>
-                                <li>Click the <strong>+ Create Key</strong> button.</li>
-                                <li>Give your key a name (e.g., "DSA-Quest") and click <strong>Create</strong>.</li>
-                                <li>Copy the key that starts with `sk-or-` and paste it into the input field on the settings page.</li>
+                                <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline text-primary">aistudio.google.com</a> and sign in with your Google account.</li>
+                                <li>Click the <strong>Create API key</strong> button.</li>
+                                <li>Copy the generated key and paste it into the input field on the settings page.</li>
                               </ol>
-                              <p className="text-sm text-muted-foreground">OpenRouter provides a generous free tier to get started with various AI models.</p>
+                              <p className="text-sm text-muted-foreground">Google provides a generous free tier to get started with the Gemini API.</p>
                             </div>
                           </SheetContent>
                         </Sheet>
                       </FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="Enter your primary OpenRouter API key" {...field} />
+                        <Input type="password" placeholder="Enter your Google AI API key" {...field} />
                       </FormControl>
                       <FormDescription>
-                        Used for all core AI interactions with models like Mixtral, Llama3, and Gemma.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="secondaryApiKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-lg">
-                        <GitBranch className="w-5 h-5 text-accent" /> Secondary API Key (Fallback)
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter your secondary/fallback API key" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Optional. This key will be used automatically if your primary key fails (e.g., due to rate limits).
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="googleApiKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-lg"><Shield className="w-5 h-5 text-accent" /> Google AI API Key (for Audio)</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter a Google AI Studio API key" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Optional. This key is only used for the text-to-speech audio feature.
+                        Used for all AI features, including interviews, feedback, and text-to-speech.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <Button type="submit" className="w-full" size="lg">
-                  <Save className="mr-2 h-4 w-4" /> Save API Keys
+                  <Save className="mr-2 h-4 w-4" /> Save API Key
                 </Button>
               </form>
             </Form>

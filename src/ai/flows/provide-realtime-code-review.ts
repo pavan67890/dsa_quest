@@ -23,11 +23,7 @@ const ProvideRealtimeCodeReviewInputSchema = z.object({
     .describe(
       'Previous feedback provided to the user on their code. Useful for maintaining context.'
     ),
-  primaryApiKey: z.string().describe("The user's primary OpenRouter API key."),
-  secondaryApiKey: z
-    .string()
-    .optional()
-    .describe("The user's secondary/fallback OpenRouter API key."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
 });
 
 export type ProvideRealtimeCodeReviewInput = z.infer<
@@ -111,25 +107,12 @@ const provideRealtimeCodeReviewFlow = ai.defineFlow(
     outputSchema: ProvideRealtimeCodeReviewOutputSchema,
   },
   async (input) => {
-    try {
-      const {output} = await provideRealtimeCodeReviewPrompt(input, {
-        auth: input.primaryApiKey,
-      });
-      return output!;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      if (
-        input.secondaryApiKey &&
-        (errorMessage.includes('429') ||
-          errorMessage.toLowerCase().includes('quota'))
-      ) {
-        const {output} = await provideRealtimeCodeReviewPrompt(input, {
-          auth: input.secondaryApiKey,
-        });
-        return output!;
-      }
-      throw error;
+    if (!input.googleApiKey) {
+      throw new Error('Google AI API Key is not provided.');
     }
+    const {output} = await provideRealtimeCodeReviewPrompt(input, {
+      auth: input.googleApiKey,
+    });
+    return output!;
   }
 );

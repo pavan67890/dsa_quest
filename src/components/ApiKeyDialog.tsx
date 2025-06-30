@@ -22,7 +22,7 @@ export function ApiKeyDialog({ isOpen }: ApiKeyDialogProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>API Key Required</AlertDialogTitle>
           <AlertDialogDescription>
-            You need to set your OpenRouter API key before you can begin. Please go to the settings page to add it.
+            You need to set your Google AI API key before you can begin. Please go to the settings page to add it.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
