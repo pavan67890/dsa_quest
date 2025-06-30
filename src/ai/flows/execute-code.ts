@@ -18,8 +18,7 @@ const ExecuteCodeInputSchema = z.object({
   problemDescription: z
     .string()
     .describe('A brief description of the problem the code is trying to solve.'),
-  primaryGoogleApiKey: z.string().optional().describe("The user's primary Google AI API key."),
-  secondaryGoogleApiKey: z.string().optional().describe("The user's secondary Google AI API key."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
 });
 
 export type ExecuteCodeInput = z.infer<typeof ExecuteCodeInputSchema>;
@@ -33,7 +32,6 @@ const ExecuteCodeOutputSchema = z.object({
   isError: z
     .boolean()
     .describe('Whether the simulated execution resulted in an error.'),
-  usedKey: z.enum(['primary', 'secondary']),
 });
 
 export type ExecuteCodeOutput = z.infer<typeof ExecuteCodeOutputSchema>;
@@ -46,8 +44,8 @@ export async function executeCode(
 
 const executeCodePrompt = ai.definePrompt({
   name: 'executeCodePrompt',
-  input: {schema: ExecuteCodeInputSchema.omit({ primaryGoogleApiKey: true, secondaryGoogleApiKey: true })},
-  output: {schema: ExecuteCodeOutputSchema.omit({ usedKey: true })},
+  input: {schema: ExecuteCodeInputSchema.omit({ googleApiKey: true })},
+  output: {schema: ExecuteCodeOutputSchema},
   prompt: `You are a code execution simulator. Your task is to analyze the provided code snippet, written to solve a specific problem, and simulate its execution.
 
   Do not just review the code. ACT as if you are the compiler/interpreter. Run the code in your "mind" and determine what its output would be.
@@ -75,35 +73,16 @@ const executeCodeFlow = ai.defineFlow(
     outputSchema: ExecuteCodeOutputSchema,
   },
   async (input) => {
-    const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
-    const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
-
-    if (primaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'primary', value: primaryGoogleApiKey });
-    }
-    if (secondaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
-    }
-
-    if (keys.length === 0) {
-      // The Genkit plugin throws FAILED_PRECONDITION when no key is provided.
-      // We throw a more user-friendly error message here to be caught by the client.
+    const { googleApiKey, ...promptInput } = input;
+    
+    if (!googleApiKey?.trim()) {
       throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
     }
 
-    let lastError: any = null;
-    for (const key of keys) {
-        try {
-            const { output } = await executeCodePrompt(promptInput, { auth: key.value });
-            return { ...output!, usedKey: key.name };
-        } catch (e: any) {
-            lastError = e;
-            const isQuotaError = e.message?.includes('429') || e.status === 'RESOURCE_EXHAUSTED' || e.details?.includes('quota');
-            if (!isQuotaError) {
-                break;
-            }
-        }
+    const { output } = await executeCodePrompt(promptInput, { auth: googleApiKey });
+    if (!output) {
+        throw new Error('The AI model did not return a valid output.');
     }
-    throw lastError || new Error('AI flow failed for an unknown reason.');
+    return output;
   }
 );

@@ -24,8 +24,7 @@ const ProvideRealtimeCodeReviewInputSchema = z.object({
     .describe(
       'Previous feedback provided to the user on their code. Useful for maintaining context.'
     ),
-  primaryGoogleApiKey: z.string().optional().describe("The user's primary Google AI API key."),
-  secondaryGoogleApiKey: z.string().optional().describe("The user's secondary Google AI API key."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
 });
 
 export type ProvideRealtimeCodeReviewInput = z.infer<
@@ -50,7 +49,6 @@ const ProvideRealtimeCodeReviewOutputSchema = z.object({
     .describe(
       'Explanation of what each of changes mean and why they were made.'
     ),
-  usedKey: z.enum(['primary', 'secondary']),
 });
 
 export type ProvideRealtimeCodeReviewOutput = z.infer<
@@ -65,8 +63,8 @@ export async function provideRealtimeCodeReview(
 
 const provideRealtimeCodeReviewPrompt = ai.definePrompt({
   name: 'provideRealtimeCodeReviewPrompt',
-  input: {schema: ProvideRealtimeCodeReviewInputSchema.omit({ primaryGoogleApiKey: true, secondaryGoogleApiKey: true })},
-  output: {schema: ProvideRealtimeCodeReviewOutputSchema.omit({ usedKey: true })},
+  input: {schema: ProvideRealtimeCodeReviewInputSchema.omit({ googleApiKey: true })},
+  output: {schema: ProvideRealtimeCodeReviewOutputSchema},
   prompt: `You are an expert code reviewer specializing in data structures and algorithms.
 
   You will provide feedback to the user on their code, focusing on correctness, efficiency, and style. 
@@ -110,35 +108,16 @@ const provideRealtimeCodeReviewFlow = ai.defineFlow(
     outputSchema: ProvideRealtimeCodeReviewOutputSchema,
   },
   async (input) => {
-    const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
-    const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
-
-    if (primaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'primary', value: primaryGoogleApiKey });
-    }
-    if (secondaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
-    }
-
-    if (keys.length === 0) {
-      // The Genkit plugin throws FAILED_PRECONDITION when no key is provided.
-      // We throw a more user-friendly error message here to be caught by the client.
+    const { googleApiKey, ...promptInput } = input;
+    
+    if (!googleApiKey?.trim()) {
       throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
     }
 
-    let lastError: any = null;
-    for (const key of keys) {
-        try {
-            const { output } = await provideRealtimeCodeReviewPrompt(promptInput, { auth: key.value });
-            return { ...output!, usedKey: key.name };
-        } catch (e: any) {
-            lastError = e;
-            const isQuotaError = e.message?.includes('429') || e.status === 'RESOURCE_EXHAUSTED' || e.details?.includes('quota');
-            if (!isQuotaError) {
-                break;
-            }
-        }
+    const { output } = await provideRealtimeCodeReviewPrompt(promptInput, { auth: googleApiKey });
+    if (!output) {
+      throw new Error('The AI model did not return a valid output.');
     }
-    throw lastError || new Error('AI flow failed for an unknown reason.');
+    return output;
   }
 );

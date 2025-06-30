@@ -22,8 +22,7 @@ import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Spar
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { primaryGoogleApiKey?: string; secondaryGoogleApiKey?: string; };
-type KeyStats = { [apiKey: string]: { calls: number; date: string } };
+type ApiKeys = { googleApiKey?: string; };
 type Conversation = { id: number; speaker: 'interviewer' | 'user'; text: string, code?: string };
 type InterviewerImageInfo = { src: string };
 type CodeOutput = { output: string; isError: boolean } | null;
@@ -44,7 +43,6 @@ export default function InterviewPage() {
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
-  const [keyStats, setKeyStats] = useLocalStorage<KeyStats>('key-stats', {});
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
   const [xp, setXp] = useLocalStorage('user-xp', 0);
   const [earnedBadges, setEarnedBadges] = useLocalStorage<string[]>('earned-badges', []);
@@ -76,23 +74,6 @@ export default function InterviewPage() {
 
   const dialogueEndRef = useRef<HTMLDivElement>(null);
 
-  const updateKeyStats = (keyUsed: 'primary' | 'secondary') => {
-    const apiKey = keyUsed === 'primary' ? apiKeys.primaryGoogleApiKey : apiKeys.secondaryGoogleApiKey;
-    if (!apiKey) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    const currentStats = keyStats[apiKey] || { calls: 0, date: '' };
-    const newCalls = currentStats.date === today ? currentStats.calls + 1 : 1;
-
-    setKeyStats({
-        ...keyStats,
-        [apiKey]: {
-            calls: newCalls,
-            date: today,
-        }
-    });
-  };
-
   useEffect(() => {
     if (!moduleId || !levelId) return;
     setIsDataLoading(true);
@@ -109,24 +90,22 @@ export default function InterviewPage() {
   }, [moduleId, levelId]);
 
 
-  const handleInterviewerResponse = useCallback((text: string, usedKey: 'primary' | 'secondary') => {
+  const handleInterviewerResponse = useCallback((text: string) => {
     setIsAiTyping(true);
     setConversation(conv => [...conv, { id: conversationIdCounter.current++, speaker: 'interviewer', text }]);
     
-    if (isTtsDisabled || (!apiKeys.primaryGoogleApiKey && !apiKeys.secondaryGoogleApiKey)) {
+    if (isTtsDisabled || !apiKeys.googleApiKey) {
         setIsAiTyping(false);
         return;
     }
 
     textToSpeech({
         text: text,
-        primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-        secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+        googleApiKey: apiKeys.googleApiKey,
     })
     .then(ttsResponse => {
         if (ttsResponse?.audioDataUri) {
             setAudioUrl(ttsResponse.audioDataUri);
-            updateKeyStats(ttsResponse.usedKey);
         }
     })
     .catch(ttsError => {
@@ -210,7 +189,7 @@ export default function InterviewPage() {
   
   useEffect(() => {
     if (isDataLoading) return;
-    if (!apiKeys.primaryGoogleApiKey && !apiKeys.secondaryGoogleApiKey) {
+    if (!apiKeys.googleApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (module && level && conversation.length === 0 && interviewPhase === 'greeting') {
       let questionText = level.question;
@@ -227,7 +206,7 @@ export default function InterviewPage() {
       setCurrentQuestion(questionText);
       const initialText = "Hello! I'm your AI interviewer for today's session. It's great to have you here. Are you ready to begin?";
       
-      handleInterviewerResponse(initialText, 'primary'); // Assume primary for initial greeting
+      handleInterviewerResponse(initialText);
     }
   }, [apiKeys, level, module, conversation.length, handleInterviewerResponse, interviewPhase, isDataLoading]);
 
@@ -262,8 +241,7 @@ export default function InterviewPage() {
 This is an icebreaker question before the main technical problem. Keep your response concise.`,
                 previousConversationSummary: conversationHistory,
                 question: '', 
-                primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-                secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+                googleApiKey: apiKeys.googleApiKey,
             });
             setInterviewPhase('icebreaker');
         } else if (interviewPhase === 'icebreaker') {
@@ -276,8 +254,7 @@ This is an icebreaker question before the main technical problem. Keep your resp
 The main technical question you must ask is provided in the 'question' field. After asking, set the nextQuestion to be an empty string to signify you are waiting for their answer.`,
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-                secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+                googleApiKey: apiKeys.googleApiKey,
             });
             setInterviewPhase('technical');
         } else if(showCodeEditor) {
@@ -285,17 +262,14 @@ The main technical question you must ask is provided in the 'question' field. Af
               code: userCode,
               language: language,
               problemDescription: currentQuestion,
-              primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-              secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+              googleApiKey: apiKeys.googleApiKey,
             });
-            updateKeyStats(review.usedKey);
             aiResponse = await simulateAiInterviewer({
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s code submission and follow-up explanation.',
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-                secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+                googleApiKey: apiKeys.googleApiKey,
             });
             aiResponse.interviewerResponse = `${review.feedback}\n\n${aiResponse.interviewerResponse}`;
         } else {
@@ -304,16 +278,14 @@ The main technical question you must ask is provided in the 'question' field. Af
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s answer to a technical question. Provide follow-up questions if needed, or hints if the user is stuck.',
                 previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-                secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+                googleApiKey: apiKeys.googleApiKey,
             });
         }
       
-      updateKeyStats(aiResponse.usedKey);
       const interviewerText = aiResponse.interviewerResponse;
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
       
-      handleInterviewerResponse(interviewerText, aiResponse.usedKey);
+      handleInterviewerResponse(interviewerText);
 
       if (aiResponse.nextQuestion.toLowerCase().includes('write the code') || aiResponse.nextQuestion.toLowerCase().includes('show me the code')) {
         setShowCodeEditor(true);
@@ -329,7 +301,7 @@ The main technical question you must ask is provided in the 'question' field. Af
         title: 'AI Error',
         description: errorMessage.includes('429') 
           ? 'You have exceeded your API quota. Please check your plan and billing details.'
-          : 'Could not get a response from the AI. Check your API keys or try again.',
+          : 'Could not get a response from the AI. Check your API key or try again.',
         variant: 'destructive',
       });
     } finally {
@@ -343,10 +315,8 @@ The main technical question you must ask is provided in the 'question' field. Af
     try {
         const report = await analyzeInterviewPerformance({ 
             interviewTranscript: transcript,
-            primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-            secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+            googleApiKey: apiKeys.googleApiKey,
         });
-        updateKeyStats(report.usedKey);
         setFinalReport(report);
         setIsInterviewOver(true);
 
@@ -393,11 +363,9 @@ The main technical question you must ask is provided in the 'question' field. Af
         code: userCode,
         language,
         problemDescription: currentQuestion,
-        primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-        secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+        googleApiKey: apiKeys.googleApiKey,
       });
       setCodeOutput(result);
-      updateKeyStats(result.usedKey);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       setCodeOutput({ output: errorMessage, isError: true });

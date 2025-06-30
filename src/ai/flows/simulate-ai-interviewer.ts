@@ -25,8 +25,7 @@ const SimulateAiInterviewerInputSchema = z.object({
       'A short summary of the previous conversation to maintain context.'
     ),
   question: z.string().describe('The current question asked by the interviewer.'),
-  primaryGoogleApiKey: z.string().optional().describe("The user's primary Google AI API key."),
-  secondaryGoogleApiKey: z.string().optional().describe("The user's secondary Google AI API key."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
 });
 
 export type SimulateAiInterviewerInput = z.infer<
@@ -56,7 +55,6 @@ const SimulateAiInterviewerOutputSchema = z.object({
     .describe(
       'The AI code review and suggestions if applicable'
     ),
-  usedKey: z.enum(['primary', 'secondary']),
 });
 
 export type SimulateAiInterviewerOutput = z.infer<
@@ -71,8 +69,8 @@ export async function simulateAiInterviewer(
 
 const simulateAiInterviewerPrompt = ai.definePrompt({
   name: 'simulateAiInterviewerPrompt',
-  input: {schema: SimulateAiInterviewerInputSchema.omit({ primaryGoogleApiKey: true, secondaryGoogleApiKey: true })},
-  output: {schema: SimulateAiInterviewerOutputSchema.omit({ usedKey: true })},
+  input: {schema: SimulateAiInterviewerInputSchema.omit({ googleApiKey: true })},
+  output: {schema: SimulateAiInterviewerOutputSchema},
   prompt: `You are an AI interviewer conducting a mock interview. Your role is to ask relevant questions, provide feedback, and assess the candidate's performance.
 
   Interviewer Prompt: {{{interviewerPrompt}}}
@@ -98,35 +96,16 @@ const simulateAiInterviewerFlow = ai.defineFlow(
     outputSchema: SimulateAiInterviewerOutputSchema,
   },
   async (input) => {
-    const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
-    const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
+    const { googleApiKey, ...promptInput } = input;
 
-    if (primaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'primary', value: primaryGoogleApiKey });
-    }
-    if (secondaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
-    }
-
-    if (keys.length === 0) {
-      // The Genkit plugin throws FAILED_PRECONDITION when no key is provided.
-      // We throw a more user-friendly error message here to be caught by the client.
+    if (!googleApiKey?.trim()) {
       throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
     }
 
-    let lastError: any = null;
-    for (const key of keys) {
-        try {
-            const { output } = await simulateAiInterviewerPrompt(promptInput, { auth: key.value });
-            return { ...output!, usedKey: key.name };
-        } catch (e: any) {
-            lastError = e;
-            const isQuotaError = e.message?.includes('429') || e.status === 'RESOURCE_EXHAUSTED' || e.details?.includes('quota');
-            if (!isQuotaError) {
-                break;
-            }
-        }
+    const { output } = await simulateAiInterviewerPrompt(promptInput, { auth: googleApiKey });
+    if (!output) {
+      throw new Error('The AI model did not return a valid output.');
     }
-    throw lastError || new Error('AI flow failed for an unknown reason.');
+    return output;
   }
 );

@@ -19,35 +19,24 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle, BarChart } from 'lucide-react';
+import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, type User, GoogleAuthProvider } from 'firebase/auth';
 import { saveProgress, loadProgress } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const formSchema = z.object({
-  primaryGoogleApiKey: z.string().optional(),
-  secondaryGoogleApiKey: z.string().optional(),
+  googleApiKey: z.string().optional(),
 });
 
 type ApiKeys = {
-  primaryGoogleApiKey?: string;
-  secondaryGoogleApiKey?: string;
-};
-
-type KeyStats = {
-  [apiKey: string]: {
-    calls: number;
-    date: string;
-  };
+  googleApiKey?: string;
 };
 
 export default function SettingsPage() {
   const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
-  const [keyStats] = useLocalStorage<KeyStats>('key-stats', {});
   const { toast } = useToast();
 
   const [user, setUser] = useState<User | null>(null);
@@ -58,15 +47,13 @@ export default function SettingsPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        primaryGoogleApiKey: apiKeys.primaryGoogleApiKey || '',
-        secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey || '',
+        googleApiKey: apiKeys.googleApiKey || '',
     },
   });
   
   useEffect(() => {
     form.reset({
-        primaryGoogleApiKey: apiKeys.primaryGoogleApiKey || '',
-        secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey || '',
+        googleApiKey: apiKeys.googleApiKey || '',
     });
   }, [apiKeys, form]);
 
@@ -86,7 +73,7 @@ export default function SettingsPage() {
     setApiKeys(values);
     toast({
       title: 'Settings Saved!',
-      description: 'Your API keys have been updated locally.',
+      description: 'Your API key has been updated locally.',
     });
   }
 
@@ -172,15 +159,6 @@ export default function SettingsPage() {
       }
   };
 
-  const getTodaysCalls = (apiKey?: string) => {
-    if (!apiKey || !keyStats[apiKey]) return 0;
-    const today = new Date().toISOString().split('T')[0];
-    if (keyStats[apiKey].date === today) {
-        return keyStats[apiKey].calls;
-    }
-    return 0;
-  };
-
   return (
     <div className="min-h-screen">
       <GameHeader />
@@ -193,71 +171,29 @@ export default function SettingsPage() {
             <h3 className="text-xl font-headline flex items-center gap-2 mb-4">API Keys</h3>
             <Alert className="mb-6">
                 <Terminal className="h-4 w-4" />
-                <AlertTitle>Bring-Your-Own-Key (BYOK) with Fallback</AlertTitle>
+                <AlertTitle>Bring-Your-Own-Key (BYOK) System</AlertTitle>
                 <AlertDescription>
-                  This app uses your personal Google AI API keys. Provide a primary and a secondary key. If the primary key fails due to quota limits, the app will automatically fall back to the secondary key.
+                  This app is built on Google's AI Platform. For the "Bring Your Own Key" system to work, you must provide your personal Google AI API key. The key is stored securely in your browser and is required for all AI features.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <Tabs defaultValue="primary" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="primary">Primary Key</TabsTrigger>
-                    <TabsTrigger value="secondary">Secondary Key</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="primary" className="space-y-4 pt-4">
-                    <FormField
-                      control={form.control}
-                      name="primaryGoogleApiKey"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2 text-lg">
-                            <KeyRound className="w-5 h-5 text-primary" /> Primary Google AI API Key
-                          </FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Enter your primary Google AI key" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-base font-medium flex items-center gap-2"><BarChart/> Key Statistics</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">{getTodaysCalls(apiKeys.primaryGoogleApiKey)}</div>
-                        <p className="text-xs text-muted-foreground">API calls made today with this key</p>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                  <TabsContent value="secondary" className="space-y-4 pt-4">
-                     <FormField
-                      control={form.control}
-                      name="secondaryGoogleApiKey"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2 text-lg">
-                            <KeyRound className="w-5 h-5 text-secondary" /> Secondary Google AI API Key
-                          </FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Enter your secondary Google AI key" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                     <Card>
-                      <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-base font-medium flex items-center gap-2"><BarChart/> Key Statistics</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                         <div className="text-2xl font-bold">{getTodaysCalls(apiKeys.secondaryGoogleApiKey)}</div>
-                        <p className="text-xs text-muted-foreground">API calls made today with this key</p>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
+                <FormField
+                  control={form.control}
+                  name="googleApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 text-lg">
+                        <KeyRound className="w-5 h-5 text-primary" /> Google AI API Key
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter your Google AI key" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="flex items-center gap-2">
                     <p className="text-sm text-muted-foreground">Need a key?</p>
                     <Sheet>
@@ -276,8 +212,7 @@ export default function SettingsPage() {
                             <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline text-primary">Google AI Studio</a>.</li>
                             <li>Log in with your Google account.</li>
                             <li>Click the "Create API key" button.</li>
-                            <li>Copy your new API key and paste it into the appropriate field on the settings page.</li>
-                            <li>You can create and use different keys for the primary and secondary slots if you wish.</li>
+                            <li>Copy your new API key and paste it into the key input field on the settings page.</li>
                             </ol>
                             <p className="text-sm text-muted-foreground">Your API keys are stored only in your browser and are never shared.</p>
                         </div>
@@ -285,7 +220,7 @@ export default function SettingsPage() {
                     </Sheet>
                 </div>
                 <Button type="submit" className="w-full" size="lg">
-                  <Save className="mr-2 h-4 w-4" /> Save API Keys
+                  <Save className="mr-2 h-4 w-4" /> Save API Key
                 </Button>
               </form>
             </Form>
@@ -331,7 +266,7 @@ export default function SettingsPage() {
                                 </div>
                             </div>
                         ) : (
-                            <Button onClick={getFreshToken} className="w-full" size="lg">
+                            <Button onClick={() => getFreshToken()} className="w-full" size="lg">
                                 <LogIn /> Sign in with Google to Enable Sync
                             </Button>
                         )}

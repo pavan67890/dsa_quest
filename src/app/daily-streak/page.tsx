@@ -16,8 +16,7 @@ import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import type { Module } from '@/lib/dsa-modules';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { primaryGoogleApiKey?: string; secondaryGoogleApiKey?: string };
-type KeyStats = { [apiKey: string]: { calls: number; date: string } };
+type ApiKeys = { googleApiKey?: string };
 
 type DailyQuestion = {
   question: string;
@@ -33,7 +32,6 @@ export default function DailyStreakPage() {
     const { toast } = useToast();
     const [progress] = useLocalStorage<Progress>('user-progress', {});
     const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
-    const [keyStats, setKeyStats] = useLocalStorage<KeyStats>('key-stats', {});
     const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
     
     const [dailyQuestion, setDailyQuestion] = useState<DailyQuestion>(null);
@@ -43,23 +41,6 @@ export default function DailyStreakPage() {
     const [feedback, setFeedback] = useState<Feedback>(null);
     const [allModules, setAllModules] = useState<Module[]>([]);
 
-    const updateKeyStats = (keyUsed: 'primary' | 'secondary') => {
-        const apiKey = keyUsed === 'primary' ? apiKeys.primaryGoogleApiKey : apiKeys.secondaryGoogleApiKey;
-        if (!apiKey) return;
-    
-        const today = new Date().toISOString().split('T')[0];
-        const currentStats = keyStats[apiKey] || { calls: 0, date: '' };
-        const newCalls = currentStats.date === today ? currentStats.calls + 1 : 1;
-    
-        setKeyStats({
-            ...keyStats,
-            [apiKey]: {
-                calls: newCalls,
-                date: today,
-            }
-        });
-    };
-
     useEffect(() => {
         fetch('/dsa-modules.json')
             .then(res => res.json())
@@ -67,7 +48,7 @@ export default function DailyStreakPage() {
     }, []);
 
     useEffect(() => {
-        if (!apiKeys.primaryGoogleApiKey && !apiKeys.secondaryGoogleApiKey) {
+        if (!apiKeys.googleApiKey) {
           setIsApiKeyDialogOpen(true);
         } else if (allModules.length > 0) {
             fetchDailyQuestion();
@@ -94,15 +75,13 @@ export default function DailyStreakPage() {
 
             const questionData = await generateDailyStreakQuestion({ 
                 completedModules,
-                primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-                secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+                googleApiKey: apiKeys.googleApiKey,
             });
             setDailyQuestion(questionData);
-            updateKeyStats(questionData.usedKey);
         } catch (error: any) {
             toast({
                 title: 'Error Generating Question',
-                description: error.message || 'Could not fetch a daily streak question. Please check your API keys or try again.',
+                description: error.message || 'Could not fetch a daily streak question. Please check your API key or try again.',
                 variant: 'destructive',
             });
             setDailyQuestion(null);
@@ -121,18 +100,16 @@ export default function DailyStreakPage() {
                 interviewerPrompt: "You are an AI assistant evaluating a user's answer to a daily data structure and algorithm question. Provide concise feedback on the correctness and quality of their answer. Be encouraging.",
                 previousConversationSummary: '',
                 question: dailyQuestion.question,
-                primaryGoogleApiKey: apiKeys.primaryGoogleApiKey,
-                secondaryGoogleApiKey: apiKeys.secondaryGoogleApiKey,
+                googleApiKey: apiKeys.googleApiKey,
             });
             setFeedback({
                 interviewerResponse: response.interviewerResponse,
                 sentiment: response.sentiment
             });
-            updateKeyStats(response.usedKey);
         } catch (error: any) {
             toast({
                 title: 'AI Error',
-                description: error.message || 'Could not get feedback from the AI. Check your API keys or try again.',
+                description: error.message || 'Could not get feedback from the AI. Check your API key or try again.',
                 variant: 'destructive',
             });
         } finally {

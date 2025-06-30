@@ -16,14 +16,12 @@ import wav from 'wav';
 
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to convert to speech.'),
-  primaryGoogleApiKey: z.string().optional().describe("The user's primary Google AI API key for TTS."),
-  secondaryGoogleApiKey: z.string().optional().describe("The user's secondary Google AI API key for TTS."),
+  googleApiKey: z.string().optional().describe("The user's Google AI API key for TTS."),
 });
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
 const TextToSpeechOutputSchema = z.object({
   audioDataUri: z.string().describe('The audio data as a base64-encoded WAV data URI.'),
-  usedKey: z.enum(['primary', 'secondary']),
 });
 export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
 
@@ -65,65 +63,43 @@ const textToSpeechFlow = ai.defineFlow(
     outputSchema: TextToSpeechOutputSchema,
   },
   async (input) => {
-    const { primaryGoogleApiKey, secondaryGoogleApiKey, ...promptInput } = input;
-    const keys: { name: 'primary' | 'secondary'; value: string }[] = [];
+    const { googleApiKey, ...promptInput } = input;
 
-    if (primaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'primary', value: primaryGoogleApiKey });
-    }
-    if (secondaryGoogleApiKey?.trim()) {
-      keys.push({ name: 'secondary', value: secondaryGoogleApiKey });
-    }
-
-    if (keys.length === 0) {
-      // The Genkit plugin throws FAILED_PRECONDITION when no key is provided.
-      // We throw a more user-friendly error message here to be caught by the client.
+    if (!googleApiKey?.trim()) {
       throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
     }
+    
+    const generateOptions = {
+        model: googleAI.model('gemini-2.5-flash-preview-tts'),
+        config: {
+            responseModalities: ['AUDIO' as const],
+            speechConfig: {
+            voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: 'Leda' },
+            },
+            },
+        },
+        prompt: promptInput.text,
+    };
 
-    let lastError: any = null;
-    for (const key of keys) {
-        try {
-            const generateOptions = {
-                model: googleAI.model('gemini-2.5-flash-preview-tts'),
-                config: {
-                    responseModalities: ['AUDIO' as const],
-                    speechConfig: {
-                    voiceConfig: {
-                        prebuiltVoiceConfig: { voiceName: 'Leda' },
-                    },
-                    },
-                },
-                prompt: promptInput.text,
-            };
-            const { media } = await ai.generate(
-                generateOptions,
-                { auth: key.value }
-            );
-            
-            if (!media) {
-                throw new Error('No audio media returned from TTS model.');
-            }
-
-            const audioBuffer = Buffer.from(
-                media.url.substring(media.url.indexOf(',') + 1),
-                'base64'
-            );
-
-            const wavBase64 = await toWav(audioBuffer);
-            
-            return {
-                audioDataUri: `data:audio/wav;base64,${wavBase64}`,
-                usedKey: key.name,
-            };
-        } catch (e: any) {
-            lastError = e;
-            const isQuotaError = e.message?.includes('429') || e.status === 'RESOURCE_EXHAUSTED' || e.details?.includes('quota');
-            if (!isQuotaError) {
-                break;
-            }
-        }
+    const { media } = await ai.generate(
+        generateOptions,
+        { auth: googleApiKey }
+    );
+    
+    if (!media) {
+        throw new Error('No audio media returned from TTS model.');
     }
-     throw lastError || new Error('AI flow failed for an unknown reason.');
+
+    const audioBuffer = Buffer.from(
+        media.url.substring(media.url.indexOf(',') + 1),
+        'base64'
+    );
+
+    const wavBase64 = await toWav(audioBuffer);
+    
+    return {
+        audioDataUri: `data:audio/wav;base64,${wavBase64}`,
+    };
   }
 );
