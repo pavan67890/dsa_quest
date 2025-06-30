@@ -22,10 +22,14 @@ import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Spar
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { googleApiKey?: string; };
+type ApiKeys = { primaryApiKey?: string; secondaryApiKey?: string; };
 type Conversation = { id: number; speaker: 'interviewer' | 'user'; text: string, code?: string };
 type InterviewerImageInfo = { src: string };
 type CodeOutput = { output: string; isError: boolean } | null;
+type KeyUsageStats = {
+  primary: { date: string; count: number };
+  secondary: { date: string; count: number };
+};
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
   neutral:   { src: '/hr/calm.png' },
@@ -43,6 +47,10 @@ export default function InterviewPage() {
 
   const { toast } = useToast();
   const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
+  const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
+    primary: { date: '', count: 0 },
+    secondary: { date: '', count: 0 },
+  });
   const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
   const [xp, setXp] = useLocalStorage('user-xp', 0);
   const [earnedBadges, setEarnedBadges] = useLocalStorage<string[]>('earned-badges', []);
@@ -94,14 +102,15 @@ export default function InterviewPage() {
     setIsAiTyping(true);
     setConversation(conv => [...conv, { id: conversationIdCounter.current++, speaker: 'interviewer', text }]);
     
-    if (isTtsDisabled || !apiKeys.googleApiKey) {
+    if (isTtsDisabled || (!apiKeys.primaryApiKey && !apiKeys.secondaryApiKey)) {
         setIsAiTyping(false);
         return;
     }
 
     textToSpeech({
         text: text,
-        googleApiKey: apiKeys.googleApiKey,
+        primaryApiKey: apiKeys.primaryApiKey,
+        secondaryApiKey: apiKeys.secondaryApiKey,
     })
     .then(ttsResponse => {
         if (ttsResponse?.audioDataUri) {
@@ -131,6 +140,27 @@ export default function InterviewPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKeys, toast, isTtsDisabled]);
 
+  const updateUsageStats = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setKeyUsageStats(prevStats => {
+      const newStats = { ...prevStats };
+      if (apiKeys.primaryApiKey) {
+        if (newStats.primary.date !== today) {
+          newStats.primary = { date: today, count: 1 };
+        } else {
+          newStats.primary.count++;
+        }
+      } else if (apiKeys.secondaryApiKey) {
+        if (newStats.secondary.date !== today) {
+          newStats.secondary = { date: today, count: 1 };
+        } else {
+          newStats.secondary.count++;
+        }
+      }
+      return newStats;
+    });
+  }, [apiKeys, setKeyUsageStats]);
+  
   useEffect(() => {
     if (typeof window !== 'undefined' && !recognitionRef.current) {
       const SpeechRecognition =
@@ -189,7 +219,7 @@ export default function InterviewPage() {
   
   useEffect(() => {
     if (isDataLoading) return;
-    if (!apiKeys.googleApiKey) {
+    if (!apiKeys.primaryApiKey && !apiKeys.secondaryApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (module && level && conversation.length === 0 && interviewPhase === 'greeting') {
       let questionText = level.question;
@@ -222,6 +252,8 @@ export default function InterviewPage() {
     setIsLoading(true);
     setAudioUrl(null);
 
+    updateUsageStats();
+
     const currentConversation: Conversation = { id: conversationIdCounter.current++, speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
     setConversation(conv => [...conv, currentConversation]);
     setUserInput('');
@@ -232,29 +264,33 @@ export default function InterviewPage() {
     try {
         let aiResponse;
         
+        const commonPayload = {
+            previousConversationSummary: conversationHistory,
+            primaryApiKey: apiKeys.primaryApiKey,
+            secondaryApiKey: apiKeys.secondaryApiKey,
+        };
+
         if (interviewPhase === 'greeting') {
             aiResponse = await simulateAiInterviewer({
+                ...commonPayload,
                 userResponse: userInput,
                 interviewerPrompt: `You are a friendly technical interviewer. The user has just confirmed they are ready to start. Your task is to:
 1. Respond positively (e.g., "Excellent!", "Great to hear!").
 2. Ask the user to briefly introduce themselves and their experience with programming.
 This is an icebreaker question before the main technical problem. Keep your response concise.`,
-                previousConversationSummary: conversationHistory,
                 question: '', 
-                googleApiKey: apiKeys.googleApiKey,
             });
             setInterviewPhase('icebreaker');
         } else if (interviewPhase === 'icebreaker') {
             aiResponse = await simulateAiInterviewer({
+                ...commonPayload,
                 userResponse: userInput,
                 interviewerPrompt: `You are a friendly technical interviewer. The user has just introduced themselves. Your task is to:
 1. Briefly and positively acknowledge their introduction (e.g., "Thanks for sharing," "That's an interesting background.").
 2. Smoothly transition to the main technical question.
 3. State the main technical question clearly.
 The main technical question you must ask is provided in the 'question' field. After asking, set the nextQuestion to be an empty string to signify you are waiting for their answer.`,
-                previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                googleApiKey: apiKeys.googleApiKey,
             });
             setInterviewPhase('technical');
         } else if(showCodeEditor) {
@@ -262,23 +298,22 @@ The main technical question you must ask is provided in the 'question' field. Af
               code: userCode,
               language: language,
               problemDescription: currentQuestion,
-              googleApiKey: apiKeys.googleApiKey,
+              primaryApiKey: apiKeys.primaryApiKey,
+              secondaryApiKey: apiKeys.secondaryApiKey,
             });
             aiResponse = await simulateAiInterviewer({
+                ...commonPayload,
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s code submission and follow-up explanation.',
-                previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                googleApiKey: apiKeys.googleApiKey,
             });
             aiResponse.interviewerResponse = `${review.feedback}\n\n${aiResponse.interviewerResponse}`;
         } else {
              aiResponse = await simulateAiInterviewer({
+                ...commonPayload,
                 userResponse: userInput,
                 interviewerPrompt: 'You are a friendly but sharp technical interviewer evaluating a candidate\'s answer to a technical question. Provide follow-up questions if needed, or hints if the user is stuck.',
-                previousConversationSummary: conversationHistory,
                 question: currentQuestion,
-                googleApiKey: apiKeys.googleApiKey,
             });
         }
       
@@ -315,7 +350,8 @@ The main technical question you must ask is provided in the 'question' field. Af
     try {
         const report = await analyzeInterviewPerformance({ 
             interviewTranscript: transcript,
-            googleApiKey: apiKeys.googleApiKey,
+            primaryApiKey: apiKeys.primaryApiKey,
+            secondaryApiKey: apiKeys.secondaryApiKey,
         });
         setFinalReport(report);
         setIsInterviewOver(true);
@@ -358,12 +394,14 @@ The main technical question you must ask is provided in the 'question' field. Af
     if (!userCode.trim()) return;
     setIsRunningCode(true);
     setCodeOutput(null);
+    updateUsageStats();
     try {
       const result = await executeCode({
         code: userCode,
         language,
         problemDescription: currentQuestion,
-        googleApiKey: apiKeys.googleApiKey,
+        primaryApiKey: apiKeys.primaryApiKey,
+        secondaryApiKey: apiKeys.secondaryApiKey,
       });
       setCodeOutput(result);
     } catch (error) {

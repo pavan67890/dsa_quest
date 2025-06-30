@@ -18,7 +18,8 @@ const GenerateDailyStreakQuestionInputSchema = z.object({
     .describe(
       'An array of names of the modules the user has fully completed.'
     ),
-  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
+  primaryApiKey: z.string().optional().describe("The user's primary Google AI API key."),
+  secondaryApiKey: z.string().optional().describe("The user's secondary Google AI API key for fallback."),
 });
 export type GenerateDailyStreakQuestionInput = z.infer<
   typeof GenerateDailyStreakQuestionInputSchema
@@ -45,7 +46,7 @@ export async function generateDailyStreakQuestion(
 
 const prompt = ai.definePrompt({
   name: 'generateDailyStreakQuestionPrompt',
-  input: {schema: GenerateDailyStreakQuestionInputSchema.omit({ googleApiKey: true })},
+  input: {schema: GenerateDailyStreakQuestionInputSchema.omit({ primaryApiKey: true, secondaryApiKey: true })},
   output: {schema: GenerateDailyStreakQuestionOutputSchema},
   prompt: `You are an expert interviewer, designing daily streak questions for DSA Quest. The questions should be based on modules that the user has fully completed, to reinforce their understanding of previously learned concepts.
 
@@ -69,16 +70,27 @@ const generateDailyStreakQuestionFlow = ai.defineFlow(
     outputSchema: GenerateDailyStreakQuestionOutputSchema,
   },
   async (input) => {
-    const { googleApiKey, ...promptInput } = input;
+    const { primaryApiKey, secondaryApiKey, ...promptInput } = input;
     
-    if (!googleApiKey?.trim()) {
-      throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    if (primaryApiKey?.trim()) {
+      try {
+        const { output } = await prompt(promptInput, { auth: primaryApiKey });
+        if (!output) throw new Error('The AI model did not return a valid output.');
+        return output;
+      } catch (e: any) {
+        if (e.message?.includes('429') && secondaryApiKey?.trim()) {
+          const { output } = await prompt(promptInput, { auth: secondaryApiKey });
+          if (!output) throw new Error('The AI model did not return a valid output on fallback.');
+          return output;
+        }
+        throw e;
+      }
+    } else if (secondaryApiKey?.trim()) {
+      const { output } = await prompt(promptInput, { auth: secondaryApiKey });
+      if (!output) throw new Error('The AI model did not return a valid output.');
+      return output;
     }
-    
-    const { output } = await prompt(promptInput, { auth: googleApiKey });
-    if (!output) {
-      throw new Error('The AI model did not return a valid output.');
-    }
-    return output;
+
+    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
   }
 );

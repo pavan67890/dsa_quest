@@ -24,7 +24,8 @@ const ProvideRealtimeCodeReviewInputSchema = z.object({
     .describe(
       'Previous feedback provided to the user on their code. Useful for maintaining context.'
     ),
-  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
+  primaryApiKey: z.string().optional().describe("The user's primary Google AI API key."),
+  secondaryApiKey: z.string().optional().describe("The user's secondary Google AI API key for fallback."),
 });
 
 export type ProvideRealtimeCodeReviewInput = z.infer<
@@ -63,7 +64,7 @@ export async function provideRealtimeCodeReview(
 
 const provideRealtimeCodeReviewPrompt = ai.definePrompt({
   name: 'provideRealtimeCodeReviewPrompt',
-  input: {schema: ProvideRealtimeCodeReviewInputSchema.omit({ googleApiKey: true })},
+  input: {schema: ProvideRealtimeCodeReviewInputSchema.omit({ primaryApiKey: true, secondaryApiKey: true })},
   output: {schema: ProvideRealtimeCodeReviewOutputSchema},
   prompt: `You are an expert code reviewer specializing in data structures and algorithms.
 
@@ -108,16 +109,27 @@ const provideRealtimeCodeReviewFlow = ai.defineFlow(
     outputSchema: ProvideRealtimeCodeReviewOutputSchema,
   },
   async (input) => {
-    const { googleApiKey, ...promptInput } = input;
+    const { primaryApiKey, secondaryApiKey, ...promptInput } = input;
     
-    if (!googleApiKey?.trim()) {
-      throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    if (primaryApiKey?.trim()) {
+      try {
+        const { output } = await provideRealtimeCodeReviewPrompt(promptInput, { auth: primaryApiKey });
+        if (!output) throw new Error('The AI model did not return a valid output.');
+        return output;
+      } catch (e: any) {
+        if (e.message?.includes('429') && secondaryApiKey?.trim()) {
+          const { output } = await provideRealtimeCodeReviewPrompt(promptInput, { auth: secondaryApiKey });
+          if (!output) throw new Error('The AI model did not return a valid output on fallback.');
+          return output;
+        }
+        throw e;
+      }
+    } else if (secondaryApiKey?.trim()) {
+      const { output } = await provideRealtimeCodeReviewPrompt(promptInput, { auth: secondaryApiKey });
+      if (!output) throw new Error('The AI model did not return a valid output.');
+      return output;
     }
 
-    const { output } = await provideRealtimeCodeReviewPrompt(promptInput, { auth: googleApiKey });
-    if (!output) {
-      throw new Error('The AI model did not return a valid output.');
-    }
-    return output;
+    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
   }
 );

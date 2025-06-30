@@ -16,7 +16,8 @@ import wav from 'wav';
 
 const TextToSpeechInputSchema = z.object({
   text: z.string().describe('The text to convert to speech.'),
-  googleApiKey: z.string().optional().describe("The user's Google AI API key for TTS."),
+  primaryApiKey: z.string().optional().describe("The user's primary Google AI API key for TTS."),
+  secondaryApiKey: z.string().optional().describe("The user's secondary Google AI API key for TTS fallback."),
 });
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
@@ -63,12 +64,8 @@ const textToSpeechFlow = ai.defineFlow(
     outputSchema: TextToSpeechOutputSchema,
   },
   async (input) => {
-    const { googleApiKey, ...promptInput } = input;
+    const { primaryApiKey, secondaryApiKey, ...promptInput } = input;
 
-    if (!googleApiKey?.trim()) {
-      throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
-    }
-    
     const generateOptions = {
         model: googleAI.model('gemini-2.5-flash-preview-tts'),
         config: {
@@ -82,24 +79,37 @@ const textToSpeechFlow = ai.defineFlow(
         prompt: promptInput.text,
     };
 
-    const { media } = await ai.generate(
-        generateOptions,
-        { auth: googleApiKey }
-    );
+    async function executeTTS(apiKey: string) {
+        const { media } = await ai.generate(
+            generateOptions,
+            { auth: apiKey }
+        );
+        if (!media) {
+            throw new Error('No audio media returned from TTS model.');
+        }
+        const audioBuffer = Buffer.from(
+            media.url.substring(media.url.indexOf(',') + 1),
+            'base64'
+        );
+        const wavBase64 = await toWav(audioBuffer);
+        return {
+            audioDataUri: `data:audio/wav;base64,${wavBase64}`,
+        };
+    }
     
-    if (!media) {
-        throw new Error('No audio media returned from TTS model.');
+    if (primaryApiKey?.trim()) {
+      try {
+        return await executeTTS(primaryApiKey);
+      } catch (e: any) {
+        if (e.message?.includes('429') && secondaryApiKey?.trim()) {
+          return await executeTTS(secondaryApiKey);
+        }
+        throw e;
+      }
+    } else if (secondaryApiKey?.trim()) {
+      return await executeTTS(secondaryApiKey);
     }
 
-    const audioBuffer = Buffer.from(
-        media.url.substring(media.url.indexOf(',') + 1),
-        'base64'
-    );
-
-    const wavBase64 = await toWav(audioBuffer);
-    
-    return {
-        audioDataUri: `data:audio/wav;base64,${wavBase64}`,
-    };
+    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
   }
 );

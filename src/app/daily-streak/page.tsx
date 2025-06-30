@@ -16,7 +16,7 @@ import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import type { Module } from '@/lib/dsa-modules';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { googleApiKey?: string };
+type ApiKeys = { primaryApiKey?: string; secondaryApiKey?: string };
 
 type DailyQuestion = {
   question: string;
@@ -48,7 +48,7 @@ export default function DailyStreakPage() {
     }, []);
 
     useEffect(() => {
-        if (!apiKeys.googleApiKey) {
+        if (!apiKeys.primaryApiKey && !apiKeys.secondaryApiKey) {
           setIsApiKeyDialogOpen(true);
         } else if (allModules.length > 0) {
             fetchDailyQuestion();
@@ -75,7 +75,8 @@ export default function DailyStreakPage() {
 
             const questionData = await generateDailyStreakQuestion({ 
                 completedModules,
-                googleApiKey: apiKeys.googleApiKey,
+                primaryApiKey: apiKeys.primaryApiKey,
+                secondaryApiKey: apiKeys.secondaryApiKey,
             });
             setDailyQuestion(questionData);
         } catch (error: any) {
@@ -100,7 +101,8 @@ export default function DailyStreakPage() {
                 interviewerPrompt: "You are an AI assistant evaluating a user's answer to a daily data structure and algorithm question. Provide concise feedback on the correctness and quality of their answer. Be encouraging.",
                 previousConversationSummary: '',
                 question: dailyQuestion.question,
-                googleApiKey: apiKeys.googleApiKey,
+                primaryApiKey: apiKeys.primaryApiKey,
+                secondaryApiKey: apiKeys.secondaryApiKey,
             });
             setFeedback({
                 interviewerResponse: response.interviewerResponse,

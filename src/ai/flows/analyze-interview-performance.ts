@@ -16,7 +16,8 @@ const AnalyzeInterviewPerformanceInputSchema = z.object({
   interviewTranscript: z
     .string()
     .describe('The complete transcript of the mock interview.'),
-  googleApiKey: z.string().optional().describe("The user's Google AI API key."),
+  primaryApiKey: z.string().optional().describe("The user's primary Google AI API key."),
+  secondaryApiKey: z.string().optional().describe("The user's secondary Google AI API key for fallback."),
 });
 
 export type AnalyzeInterviewPerformanceInput = z.infer<
@@ -53,7 +54,7 @@ export async function analyzeInterviewPerformance(
 
 const analyzeInterviewPerformancePrompt = ai.definePrompt({
   name: 'analyzeInterviewPerformancePrompt',
-  input: {schema: AnalyzeInterviewPerformanceInputSchema.omit({ googleApiKey: true })},
+  input: {schema: AnalyzeInterviewPerformanceInputSchema.omit({ primaryApiKey: true, secondaryApiKey: true })},
   output: {schema: AnalyzeInterviewPerformanceOutputSchema},
   prompt: `You are an AI-powered interview performance analyzer. You will receive the transcript of a mock interview and provide a detailed analysis of the candidate's performance.
 
@@ -72,16 +73,27 @@ const analyzeInterviewPerformanceFlow = ai.defineFlow(
     outputSchema: AnalyzeInterviewPerformanceOutputSchema,
   },
   async (input) => {
-    const { googleApiKey, ...promptInput } = input;
+    const { primaryApiKey, secondaryApiKey, ...promptInput } = input;
     
-    if (!googleApiKey?.trim()) {
-      throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    if (primaryApiKey?.trim()) {
+      try {
+        const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: primaryApiKey });
+        if (!output) throw new Error('The AI model did not return a valid output.');
+        return output;
+      } catch (e: any) {
+        if (e.message?.includes('429') && secondaryApiKey?.trim()) {
+          const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: secondaryApiKey });
+          if (!output) throw new Error('The AI model did not return a valid output on fallback.');
+          return output;
+        }
+        throw e;
+      }
+    } else if (secondaryApiKey?.trim()) {
+      const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: secondaryApiKey });
+      if (!output) throw new Error('The AI model did not return a valid output.');
+      return output;
     }
 
-    const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: googleApiKey });
-    if (!output) {
-      throw new Error('The AI model did not return a valid output.');
-    }
-    return output;
+    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
   }
 );

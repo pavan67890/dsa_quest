@@ -19,24 +19,36 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle } from 'lucide-react';
+import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, type User, GoogleAuthProvider } from 'firebase/auth';
 import { saveProgress, loadProgress } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const formSchema = z.object({
-  googleApiKey: z.string().optional(),
+  primaryApiKey: z.string().optional(),
+  secondaryApiKey: z.string().optional(),
 });
 
 type ApiKeys = {
-  googleApiKey?: string;
+  primaryApiKey?: string;
+  secondaryApiKey?: string;
+};
+
+type KeyUsageStats = {
+  primary: { date: string; count: number };
+  secondary: { date: string; count: number };
 };
 
 export default function SettingsPage() {
   const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
+  const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
+    primary: { date: '', count: 0 },
+    secondary: { date: '', count: 0 },
+  });
   const { toast } = useToast();
 
   const [user, setUser] = useState<User | null>(null);
@@ -47,13 +59,15 @@ export default function SettingsPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        googleApiKey: apiKeys.googleApiKey || '',
+      primaryApiKey: apiKeys.primaryApiKey || '',
+      secondaryApiKey: apiKeys.secondaryApiKey || '',
     },
   });
   
   useEffect(() => {
     form.reset({
-        googleApiKey: apiKeys.googleApiKey || '',
+      primaryApiKey: apiKeys.primaryApiKey || '',
+      secondaryApiKey: apiKeys.secondaryApiKey || '',
     });
   }, [apiKeys, form]);
 
@@ -73,7 +87,7 @@ export default function SettingsPage() {
     setApiKeys(values);
     toast({
       title: 'Settings Saved!',
-      description: 'Your API key has been updated locally.',
+      description: 'Your API keys have been updated locally.',
     });
   }
 
@@ -159,6 +173,10 @@ export default function SettingsPage() {
       }
   };
 
+  const today = new Date().toISOString().split('T')[0];
+  const primaryCallsToday = keyUsageStats.primary.date === today ? keyUsageStats.primary.count : 0;
+  const secondaryCallsToday = keyUsageStats.secondary.date === today ? keyUsageStats.secondary.count : 0;
+
   return (
     <div className="min-h-screen">
       <GameHeader />
@@ -173,28 +191,61 @@ export default function SettingsPage() {
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Bring-Your-Own-Key (BYOK) System</AlertTitle>
                 <AlertDescription>
-                  This app is built on Google's AI Platform. For the "Bring Your Own Key" system to work, you must provide your personal Google AI API key. The key is stored securely in your browser and is required for all AI features.
+                  This app uses your personal Google AI API keys. Provide a primary and a secondary key. If the primary key fails due to quota limits, the app will automatically fall back to the secondary key.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="googleApiKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 text-lg">
-                        <KeyRound className="w-5 h-5 text-primary" /> Google AI API Key
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="Enter your Google AI key" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <Tabs defaultValue="primary" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="primary">Primary Key</TabsTrigger>
+                    <TabsTrigger value="secondary">Secondary Key</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="primary" className="pt-4">
+                     <FormField
+                        control={form.control}
+                        name="primaryApiKey"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2 text-lg">
+                              <KeyRound className="w-5 h-5 text-primary" /> Primary Google AI API Key
+                            </FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Enter your primary Google AI key" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                          <Info className="h-4 w-4"/>
+                          Calls Today: {primaryCallsToday}
+                      </div>
+                  </TabsContent>
+                  <TabsContent value="secondary" className="pt-4">
+                     <FormField
+                        control={form.control}
+                        name="secondaryApiKey"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="flex items-center gap-2 text-lg">
+                              <KeyRound className="w-5 h-5 text-secondary" /> Secondary Google AI API Key
+                            </FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="Enter your fallback Google AI key" {...field} />
+                            </FormControl>
+                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                          <Info className="h-4 w-4"/>
+                          Calls Today: {secondaryCallsToday}
+                      </div>
+                  </TabsContent>
+                </Tabs>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pt-4">
                     <p className="text-sm text-muted-foreground">Need a key?</p>
                     <Sheet>
                         <SheetTrigger asChild>
@@ -220,7 +271,7 @@ export default function SettingsPage() {
                     </Sheet>
                 </div>
                 <Button type="submit" className="w-full" size="lg">
-                  <Save className="mr-2 h-4 w-4" /> Save API Key
+                  <Save className="mr-2 h-4 w-4" /> Save API Keys
                 </Button>
               </form>
             </Form>
