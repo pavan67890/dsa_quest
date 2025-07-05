@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -119,10 +118,10 @@ export default function SettingsPage() {
                   localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(progressData[STORAGE_KEYS.USER_PROGRESS] || {}));
                   localStorage.setItem(STORAGE_KEYS.USER_XP, JSON.stringify(progressData[STORAGE_KEYS.USER_XP] || 0));
                   localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
-                  toast({ title: 'Progress Loaded!', description: 'Your progress has been restored from Google Drive. The page will now reload.' });
+                  toast({ title: 'Progress Loaded!', description: `Welcome back, ${result.user.displayName}! Your progress has been restored from Google Drive. The page will now reload.` });
                   setTimeout(() => window.location.reload(), 2000);
               } else {
-                   toast({ title: 'Welcome!', description: 'No cloud save found. Your future progress will be synced automatically.', variant: 'default' });
+                   toast({ title: `Welcome, ${result.user.displayName}!`, description: 'No cloud save found. Your future progress will be synced automatically.', variant: 'default' });
               }
           }
       } catch (error: any) {

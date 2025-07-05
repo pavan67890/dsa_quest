@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -47,7 +46,7 @@ export default function LoginPage() {
             localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
             toast({
               title: 'Progress Loaded!',
-              description: 'Welcome back! Your progress has been restored from the cloud.',
+              description: `Welcome back, ${result.user.displayName}! Your progress has been restored from the cloud.`,
             });
           }
         } catch (e) {
