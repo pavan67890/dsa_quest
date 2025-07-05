@@ -1,6 +1,7 @@
 
 import { auth, googleProvider } from '@/lib/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 const APP_FILE_NAME = 'dsa-quest-progress.json';
 const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
@@ -133,7 +134,7 @@ export async function triggerSync() {
         return;
     }
 
-    const loginMethod = localStorage.getItem('login-method');
+    const loginMethod = localStorage.getItem(STORAGE_KEYS.LOGIN_METHOD);
     if (loginMethod !== '"google"') {
         return; // Only sync if user is in google mode
     }
@@ -148,9 +149,9 @@ export async function triggerSync() {
         }
 
         const progressData = {
-            'user-progress': JSON.parse(localStorage.getItem('user-progress') || '{}'),
-            'user-xp': JSON.parse(localStorage.getItem('user-xp') || '0'),
-            'earned-badges': JSON.parse(localStorage.getItem('earned-badges') || '[]'),
+            [STORAGE_KEYS.USER_PROGRESS]: JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROGRESS) || '{}'),
+            [STORAGE_KEYS.USER_XP]: JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_XP) || '0'),
+            [STORAGE_KEYS.EARNED_BADGES]: JSON.parse(localStorage.getItem(STORAGE_KEYS.EARNED_BADGES) || '[]'),
         };
         
         await saveProgress(token, progressData);

@@ -9,11 +9,12 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import type { Module } from '@/lib/dsa-modules';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 export default function HomePage() {
   const router = useRouter();
-  const [progress] = useLocalStorage('user-progress', {});
-  const [loginMethod] = useLocalStorage('login-method', '');
+  const [progress] = useLocalStorage(STORAGE_KEYS.USER_PROGRESS, {});
+  const [loginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, '');
   const [hasCompletedModule, setHasCompletedModule] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -11,11 +11,12 @@ import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import { loadProgress } from '@/services/driveService';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [, setLoginMethod] = useLocalStorage('login-method', 'guest');
+  const [, setLoginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, 'guest');
 
   const handleGuestLogin = () => {
     setLoginMethod('guest');
@@ -41,9 +42,9 @@ export default function LoginPage() {
         try {
           const progressData: any = await loadProgress(credential.accessToken);
           if (progressData) {
-            localStorage.setItem('user-progress', JSON.stringify(progressData['user-progress'] || {}));
-            localStorage.setItem('user-xp', JSON.stringify(progressData['user-xp'] || 0));
-            localStorage.setItem('earned-badges', JSON.stringify(progressData['earned-badges'] || []));
+            localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(progressData[STORAGE_KEYS.USER_PROGRESS] || {}));
+            localStorage.setItem(STORAGE_KEYS.USER_XP, JSON.stringify(progressData[STORAGE_KEYS.USER_XP] || 0));
+            localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
             toast({
               title: 'Progress Loaded!',
               description: 'Welcome back! Your progress has been restored from the cloud.',

@@ -21,6 +21,7 @@ import { triggerSync } from '@/services/driveService';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User, Play, X, Cloud } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 type ApiKeys = { 
@@ -52,14 +53,14 @@ export default function InterviewPage() {
   const levelId = params.levelId as string;
 
   const { toast } = useToast();
-  const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
-  const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
+  const [apiKeys] = useLocalStorage<ApiKeys>(STORAGE_KEYS.API_KEYS, {});
+  const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>(STORAGE_KEYS.KEY_USAGE_STATS, {
     primary: { date: '', count: 0 },
     secondary: { date: '', count: 0 },
   });
-  const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
-  const [xp, setXp] = useLocalStorage('user-xp', 0);
-  const [earnedBadges, setEarnedBadges] = useLocalStorage<string[]>('earned-badges', []);
+  const [progress, setProgress] = useLocalStorage<Progress>(STORAGE_KEYS.USER_PROGRESS, {});
+  const [xp, setXp] = useLocalStorage(STORAGE_KEYS.USER_XP, 0);
+  const [earnedBadges, setEarnedBadges] = useLocalStorage<string[]>(STORAGE_KEYS.EARNED_BADGES, []);
   
   const [module, setModule] = useState<Module | null>(null);
   const [level, setLevel] = useState<Level | null>(null);

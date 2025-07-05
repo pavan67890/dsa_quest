@@ -12,10 +12,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState, useEffect } from 'react';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 export function GameHeader() {
-  const [xp] = useLocalStorage('user-xp', 0);
-  const [loginMethod] = useLocalStorage('login-method', 'guest');
+  const [xp] = useLocalStorage(STORAGE_KEYS.USER_XP, 0);
+  const [loginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, 'guest');
   const level = Math.floor(xp / 100) + 1;
   const progress = (xp % 100);
 

@@ -14,6 +14,7 @@ import { generateDailyStreakQuestion } from '@/ai/flows/generate-daily-streak-qu
 import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import type { Module } from '@/lib/dsa-modules';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 type ApiKeys = { 
@@ -39,9 +40,9 @@ type Feedback = {
 
 export default function DailyStreakPage() {
     const { toast } = useToast();
-    const [progress] = useLocalStorage<Progress>('user-progress', {});
-    const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
-    const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
+    const [progress] = useLocalStorage<Progress>(STORAGE_KEYS.USER_PROGRESS, {});
+    const [apiKeys] = useLocalStorage<ApiKeys>(STORAGE_KEYS.API_KEYS, {});
+    const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>(STORAGE_KEYS.KEY_USAGE_STATS, {
         primary: { date: '', count: 0 },
         secondary: { date: '', count: 0 },
     });

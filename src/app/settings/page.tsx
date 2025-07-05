@@ -27,6 +27,7 @@ import { signInWithPopup, signOut, onAuthStateChanged, type User, GoogleAuthProv
 import { loadProgress } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 const formSchema = z.object({
   primaryApiKey: z.string().optional(),
@@ -48,8 +49,8 @@ type KeyUsageStats = {
 };
 
 export default function SettingsPage() {
-  const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
-  const [keyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
+  const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>(STORAGE_KEYS.API_KEYS, {});
+  const [keyUsageStats] = useLocalStorage<KeyUsageStats>(STORAGE_KEYS.KEY_USAGE_STATS, {
     primary: { date: '', count: 0 },
     secondary: { date: '', count: 0 },
   });
@@ -57,7 +58,7 @@ export default function SettingsPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [, setLoginMethod] = useLocalStorage('login-method', 'guest');
+  const [, setLoginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, 'guest');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -115,9 +116,9 @@ export default function SettingsPage() {
               
               const progressData: any = await loadProgress(credential.accessToken);
               if (progressData) {
-                  localStorage.setItem('user-progress', JSON.stringify(progressData['user-progress'] || {}));
-                  localStorage.setItem('user-xp', JSON.stringify(progressData['user-xp'] || 0));
-                  localStorage.setItem('earned-badges', JSON.stringify(progressData['earned-badges'] || []));
+                  localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(progressData[STORAGE_KEYS.USER_PROGRESS] || {}));
+                  localStorage.setItem(STORAGE_KEYS.USER_XP, JSON.stringify(progressData[STORAGE_KEYS.USER_XP] || 0));
+                  localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
                   toast({ title: 'Progress Loaded!', description: 'Your progress has been restored from Google Drive. The page will now reload.' });
                   setTimeout(() => window.location.reload(), 2000);
               } else {

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Medal, ShieldCheck, Star } from 'lucide-react';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 type BadgeInfo = {
   id: string;
@@ -23,7 +24,7 @@ const allBadges: BadgeInfo[] = [
 ];
 
 export default function AchievementsPage() {
-  const [earnedBadges] = useLocalStorage<string[]>('earned-badges', []);
+  const [earnedBadges] = useLocalStorage<string[]>(STORAGE_KEYS.EARNED_BADGES, []);
 
   return (
     <div className="min-h-screen">

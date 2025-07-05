@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
 
@@ -31,7 +32,7 @@ export default function ModulePage() {
   const [module, setModule] = useState<Module | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [progress, setProgress] = useLocalStorage<Progress>('user-progress', {});
+  const [progress, setProgress] = useLocalStorage<Progress>(STORAGE_KEYS.USER_PROGRESS, {});
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
