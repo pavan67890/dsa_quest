@@ -9,13 +9,11 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [, setLoginMethod] = useLocalStorage('login-method', 'guest');
-  const isGoogleLoginDisabled = !auth || !googleProvider;
 
   const handleGuestLogin = () => {
     setLoginMethod('guest');
@@ -23,18 +21,23 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    if (isGoogleLoginDisabled) {
-      // This should not be reachable if the button is disabled, but serves as a safeguard.
-      // A toast is not necessary as the UI should communicate the disabled state.
+    if (!auth || !googleProvider) {
+      toast({
+        title: 'Sign-In Failed',
+        description: 'Cloud Sync is not configured. Add your Firebase keys to the .env file and restart the server to enable this feature.',
+        variant: 'destructive',
+      });
       return;
     }
+
     try {
-      await signInWithPopup(auth!, googleProvider!);
+      await signInWithPopup(auth, googleProvider);
       setLoginMethod('google');
       router.push('/home');
     } catch (error: any) {
       console.error("Google Sign-In Error", error);
       let description = 'Could not sign in with Google. Please try again.';
+      // Check for common, user-fixable errors.
       if (error.code === 'auth/invalid-api-key' || error.message.includes('API key not valid') || error.message.includes('api-key-expired')) {
         description = 'Your Firebase API key is invalid or expired. Please generate a new one, add it to your .env file, and restart the server.';
       } else if (error.code === 'auth/popup-closed-by-user') {
@@ -67,23 +70,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-sm text-muted-foreground">Choose how you want to play:</p>
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  {/* The div wrapper is necessary for the tooltip to work on a disabled button */}
-                  <div className="w-full">
-                    <Button onClick={handleGoogleLogin} className="w-full" size="lg" disabled={isGoogleLoginDisabled}>
-                      <LogIn /> Sign in with Google & Sync Progress
-                    </Button>
-                  </div>
-                </TooltipTrigger>
-                {isGoogleLoginDisabled && (
-                  <TooltipContent>
-                    <p>Cloud Sync is not configured. Add Firebase keys to enable.</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
+            
+            <Button onClick={handleGoogleLogin} className="w-full" size="lg">
+              <LogIn /> Sign in with Google & Sync Progress
+            </Button>
 
             <Button onClick={handleGuestLogin} className="w-full" variant="secondary" size="lg">
               <User /> Continue as Guest
