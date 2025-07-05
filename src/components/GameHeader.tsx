@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Settings, Trophy, Sparkles, AlertTriangle } from 'lucide-react';
+import { Settings, Trophy, Sparkles, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import useLocalStorage from '@/hooks/useLocalStorage';
@@ -12,9 +12,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { STORAGE_KEYS } from '@/lib/storageKeys';
 
 export function GameHeader() {
+  const router = useRouter();
   const [xp] = useLocalStorage(STORAGE_KEYS.USER_XP, 0);
   const [loginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, 'guest');
   const level = Math.floor(xp / 100) + 1;
@@ -29,6 +31,19 @@ export function GameHeader() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm">
       <div className="flex items-center gap-4">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <ArrowLeft className="h-5 w-5" />
+                <span className="sr-only">Go back</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Go back</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Link href="/home" className="flex items-center gap-2">
           <Sparkles className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold font-headline text-primary">DSA Quest</h1>
