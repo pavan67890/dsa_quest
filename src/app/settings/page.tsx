@@ -31,11 +31,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const formSchema = z.object({
   primaryApiKey: z.string().optional(),
   secondaryApiKey: z.string().optional(),
+  primaryApiKeyLimit: z.string().optional(),
+  secondaryApiKeyLimit: z.string().optional(),
 });
 
 type ApiKeys = {
   primaryApiKey?: string;
   secondaryApiKey?: string;
+  primaryApiKeyLimit?: string;
+  secondaryApiKeyLimit?: string;
 };
 
 type KeyUsageStats = {
@@ -45,7 +49,7 @@ type KeyUsageStats = {
 
 export default function SettingsPage() {
   const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
-  const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
+  const [keyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
     primary: { date: '', count: 0 },
     secondary: { date: '', count: 0 },
   });
@@ -61,6 +65,8 @@ export default function SettingsPage() {
     defaultValues: {
       primaryApiKey: apiKeys.primaryApiKey || '',
       secondaryApiKey: apiKeys.secondaryApiKey || '',
+      primaryApiKeyLimit: apiKeys.primaryApiKeyLimit || '',
+      secondaryApiKeyLimit: apiKeys.secondaryApiKeyLimit || '',
     },
   });
   
@@ -68,6 +74,8 @@ export default function SettingsPage() {
     form.reset({
       primaryApiKey: apiKeys.primaryApiKey || '',
       secondaryApiKey: apiKeys.secondaryApiKey || '',
+      primaryApiKeyLimit: apiKeys.primaryApiKeyLimit || '',
+      secondaryApiKeyLimit: apiKeys.secondaryApiKeyLimit || '',
     });
   }, [apiKeys, form]);
 
@@ -87,7 +95,7 @@ export default function SettingsPage() {
     setApiKeys(values);
     toast({
       title: 'Settings Saved!',
-      description: 'Your API keys have been updated locally.',
+      description: 'Your API keys and limits have been updated locally.',
     });
   }
 
@@ -191,7 +199,7 @@ export default function SettingsPage() {
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Bring-Your-Own-Key (BYOK) System</AlertTitle>
                 <AlertDescription>
-                  This app uses your personal Google AI API keys. Provide a primary and a secondary key. If the primary key fails due to quota limits, the app will automatically fall back to the secondary key.
+                 This app utilizes a flexible BYOK system. For the best experience, we recommend using a Mixtral-8x7b model endpoint as your primary key and a Gemma-7B model endpoint as your secondary key. The app will automatically fall back to the secondary key if the primary key's daily limit is reached or an API error occurs.
                 </AlertDescription>
             </Alert>
             <Form {...form}>
@@ -201,17 +209,30 @@ export default function SettingsPage() {
                     <TabsTrigger value="primary">Primary Key</TabsTrigger>
                     <TabsTrigger value="secondary">Secondary Key</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="primary" className="pt-4">
+                  <TabsContent value="primary" className="pt-4 space-y-4">
                      <FormField
                         control={form.control}
                         name="primaryApiKey"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="flex items-center gap-2 text-lg">
-                              <KeyRound className="w-5 h-5 text-primary" /> Primary Google AI API Key
+                              <KeyRound className="w-5 h-5 text-primary" /> Primary API Key (e.g., Mixtral-8x7b)
                             </FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="Enter your primary Google AI key" {...field} />
+                              <Input type="password" placeholder="Enter your primary API key" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="primaryApiKeyLimit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Daily Request Limit</FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="e.g., 1000" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -219,28 +240,41 @@ export default function SettingsPage() {
                       />
                       <div className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
                           <Info className="h-4 w-4"/>
-                          Calls Today: {primaryCallsToday}
+                          Calls Today: {primaryCallsToday} / {apiKeys.primaryApiKeyLimit || '∞'}
                       </div>
                   </TabsContent>
-                  <TabsContent value="secondary" className="pt-4">
+                  <TabsContent value="secondary" className="pt-4 space-y-4">
                      <FormField
                         control={form.control}
                         name="secondaryApiKey"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="flex items-center gap-2 text-lg">
-                              <KeyRound className="w-5 h-5 text-secondary" /> Secondary Google AI API Key
+                              <KeyRound className="w-5 h-5 text-secondary-foreground" /> Secondary API Key (e.g., Gemma-7B)
                             </FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="Enter your fallback Google AI key" {...field} />
+                              <Input type="password" placeholder="Enter your fallback API key" {...field} />
                             </FormControl>
                              <FormMessage />
                           </FormItem>
                         )}
                       />
+                      <FormField
+                        control={form.control}
+                        name="secondaryApiKeyLimit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Daily Request Limit</FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="e.g., 1000" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                        />
                       <div className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
                           <Info className="h-4 w-4"/>
-                          Calls Today: {secondaryCallsToday}
+                          Calls Today: {secondaryCallsToday} / {apiKeys.secondaryApiKeyLimit || '∞'}
                       </div>
                   </TabsContent>
                 </Tabs>
@@ -249,21 +283,22 @@ export default function SettingsPage() {
                     <p className="text-sm text-muted-foreground">Need a key?</p>
                     <Sheet>
                         <SheetTrigger asChild>
-                        <Button variant="link" className="p-0 h-auto text-sm">How to get a Google AI API key</Button>
+                        <Button variant="link" className="p-0 h-auto text-sm">How to get an API key</Button>
                         </SheetTrigger>
                         <SheetContent>
                         <SheetHeader>
-                            <SheetTitle>Getting your Google AI API Key</SheetTitle>
+                            <SheetTitle>Getting your API Key</SheetTitle>
                             <SheetDescription>
-                             Follow these steps to get a free API key from Google AI Studio to use with models like Gemini.
+                             Follow these steps to get a free API key from a provider like OpenRouter to use with models like Mixtral or Gemma.
                             </SheetDescription>
                         </SheetHeader>
                         <div className="py-4 space-y-4">
                             <ol className="list-decimal list-inside space-y-2">
-                            <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="underline text-primary">Google AI Studio</a>.</li>
-                            <li>Log in with your Google account.</li>
-                            <li>Click the "Create API key" button.</li>
-                            <li>Copy your new API key and paste it into the key input field on the settings page.</li>
+                            <li>Go to a provider like <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline text-primary">OpenRouter.ai</a>.</li>
+                            <li>Sign up or log in.</li>
+                            <li>Navigate to the 'Keys' section of your account.</li>
+                            <li>Click the "Create Key" button.</li>
+                            <li>Copy your new API key and paste it into the appropriate field on the settings page.</li>
                             </ol>
                             <p className="text-sm text-muted-foreground">Your API keys are stored only in your browser and are never shared.</p>
                         </div>
@@ -271,7 +306,7 @@ export default function SettingsPage() {
                     </Sheet>
                 </div>
                 <Button type="submit" className="w-full" size="lg">
-                  <Save className="mr-2 h-4 w-4" /> Save API Keys
+                  <Save className="mr-2 h-4 w-4" /> Save API Keys & Limits
                 </Button>
               </form>
             </Form>

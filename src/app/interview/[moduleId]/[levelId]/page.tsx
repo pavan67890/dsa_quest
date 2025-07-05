@@ -22,7 +22,12 @@ import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Spar
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { primaryApiKey?: string; secondaryApiKey?: string; };
+type ApiKeys = { 
+  primaryApiKey?: string; 
+  secondaryApiKey?: string;
+  primaryApiKeyLimit?: string;
+  secondaryApiKeyLimit?: string;
+};
 type Conversation = { id: number; speaker: 'interviewer' | 'user'; text: string, code?: string };
 type InterviewerImageInfo = { src: string };
 type CodeOutput = { output: string; isError: boolean } | null;
@@ -98,7 +103,52 @@ export default function InterviewPage() {
   }, [moduleId, levelId]);
 
 
-  const handleInterviewerResponse = useCallback((text: string) => {
+  const updateUsageStats = useCallback((keyType: 'primary' | 'secondary') => {
+    const today = new Date().toISOString().split('T')[0];
+    setKeyUsageStats(prevStats => {
+      const newStats = { ...prevStats };
+      if (keyType === 'primary') {
+        if (newStats.primary.date !== today) {
+          newStats.primary = { date: today, count: 1 };
+        } else {
+          newStats.primary.count++;
+        }
+      } else if (keyType === 'secondary') {
+        if (newStats.secondary.date !== today) {
+          newStats.secondary = { date: today, count: 1 };
+        } else {
+          newStats.secondary.count++;
+        }
+      }
+      return newStats;
+    });
+  }, [setKeyUsageStats]);
+
+  const checkAndWarnLimits = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const primaryLimit = apiKeys.primaryApiKeyLimit ? parseInt(apiKeys.primaryApiKeyLimit, 10) : Infinity;
+    const primaryUsage = keyUsageStats.primary.date === today ? keyUsageStats.primary.count : 0;
+
+    if (isFinite(primaryLimit) && primaryUsage >= primaryLimit) {
+         toast({
+            title: 'Primary Key Limit Reached',
+            description: 'Falling back to secondary API key if available.',
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    if (isFinite(primaryLimit) && primaryUsage > 0 && primaryUsage >= primaryLimit * 0.9) {
+        toast({
+            title: 'API Key Limit Warning',
+            description: `You have used ${primaryUsage} of your ${primaryLimit} daily requests for the primary key.`,
+        });
+    }
+  }, [apiKeys.primaryApiKeyLimit, keyUsageStats.primary, toast]);
+
+
+  const handleInterviewerResponse = useCallback((text: string, keyUsed?: 'primary' | 'secondary') => {
     setIsAiTyping(true);
     setConversation(conv => [...conv, { id: conversationIdCounter.current++, speaker: 'interviewer', text }]);
     
@@ -106,7 +156,7 @@ export default function InterviewPage() {
         setIsAiTyping(false);
         return;
     }
-
+    checkAndWarnLimits();
     textToSpeech({
         text: text,
         primaryApiKey: apiKeys.primaryApiKey,
@@ -115,6 +165,7 @@ export default function InterviewPage() {
     .then(ttsResponse => {
         if (ttsResponse?.audioDataUri) {
             setAudioUrl(ttsResponse.audioDataUri);
+            updateUsageStats(ttsResponse.keyUsed);
         }
     })
     .catch(ttsError => {
@@ -138,28 +189,7 @@ export default function InterviewPage() {
         setIsAiTyping(false);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiKeys, toast, isTtsDisabled]);
-
-  const updateUsageStats = useCallback(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setKeyUsageStats(prevStats => {
-      const newStats = { ...prevStats };
-      if (apiKeys.primaryApiKey) {
-        if (newStats.primary.date !== today) {
-          newStats.primary = { date: today, count: 1 };
-        } else {
-          newStats.primary.count++;
-        }
-      } else if (apiKeys.secondaryApiKey) {
-        if (newStats.secondary.date !== today) {
-          newStats.secondary = { date: today, count: 1 };
-        } else {
-          newStats.secondary.count++;
-        }
-      }
-      return newStats;
-    });
-  }, [apiKeys, setKeyUsageStats]);
+  }, [apiKeys, toast, isTtsDisabled, updateUsageStats, checkAndWarnLimits]);
   
   useEffect(() => {
     if (typeof window !== 'undefined' && !recognitionRef.current) {
@@ -252,7 +282,7 @@ export default function InterviewPage() {
     setIsLoading(true);
     setAudioUrl(null);
 
-    updateUsageStats();
+    checkAndWarnLimits();
 
     const currentConversation: Conversation = { id: conversationIdCounter.current++, speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
     setConversation(conv => [...conv, currentConversation]);
@@ -294,6 +324,7 @@ The main technical question you must ask is provided in the 'question' field. Af
             });
             setInterviewPhase('technical');
         } else if(showCodeEditor) {
+            checkAndWarnLimits();
             const review = await provideRealtimeCodeReview({
               code: userCode,
               language: language,
@@ -301,6 +332,7 @@ The main technical question you must ask is provided in the 'question' field. Af
               primaryApiKey: apiKeys.primaryApiKey,
               secondaryApiKey: apiKeys.secondaryApiKey,
             });
+            updateUsageStats(review.keyUsed);
             aiResponse = await simulateAiInterviewer({
                 ...commonPayload,
                 userResponse: `${userInput}\n\nCode Submitted:\n${userCode}\n\nAI Code Review:\n${review.feedback}`,
@@ -317,6 +349,7 @@ The main technical question you must ask is provided in the 'question' field. Af
             });
         }
       
+      updateUsageStats(aiResponse.keyUsed);
       const interviewerText = aiResponse.interviewerResponse;
       setSentiment(aiResponse.sentiment.toLowerCase() || 'neutral');
       
@@ -347,12 +380,14 @@ The main technical question you must ask is provided in the 'question' field. Af
   const endInterview = async () => {
     setIsLoading(true);
     const transcript = conversation.map(c => `${c.speaker}: ${c.text}`).join('\n');
+    checkAndWarnLimits();
     try {
         const report = await analyzeInterviewPerformance({ 
             interviewTranscript: transcript,
             primaryApiKey: apiKeys.primaryApiKey,
             secondaryApiKey: apiKeys.secondaryApiKey,
         });
+        updateUsageStats(report.keyUsed);
         setFinalReport(report);
         setIsInterviewOver(true);
 
@@ -394,7 +429,7 @@ The main technical question you must ask is provided in the 'question' field. Af
     if (!userCode.trim()) return;
     setIsRunningCode(true);
     setCodeOutput(null);
-    updateUsageStats();
+    checkAndWarnLimits();
     try {
       const result = await executeCode({
         code: userCode,
@@ -403,6 +438,7 @@ The main technical question you must ask is provided in the 'question' field. Af
         primaryApiKey: apiKeys.primaryApiKey,
         secondaryApiKey: apiKeys.secondaryApiKey,
       });
+      updateUsageStats(result.keyUsed);
       setCodeOutput(result);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';

@@ -16,7 +16,16 @@ import { ApiKeyDialog } from '@/components/ApiKeyDialog';
 import type { Module } from '@/lib/dsa-modules';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
-type ApiKeys = { primaryApiKey?: string; secondaryApiKey?: string };
+type ApiKeys = { 
+  primaryApiKey?: string; 
+  secondaryApiKey?: string; 
+  primaryApiKeyLimit?: string;
+  secondaryApiKeyLimit?: string;
+};
+type KeyUsageStats = {
+  primary: { date: string; count: number };
+  secondary: { date: string; count: number };
+};
 
 type DailyQuestion = {
   question: string;
@@ -32,6 +41,10 @@ export default function DailyStreakPage() {
     const { toast } = useToast();
     const [progress] = useLocalStorage<Progress>('user-progress', {});
     const [apiKeys] = useLocalStorage<ApiKeys>('api-keys', {});
+    const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>('key-usage-stats', {
+        primary: { date: '', count: 0 },
+        secondary: { date: '', count: 0 },
+    });
     const [isApiKeyDialogOpen, setIsApiKeyDialogOpen] = useState(false);
     
     const [dailyQuestion, setDailyQuestion] = useState<DailyQuestion>(null);
@@ -47,6 +60,50 @@ export default function DailyStreakPage() {
             .then(data => setAllModules(data));
     }, []);
 
+    const updateUsageStats = (keyType: 'primary' | 'secondary') => {
+        const today = new Date().toISOString().split('T')[0];
+        setKeyUsageStats(prevStats => {
+          const newStats = { ...prevStats };
+          if (keyType === 'primary') {
+            if (newStats.primary.date !== today) {
+              newStats.primary = { date: today, count: 1 };
+            } else {
+              newStats.primary.count++;
+            }
+          } else if (keyType === 'secondary') {
+            if (newStats.secondary.date !== today) {
+              newStats.secondary = { date: today, count: 1 };
+            } else {
+              newStats.secondary.count++;
+            }
+          }
+          return newStats;
+        });
+    };
+
+    const checkAndWarnLimits = () => {
+        const today = new Date().toISOString().split('T')[0];
+        
+        const primaryLimit = apiKeys.primaryApiKeyLimit ? parseInt(apiKeys.primaryApiKeyLimit, 10) : Infinity;
+        const primaryUsage = keyUsageStats.primary.date === today ? keyUsageStats.primary.count : 0;
+    
+        if (isFinite(primaryLimit) && primaryUsage >= primaryLimit) {
+             toast({
+                title: 'Primary Key Limit Reached',
+                description: 'Falling back to secondary API key if available.',
+                variant: 'destructive',
+            });
+            return;
+        }
+    
+        if (isFinite(primaryLimit) && primaryUsage >= primaryLimit * 0.9) {
+            toast({
+                title: 'API Key Limit Warning',
+                description: `You have used ${primaryUsage} of your ${primaryLimit} daily requests for the primary key.`,
+            });
+        }
+    }
+
     useEffect(() => {
         if (!apiKeys.primaryApiKey && !apiKeys.secondaryApiKey) {
           setIsApiKeyDialogOpen(true);
@@ -60,6 +117,7 @@ export default function DailyStreakPage() {
         setIsLoadingQuestion(true);
         setFeedback(null);
         setUserAnswer('');
+        checkAndWarnLimits();
         try {
             const completedModules = allModules
                 .filter(module => {
@@ -78,6 +136,7 @@ export default function DailyStreakPage() {
                 primaryApiKey: apiKeys.primaryApiKey,
                 secondaryApiKey: apiKeys.secondaryApiKey,
             });
+            updateUsageStats(questionData.keyUsed);
             setDailyQuestion(questionData);
         } catch (error: any) {
             toast({
@@ -95,6 +154,7 @@ export default function DailyStreakPage() {
         if (!userAnswer.trim() || !dailyQuestion || dailyQuestion.level === 'Locked') return;
         setIsSubmitting(true);
         setFeedback(null);
+        checkAndWarnLimits();
         try {
             const response = await simulateAiInterviewer({
                 userResponse: userAnswer,
@@ -104,6 +164,7 @@ export default function DailyStreakPage() {
                 primaryApiKey: apiKeys.primaryApiKey,
                 secondaryApiKey: apiKeys.secondaryApiKey,
             });
+            updateUsageStats(response.keyUsed);
             setFeedback({
                 interviewerResponse: response.interviewerResponse,
                 sentiment: response.sentiment

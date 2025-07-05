@@ -23,6 +23,7 @@ export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
 const TextToSpeechOutputSchema = z.object({
   audioDataUri: z.string().describe('The audio data as a base64-encoded WAV data URI.'),
+  keyUsed: z.enum(['primary', 'secondary']).describe('Which API key was used for the request.'),
 });
 export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;
 
@@ -99,17 +100,20 @@ const textToSpeechFlow = ai.defineFlow(
     
     if (primaryApiKey?.trim()) {
       try {
-        return await executeTTS(primaryApiKey);
+        const result = await executeTTS(primaryApiKey);
+        return { ...result, keyUsed: 'primary' };
       } catch (e: any) {
         if (e.message?.includes('429') && secondaryApiKey?.trim()) {
-          return await executeTTS(secondaryApiKey);
+          const result = await executeTTS(secondaryApiKey);
+           return { ...result, keyUsed: 'secondary' };
         }
         throw e;
       }
     } else if (secondaryApiKey?.trim()) {
-      return await executeTTS(secondaryApiKey);
+      const result = await executeTTS(secondaryApiKey);
+      return { ...result, keyUsed: 'secondary' };
     }
 
-    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    throw new Error('A valid API key is required. Please go to Settings to add your key.');
   }
 );

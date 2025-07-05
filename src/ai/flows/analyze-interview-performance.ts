@@ -40,6 +40,7 @@ const AnalyzeInterviewPerformanceOutputSchema = z.object({
     .describe(
       'The amount of experience points earned based on interview performance.'
     ),
+    keyUsed: z.enum(['primary', 'secondary']).describe('Which API key was used for the request.'),
 });
 
 export type AnalyzeInterviewPerformanceOutput = z.infer<
@@ -55,7 +56,7 @@ export async function analyzeInterviewPerformance(
 const analyzeInterviewPerformancePrompt = ai.definePrompt({
   name: 'analyzeInterviewPerformancePrompt',
   input: {schema: AnalyzeInterviewPerformanceInputSchema.omit({ primaryApiKey: true, secondaryApiKey: true })},
-  output: {schema: AnalyzeInterviewPerformanceOutputSchema},
+  output: {schema: AnalyzeInterviewPerformanceOutputSchema.omit({ keyUsed: true })},
   prompt: `You are an AI-powered interview performance analyzer. You will receive the transcript of a mock interview and provide a detailed analysis of the candidate's performance.
 
   Based on the interview transcript, provide a summary of the candidate's performance, highlighting their key strengths and weaknesses. Also, suggest specific actions the candidate can take to improve their skills.
@@ -79,21 +80,21 @@ const analyzeInterviewPerformanceFlow = ai.defineFlow(
       try {
         const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: primaryApiKey });
         if (!output) throw new Error('The AI model did not return a valid output.');
-        return output;
+        return {...output, keyUsed: 'primary'};
       } catch (e: any) {
         if (e.message?.includes('429') && secondaryApiKey?.trim()) {
           const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: secondaryApiKey });
           if (!output) throw new Error('The AI model did not return a valid output on fallback.');
-          return output;
+          return {...output, keyUsed: 'secondary'};
         }
         throw e;
       }
     } else if (secondaryApiKey?.trim()) {
       const { output } = await analyzeInterviewPerformancePrompt(promptInput, { auth: secondaryApiKey });
       if (!output) throw new Error('The AI model did not return a valid output.');
-      return output;
+      return {...output, keyUsed: 'secondary'};
     }
 
-    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    throw new Error('A valid API key is required. Please go to Settings to add your key.');
   }
 );

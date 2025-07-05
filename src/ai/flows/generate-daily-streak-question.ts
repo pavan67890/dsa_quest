@@ -33,6 +33,7 @@ const GenerateDailyStreakQuestionOutputSchema = z.object({
     .describe(
       "The conceptual difficulty of the question (e.g., 'Easy', 'Medium', 'Hard')."
     ),
+  keyUsed: z.enum(['primary', 'secondary']).describe('Which API key was used for the request.'),
 });
 export type GenerateDailyStreakQuestionOutput = z.infer<
   typeof GenerateDailyStreakQuestionOutputSchema
@@ -47,7 +48,7 @@ export async function generateDailyStreakQuestion(
 const prompt = ai.definePrompt({
   name: 'generateDailyStreakQuestionPrompt',
   input: {schema: GenerateDailyStreakQuestionInputSchema.omit({ primaryApiKey: true, secondaryApiKey: true })},
-  output: {schema: GenerateDailyStreakQuestionOutputSchema},
+  output: {schema: GenerateDailyStreakQuestionOutputSchema.omit({ keyUsed: true })},
   prompt: `You are an expert interviewer, designing daily streak questions for DSA Quest. The questions should be based on modules that the user has fully completed, to reinforce their understanding of previously learned concepts.
 
   Generate a challenging but fair question from one of the following completed modules:
@@ -76,21 +77,21 @@ const generateDailyStreakQuestionFlow = ai.defineFlow(
       try {
         const { output } = await prompt(promptInput, { auth: primaryApiKey });
         if (!output) throw new Error('The AI model did not return a valid output.');
-        return output;
+        return {...output, keyUsed: 'primary'};
       } catch (e: any) {
         if (e.message?.includes('429') && secondaryApiKey?.trim()) {
           const { output } = await prompt(promptInput, { auth: secondaryApiKey });
           if (!output) throw new Error('The AI model did not return a valid output on fallback.');
-          return output;
+          return {...output, keyUsed: 'secondary'};
         }
         throw e;
       }
     } else if (secondaryApiKey?.trim()) {
       const { output } = await prompt(promptInput, { auth: secondaryApiKey });
       if (!output) throw new Error('The AI model did not return a valid output.');
-      return output;
+      return {...output, keyUsed: 'secondary'};
     }
 
-    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    throw new Error('A valid API key is required. Please go to Settings to add your key.');
   }
 );

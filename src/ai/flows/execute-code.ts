@@ -33,6 +33,7 @@ const ExecuteCodeOutputSchema = z.object({
   isError: z
     .boolean()
     .describe('Whether the simulated execution resulted in an error.'),
+  keyUsed: z.enum(['primary', 'secondary']).describe('Which API key was used for the request.'),
 });
 
 export type ExecuteCodeOutput = z.infer<typeof ExecuteCodeOutputSchema>;
@@ -46,7 +47,7 @@ export async function executeCode(
 const executeCodePrompt = ai.definePrompt({
   name: 'executeCodePrompt',
   input: {schema: ExecuteCodeInputSchema.omit({ primaryApiKey: true, secondaryApiKey: true })},
-  output: {schema: ExecuteCodeOutputSchema},
+  output: {schema: ExecuteCodeOutputSchema.omit({ keyUsed: true })},
   prompt: `You are a code execution simulator. Your task is to analyze the provided code snippet, written to solve a specific problem, and simulate its execution.
 
   Do not just review the code. ACT as if you are the compiler/interpreter. Run the code in your "mind" and determine what its output would be.
@@ -80,21 +81,21 @@ const executeCodeFlow = ai.defineFlow(
       try {
         const { output } = await executeCodePrompt(promptInput, { auth: primaryApiKey });
         if (!output) throw new Error('The AI model did not return a valid output.');
-        return output;
+        return {...output, keyUsed: 'primary'};
       } catch (e: any) {
         if (e.message?.includes('429') && secondaryApiKey?.trim()) {
           const { output } = await executeCodePrompt(promptInput, { auth: secondaryApiKey });
           if (!output) throw new Error('The AI model did not return a valid output on fallback.');
-          return output;
+          return {...output, keyUsed: 'secondary'};
         }
         throw e;
       }
     } else if (secondaryApiKey?.trim()) {
       const { output } = await executeCodePrompt(promptInput, { auth: secondaryApiKey });
       if (!output) throw new Error('The AI model did not return a valid output.');
-      return output;
+      return {...output, keyUsed: 'secondary'};
     }
 
-    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    throw new Error('A valid API key is required. Please go to Settings to add your key.');
   }
 );

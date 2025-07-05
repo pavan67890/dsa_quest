@@ -56,6 +56,7 @@ const SimulateAiInterviewerOutputSchema = z.object({
     .describe(
       'The AI code review and suggestions if applicable'
     ),
+    keyUsed: z.enum(['primary', 'secondary']).describe('Which API key was used for the request.'),
 });
 
 export type SimulateAiInterviewerOutput = z.infer<
@@ -71,7 +72,7 @@ export async function simulateAiInterviewer(
 const simulateAiInterviewerPrompt = ai.definePrompt({
   name: 'simulateAiInterviewerPrompt',
   input: {schema: SimulateAiInterviewerInputSchema.omit({ primaryApiKey: true, secondaryApiKey: true })},
-  output: {schema: SimulateAiInterviewerOutputSchema},
+  output: {schema: SimulateAiInterviewerOutputSchema.omit({ keyUsed: true })},
   prompt: `You are an AI interviewer conducting a mock interview. Your role is to ask relevant questions, provide feedback, and assess the candidate's performance.
 
   Interviewer Prompt: {{{interviewerPrompt}}}
@@ -103,21 +104,21 @@ const simulateAiInterviewerFlow = ai.defineFlow(
       try {
         const { output } = await simulateAiInterviewerPrompt(promptInput, { auth: primaryApiKey });
         if (!output) throw new Error('The AI model did not return a valid output.');
-        return output;
+        return {...output, keyUsed: 'primary'};
       } catch (e: any) {
         if (e.message?.includes('429') && secondaryApiKey?.trim()) {
           const { output } = await simulateAiInterviewerPrompt(promptInput, { auth: secondaryApiKey });
           if (!output) throw new Error('The AI model did not return a valid output on fallback.');
-          return output;
+          return {...output, keyUsed: 'secondary'};
         }
         throw e;
       }
     } else if (secondaryApiKey?.trim()) {
       const { output } = await simulateAiInterviewerPrompt(promptInput, { auth: secondaryApiKey });
       if (!output) throw new Error('The AI model did not return a valid output.');
-      return output;
+      return {...output, keyUsed: 'secondary'};
     }
 
-    throw new Error('A valid Google AI API key is required. Please go to Settings to add your key.');
+    throw new Error('A valid API key is required. Please go to Settings to add your key.');
   }
 );
