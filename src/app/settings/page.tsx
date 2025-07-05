@@ -318,11 +318,11 @@ export default function SettingsPage() {
                     <Cloud className="w-6 h-6 text-primary"/> Cloud Sync
                 </h3>
                 {!auth || !googleProvider ? (
-                    <Alert variant="destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Cloud Sync Is Not Configured</AlertTitle>
+                    <Alert>
+                        <Cloud className="h-4 w-4" />
+                        <AlertTitle>Enable Cloud Sync</AlertTitle>
                         <AlertDescription>
-                            Firebase configuration not detected. Please ensure your keys are in a `.env.local` file and that you have restarted your development server to enable cloud sync.
+                          To save your progress across devices, connect a Google account. This requires Firebase to be configured in your environment. Once enabled, you can sign in here to back up and restore your progress to Google Drive.
                         </AlertDescription>
                     </Alert>
                 ) : (
