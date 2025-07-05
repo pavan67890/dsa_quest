@@ -23,7 +23,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, type User, GoogleAuthProvider } from 'firebase/auth';
-import { loadProgress } from '@/services/driveService';
+import { loadProgress, triggerSync } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STORAGE_KEYS } from '@/lib/storageKeys';
@@ -57,7 +57,7 @@ export default function SettingsPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [, setLoginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, 'guest');
+  const [loginMethod, setLoginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, 'guest');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -98,7 +98,7 @@ export default function SettingsPage() {
     });
   }
 
-  const handleSignInAndLoad = async (): Promise<void> => {
+  const handleSignIn = async (): Promise<void> => {
       if (!auth || !googleProvider) {
         toast({ title: 'Cloud Sync Is Not Configured', description: 'Firebase configuration not detected. Please ensure your keys are in a `.env.local` file and that you have restarted your development server to enable cloud sync.', variant: 'destructive' });
         return;
@@ -113,15 +113,19 @@ export default function SettingsPage() {
               setUser(result.user);
               setLoginMethod('google');
               
-              const progressData: any = await loadProgress(credential.accessToken);
-              if (progressData) {
-                  localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(progressData[STORAGE_KEYS.USER_PROGRESS] || {}));
-                  localStorage.setItem(STORAGE_KEYS.USER_XP, JSON.stringify(progressData[STORAGE_KEYS.USER_XP] || 0));
-                  localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
-                  toast({ title: 'Progress Loaded!', description: `Welcome back, ${result.user.displayName}! Your progress has been restored from Google Drive. The page will now reload.` });
-                  setTimeout(() => window.location.reload(), 2000);
-              } else {
-                   toast({ title: `Welcome, ${result.user.displayName}!`, description: 'No cloud save found. Your future progress will be synced automatically.', variant: 'default' });
+              try {
+                const progressData: any = await loadProgress(credential.accessToken);
+                if (progressData) {
+                    localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(progressData[STORAGE_KEYS.USER_PROGRESS] || {}));
+                    localStorage.setItem(STORAGE_KEYS.USER_XP, JSON.stringify(progressData[STORAGE_KEYS.USER_XP] || 0));
+                    localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
+                    toast({ title: 'Progress Loaded!', description: `Welcome back, ${result.user.displayName}! Your progress has been restored from Google Drive.` });
+                } else {
+                     toast({ title: `Welcome, ${result.user.displayName}!`, description: 'No cloud save found. Your future progress will be synced automatically.', variant: 'default' });
+                }
+              } catch(e) {
+                console.error("Failed to load progress on login:", e);
+                toast({ title: `Welcome, ${result.user.displayName}!`, description: 'Could not load progress from the cloud, but you are signed in. Your future progress will be synced.', variant: 'default' });
               }
           }
       } catch (error: any) {
@@ -265,7 +269,7 @@ export default function SettingsPage() {
                             <li>Click the "Create Key" button.</li>
                             <li>Copy your new API key and paste it into the appropriate field on the settings page.</li>
                             </ol>
-                            <p className="text-sm text-muted-foreground">Your API keys are stored only in your browser and are never shared.</p>
+                            <p className="text-sm text-muted-foreground">Your API keys are stored securely in your browser's local storage. They are <strong>not</strong> included in the data synced to your Google Drive.</p>
                         </div>
                         </SheetContent>
                     </Sheet>
@@ -311,14 +315,14 @@ export default function SettingsPage() {
                                 </Alert>
                             </div>
                         ) : (
-                            <>
+                            <div className="space-y-4">
                                 <p className="text-sm text-muted-foreground">
-                                    Sign in with your Google account to save and load your progress to your private Google Drive app folder.
+                                    Sign in with your Google account to automatically save and load your progress to your private Google Drive app folder.
                                 </p>
-                                <Button onClick={handleSignInAndLoad} className="w-full" size="lg">
+                                <Button onClick={handleSignIn} className="w-full" size="lg">
                                     <LogIn /> Sign in with Google to Enable Sync
                                 </Button>
-                            </>
+                            </div>
                         )}
                     </>
                 )}
