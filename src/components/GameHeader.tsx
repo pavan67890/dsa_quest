@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -14,13 +15,32 @@ import {
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { STORAGE_KEYS } from '@/lib/storageKeys';
+import { useToast } from '@/hooks/use-toast';
 
 export function GameHeader() {
   const router = useRouter();
   const [xp] = useLocalStorage(STORAGE_KEYS.USER_XP, 0);
   const [loginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, 'guest');
-  const level = Math.floor(xp / 100) + 1;
-  const progress = (xp % 100);
+  
+  const { toast } = useToast();
+
+  const calculatedLevel = Math.floor(xp / 100) + 1;
+  const progress = xp % 100;
+  
+  const [lastKnownLevel, setLastKnownLevel] = useState(calculatedLevel);
+
+  useEffect(() => {
+    if (calculatedLevel > lastKnownLevel) {
+      toast({
+        title: `🎉 Level Up!`,
+        description: `Congratulations! You've reached Level ${calculatedLevel}!`,
+      });
+      setLastKnownLevel(calculatedLevel);
+    } else if (calculatedLevel < lastKnownLevel) {
+      setLastKnownLevel(calculatedLevel);
+    }
+  }, [xp, calculatedLevel, lastKnownLevel, toast]);
+
 
   const [isClient, setIsClient] = useState(false);
 
@@ -53,9 +73,9 @@ export function GameHeader() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="w-full">
-                  <span className="text-xs font-semibold text-muted-foreground">LVL {level}</span>
+                  <span className="text-xs font-semibold text-muted-foreground">LVL {calculatedLevel}</span>
                   <Progress value={progress} className="h-2" />
-                  <span className="text-xs text-muted-foreground">{xp} / {(level) * 100} XP</span>
+                  <span className="text-xs text-muted-foreground">{xp} / {(calculatedLevel) * 100} XP</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>

@@ -41,6 +41,7 @@ type Feedback = {
 export default function DailyStreakPage() {
     const { toast } = useToast();
     const [progress] = useLocalStorage<Progress>(STORAGE_KEYS.USER_PROGRESS, {});
+    const [xp, setXp] = useLocalStorage<number>(STORAGE_KEYS.USER_XP, 0);
     const [apiKeys] = useLocalStorage<ApiKeys>(STORAGE_KEYS.API_KEYS, {});
     const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>(STORAGE_KEYS.KEY_USAGE_STATS, {
         primary: { date: '', count: 0 },
@@ -170,6 +171,15 @@ export default function DailyStreakPage() {
                 interviewerResponse: response.interviewerResponse,
                 sentiment: response.sentiment
             });
+            const positiveSentiments = ['positive', 'satisfied', 'happy'];
+            if (response.sentiment && positiveSentiments.includes(response.sentiment.toLowerCase())) {
+                const streakXp = 25;
+                setXp(xp + streakXp);
+                toast({
+                    title: 'Streak Maintained!',
+                    description: `Great job! You earned ${streakXp} XP.`,
+                });
+            }
         } catch (error: any) {
             toast({
                 title: 'AI Error',
