@@ -3,229 +3,151 @@
   {
     "id": "arrays",
     "name": "Arrays",
-    "description": "Master the fundamental data structure for storing collections of elements.",
-    "initialLives": 3,
+    "description": "Mastering array manipulations, searching, and sorting through a series of challenges.",
+    "initialLives": 5,
     "levels": [
-      { "id": 1, "name": "1", "question": "Find the largest element in an array." },
-      { "id": 2, "name": "2", "question": "Check if an array is sorted." },
-      { "id": 3, "name": "3", "question": "Remove duplicates from a sorted array." },
-      { "id": 4, "name": "4", "question": "Rotate array by k elements." },
-      { "id": 5, "name": "5", "question": "Move all zeros to the end of the array." },
-      { "id": 6, "name": "6", "question": "Find the Union of two sorted arrays." },
-      { "id": 7, "name": "7", "question": "Find missing number in an array." },
-      { "id": 8, "name": "8", "question": "Maximum consecutive ones." },
-      { "id": 9, "name": "9", "question": "Find the number that appears once." },
-      { "id": 10, "name": "10", "question": "Two Sum Problem." },
-      { "id": 11, "name": "11", "question": "Sort an array of 0s, 1s and 2s." },
-      { "id": 12, "name": "12", "question": "Majority Element (>N/2 times)." },
-      { "id": 13, "name": "13", "question": "Kadane's Algorithm for Maximum Subarray Sum." },
-      { "id": 14, "name": "14", "question": "Best time to buy and sell stock." },
-      { "id": 15, "name": "15", "question": "Rearrange array elements by sign." },
-      { "id": 16, "name": "16", "question": "Next Permutation." },
-      { "id": 17, "name": "17", "question": "Leaders in an Array problem." },
-      { "id": 18, "name": "18", "question": "Longest Consecutive Sequence in an Array." },
-      { "id": 19, "name": "19", "question": "Set Matrix Zeros." },
-      { "id": 20, "name": "20", "question": "Rotate Image by 90 degrees." },
-      { "id": 21, "name": "21", "question": "Spiral Traversal of Matrix." },
-      { "id": 22, "name": "22", "isSurprise": true, "question": "Surprise Array Question" }
+      { "id": 1, "name": "E1", "question": "Find the largest element in an array.\n\nSample Input: arr = [2, 5, 1, 3, 0]\nSample Output: 5" },
+      { "id": 2, "name": "E2", "question": "Find the second largest element in an array.\n\nSample Input: arr = [1, 2, 4, 7, 7, 5]\nSample Output: 5" },
+      { "id": 3, "name": "E3", "question": "Check if an array is sorted in non-decreasing order.\n\nSample Input: arr = [1, 2, 3, 4, 5]\nSample Output: true" },
+      { "id": 4, "name": "E4", "question": "Remove duplicates from a sorted array and return the number of unique elements.\n\nSample Input: arr = [1, 1, 2, 2, 2, 3, 3]\nSample Output: 3 (Array becomes [1, 2, 3, _, _, _, _])" },
+      { "id": 5, "name": "E5", "question": "Left rotate an array by one place.\n\nSample Input: arr = [1, 2, 3, 4, 5]\nSample Output: [2, 3, 4, 5, 1]" },
+      { "id": 6, "name": "E6", "question": "Left rotate an array by D places.\n\nSample Input: arr = [1, 2, 3, 4, 5, 6, 7], D = 3\nSample Output: [4, 5, 6, 7, 1, 2, 3]" },
+      { "id": 7, "name": "M1", "question": "Move all zeros to the end of the array.\n\nSample Input: arr = [1, 0, 2, 3, 0, 4, 0, 1]\nSample Output: [1, 2, 3, 4, 1, 0, 0, 0]" },
+      { "id": 8, "name": "M2", "question": "Given an array, find the union of two sorted arrays.\n\nSample Input: a = [1, 2, 3, 4, 5], b = [2, 3, 4, 4, 5]\nSample Output: [1, 2, 3, 4, 5]" },
+      { "id": 9, "name": "M3", "question": "Find the missing number in an array of N-1 numbers from 1 to N.\n\nSample Input: arr = [1, 2, 4, 5], N=5\nSample Output: 3" },
+      { "id": 10, "name": "M4", "question": "Find the maximum consecutive ones in a binary array.\n\nSample Input: arr = [1, 1, 0, 1, 1, 1]\nSample Output: 3" },
+      { "id": 11, "name": "H1", "question": "Find the number that appears once, while every other number appears twice.\n\nSample Input: arr = [2, 2, 1, 3, 3]\nSample Output: 1" },
+      { "id": 12, "name": "H2", "question": "Given a non-empty array of integers, every element appears twice except for one. Find that single one.\n\nSample Input: [4,1,2,1,2]\nSample Output: 4" },
+      { "id": 13, "isSurprise": true, "name": "S1", "question": "Find a subarray with a given sum.\n\nSample Input: arr = [1, 4, 20, 3, 10, 5], sum = 33\nSample Output: Subarray found between indexes 2 and 4" }
+    ]
+  },
+  {
+    "id": "binary-search",
+    "name": "Binary Search",
+    "description": "Efficiently search sorted data structures.",
+    "initialLives": 5,
+    "levels": [
+        { "id": 1, "name": "E1", "question": "Implement binary search on a sorted array.\n\nSample Input: arr = [-1,0,3,5,9,12], target = 9\nSample Output: 4" },
+        { "id": 2, "name": "E2", "question": "Find the lower bound of a target in a sorted array (first index >= target).\n\nSample Input: arr = [3, 5, 8, 15, 19], target = 9\nSample Output: 3 (index of 15)" },
+        { "id": 3, "name": "E3", "question": "Find the upper bound of a target in a sorted array (first index > target).\n\nSample Input: arr = [1, 2, 2, 3], target = 2\nSample Output: 3 (index of 3)" },
+        { "id": 4, "name": "M1", "question": "Find the first and last positions of an element in a sorted array.\n\nSample Input: arr = [5,7,7,8,8,10], target = 8\nSample Output: [3,4]" },
+        { "id": 5, "name": "M2", "question": "Find the number of occurrences of a target in a sorted array.\n\nSample Input: arr = [1, 1, 2, 2, 2, 2, 3], target = 2\nSample Output: 4" },
+        { "id": 6, "name": "M3", "question": "Find peak element in an array.\n\nSample Input: arr = [1,2,1,3,5,6,4]\nSample Output: 5 (index of 6)" },
+        { "id": 7, "name": "H1", "question": "Find the square root of a number using binary search.\n\nSample Input: x = 8\nSample Output: 2" },
+        { "id": 8, "name": "H2", "question": "Find the N-th root of a number M.\n\nSample Input: N = 3, M = 27\nSample Output: 3" },
+        { "id": 9, "name": "H3", "question": "Find the minimum element in a rotated sorted array.\n\nSample Input: nums = [4,5,6,7,0,1,2]\nSample Output: 0" },
+        { "id": 10, "isSurprise": true, "name": "S1", "question": "Search in a 2D matrix that is row-wise and column-wise sorted.\n\nSample Input: matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 5\nSample Output: true" }
     ]
   },
   {
     "id": "strings",
     "name": "Strings",
-    "description": "Manipulate and process text data with various string algorithms.",
-    "initialLives": 3,
+    "description": "Tackling string manipulation, pattern matching, and parsing.",
+    "initialLives": 5,
     "levels": [
-      { "id": 1, "name": "1", "question": "Remove outermost parentheses." },
-      { "id": 2, "name": "2", "question": "Reverse words in a string." },
-      { "id": 3, "name": "3", "question": "Largest odd number in a string." },
-      { "id": 4, "name": "4", "question": "Longest common prefix." },
-      { "id": 5, "name": "5", "question": "Isomorphic strings." },
-      { "id": 6, "name": "6", "question": "Check if one string is a rotation of another." },
-      { "id": 7, "name": "7", "question": "Check if strings are anagrams." },
-      { "id": 8, "name": "8", "question": "Sort characters by frequency." },
-      { "id": 9, "name": "9", "question": "Maximum nesting depth of parentheses." },
-      { "id": 10, "name": "10", "question": "Roman to Integer." },
-      { "id": 11, "name": "11", "question": "String to Integer (atoi)." },
-      { "id": 12, "name": "12", "question": "Count with K different characters." },
-      { "id": 13, "name": "13", "isSurprise": true, "question": "Surprise String Question" }
+      { "id": 1, "name": "E1", "question": "Reverse a string.\n\nSample Input: s = \"hello\"\nSample Output: \"olleh\"" },
+      { "id": 2, "name": "E2", "question": "Check if a string is a palindrome.\n\nSample Input: s = \"racecar\"\nSample Output: true" },
+      { "id": 3, "name": "M1", "question": "Find the longest substring without repeating characters.\n\nSample Input: s = \"abcabcbb\"\nSample Output: 3 (substring is \"abc\")" },
+      { "id": 4, "name": "M2", "question": "Implement atoi to convert a string to an integer.\n\nSample Input: s = \"   -42\"\nSample Output: -42" },
+      { "id": 5, "name": "M3", "question": "Find the longest palindromic substring in a given string.\n\nSample Input: s = \"babad\"\nSample Output: \"bab\" (\"aba\" is also a valid answer)" },
+      { "id": 6, "name": "H1", "question": "Implement the Robin-Karp algorithm for pattern searching.\n\nSample Input: text = \"ABCCDDAEFG\", pattern = \"CDD\"\nSample Output: Pattern found at index 2" },
+      { "id": 7, "name": "H2", "question": "Implement the Knuth-Morris-Pratt (KMP) algorithm for pattern searching.\n\nSample Input: text = \"ababcabcabababd\", pattern = \"ababd\"\nSample Output: Pattern found at index 10" },
+      { "id": 8, "isSurprise": true, "name": "S1", "question": "Given two strings, check if they are anagrams of each other.\n\nSample Input: s1 = \"listen\", s2 = \"silent\"\nSample Output: true" }
     ]
   },
   {
     "id": "linked-lists",
     "name": "Linked Lists",
-    "description": "Learn to manage dynamic data sets with nodes and pointers.",
+    "description": "Understanding pointers and nodes to build dynamic data structures.",
     "initialLives": 5,
     "levels": [
-      { "id": 1, "name": "1", "question": "Introduction to Linked List." },
-      { "id": 2, "name": "2", "question": "Delete a Node in a Linked List." },
-      { "id": 3, "name": "3", "question": "Reverse a Linked List." },
-      { "id": 4, "name": "4", "question": "Find the middle of a Linked List." },
-      { "id": 5, "name": "5", "question": "Detect a cycle in a Linked List." },
-      { "id": 6, "name": "6", "question": "Find the starting point of the Loop of Linked List." },
-      { "id": 7, "name": "7", "question": "Check if a Linked List is a palindrome." },
-      { "id": 8, "name": "8", "question": "Add two numbers represented by linked lists." },
-      { "id": 9, "name": "9", "question": "Merge two sorted linked lists." },
-      { "id": 10, "name": "10", "question": "Delete the Nth node from the end of the Linked List." },
-      { "id": 11, "name": "11", "question": "Rotate a Linked List." },
-      { "id": 12, "name": "12", "isSurprise": true, "question": "Surprise Linked List Question" }
-    ]
-  },
-  {
-    "id": "stacks-queues",
-    "name": "Stacks & Queues",
-    "description": "Understand LIFO and FIFO data structures and their applications.",
-    "initialLives": 3,
-    "levels": [
-      { "id": 1, "name": "1", "question": "Implement Stack using Arrays." },
-      { "id": 2, "name": "2", "question": "Implement Queue using Arrays." },
-      { "id": 3, "name": "3", "question": "Implement Stack using Queues." },
-      { "id": 4, "name": "4", "question": "Implement Queue using Stacks." },
-      { "id": 5, "name": "5", "question": "Check for balanced parentheses." },
-      { "id": 6, "name": "6", "question": "Next Greater Element." },
-      { "id": 7, "name": "7", "question": "Implement a Min Stack." },
-      { "id": 8, "name": "8", "isSurprise": true, "question": "Surprise Stack/Queue Question" }
+      { "id": 1, "name": "E1", "question": "Implement a singly linked list with insertion at the beginning.\n\nSample Input: Insert 1, then 2\nSample Output: List is 2 -> 1" },
+      { "id": 2, "name": "E2", "question": "Delete a node from a singly linked list given its value.\n\nSample Input: List 1->2->3->4, delete 3\nSample Output: 1->2->4" },
+      { "id": 3, "name": "M1", "question": "Reverse a linked list.\n\nSample Input: 1->2->3->4->NULL\nSample Output: 4->3->2->1->NULL" },
+      { "id": 4, "name": "M2", "question": "Find the middle of a linked list.\n\nSample Input: 1->2->3->4->5\nSample Output: 3" },
+      { "id": 5, "name": "M3", "question": "Merge two sorted linked lists.\n\nSample Input: 1->2->4, 1->3->4\nSample Output: 1->1->2->3->4->4" },
+      { "id": 6, "name": "M4", "question": "Detect a cycle in a linked list.\n\nSample Input: A list where the last node points back to the second node.\nSample Output: true" },
+      { "id": 7, "name": "H1", "question": "Reverse a linked list in groups of given size k.\n\nSample Input: 1->2->3->4->5->6->7->8, k=3\nSample Output: 3->2->1->6->5->4->8->7" },
+      { "id": 8, "name": "H2", "question": "Find the intersection point of two linked lists.\n\nSample Input: Two lists that intersect at a specific node.\nSample Output: The value of the intersection node." },
+      { "id": 9, "isSurprise": true, "name": "S1", "question": "Add two numbers represented by linked lists.\n\nSample Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)\nSample Output: 7 -> 0 -> 8" }
     ]
   },
   {
     "id": "recursion",
     "name": "Recursion & Backtracking",
-    "description": "Solve complex problems by breaking them into smaller, self-similar subproblems.",
+    "description": "Solving complex problems by breaking them down into smaller pieces.",
     "initialLives": 5,
     "levels": [
-      { "id": 1, "name": "1", "question": "Print N to 1 using recursion." },
-      { "id": 2, "name": "2", "question": "Sum of first N numbers." },
-      { "id": 3, "name": "3", "question": "Factorial of N." },
-      { "id": 4, "name": "4", "question": "Reverse an array using recursion." },
-      { "id": 5, "name": "5", "question": "Check if a string is a palindrome." },
-      { "id": 6, "name": "6", "question": "Generate all binary strings." },
-      { "id": 7, "name": "7", "question": "Generate Parentheses." },
-      { "id": 8, "name": "8", "question": "Subsets Sum." },
-      { "id": 9, "name": "9", "question": "Combination Sum." },
-      { "id": 10, "name": "10", "question": "N-Queens Problem." },
-      { "id": 11, "name": "11", "question": "Sudoku Solver." },
-      { "id": 12, "name": "12", "isSurprise": true, "question": "Surprise Recursion Question" }
+      { "id": 1, "name": "E1", "question": "Print numbers from 1 to N using recursion.\n\nSample Input: N = 5\nSample Output: 1 2 3 4 5" },
+      { "id": 2, "name": "E2", "question": "Calculate the factorial of a number using recursion.\n\nSample Input: N = 5\nSample Output: 120" },
+      { "id": 3, "name": "M1", "question": "Generate all subsets of a set (powerset).\n\nSample Input: arr = [1, 2, 3]\nSample Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]" },
+      { "id": 4, "name": "M2", "question": "Generate all permutations of a string/array.\n\nSample Input: arr = [1, 2, 3]\nSample Output: [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]" },
+      { "id": 5, "name": "H1", "question": "Solve the N-Queens problem.\n\nSample Input: N = 4\nSample Output: All distinct solutions for placing 4 queens on a 4x4 chessboard." },
+      { "id": 6, "name": "H2", "question": "Solve a Sudoku puzzle using backtracking.\n\nSample Input: A 9x9 partially filled Sudoku grid.\nSample Output: The solved Sudoku grid." },
+      { "id": 7, "isSurprise": true, "name": "S1", "question": "Find all combination of numbers from a given array that sum up to a target.\n\nSample Input: candidates = [2,3,6,7], target = 7\nSample Output: [[2,2,3], [7]]" }
+    ]
+  },
+  {
+    "id": "stacks-queues",
+    "name": "Stacks & Queues",
+    "description": "LIFO and FIFO data structures for various applications.",
+    "initialLives": 5,
+    "levels": [
+      { "id": 1, "name": "E1", "question": "Implement a stack using an array.\n\nSample Input: Push 1, Push 2, Pop\nSample Output: 2" },
+      { "id": 2, "name": "E2", "question": "Implement a queue using an array.\n\nSample Input: Enqueue 1, Enqueue 2, Dequeue\nSample Output: 1" },
+      { "id": 3, "name": "M1", "question": "Check for balanced parentheses in an expression.\n\nSample Input: \"({[]})\"\nSample Output: true" },
+      { "id": 4, "name": "M2", "question": "Find the next greater element for each element in an array.\n\nSample Input: [4, 5, 2, 25]\nSample Output: [5, 25, 25, -1]" },
+      { "id": 5, "name": "H1", "question": "Implement a min stack that supports push, pop, top, and retrieving the minimum element in constant time.\n\nSample Operations: push(-2), push(0), push(-3), getMin(), pop(), top(), getMin()\nSample Output: -3, 0, -2" },
+      { "id": 6, "name": "H2", "question": "Find the largest rectangular area in a histogram.\n\nSample Input: [2, 1, 5, 6, 2, 3]\nSample Output: 10" },
+      { "id": 7, "isSurprise": true, "name": "S1", "question": "Implement a stack using two queues.\n\nSample Operations: push(1), push(2), pop()\nSample Output: 2" }
     ]
   },
   {
     "id": "trees",
-    "name": "Trees",
-    "description": "Explore hierarchical data structures with nodes and edges.",
+    "name": "Binary Trees",
+    "description": "Exploring hierarchical data structures and their traversals.",
     "initialLives": 5,
     "levels": [
-      { "id": 1, "name": "1", "question": "Binary Tree Traversal (Inorder, Preorder, Postorder)." },
-      { "id": 2, "name": "2", "question": "Level Order Traversal." },
-      { "id": 3, "name": "3", "question": "Height of a Binary Tree." },
-      { "id": 4, "name": "4", "question": "Check for Balanced Binary Tree." },
-      { "id": 5, "name": "5", "question": "Diameter of a Binary Tree." },
-      { "id": 6, "name": "6", "question": "Maximum Path Sum in a Binary Tree." },
-      { "id": 7, "name": "7", "question": "Check if two trees are identical." },
-      { "id": 8, "name": "8", "question": "Zigzag Level Order Traversal." },
-      { "id": 9, "name": "9", "question": "Boundary Traversal of a Binary Tree." },
-      { "id": 10, "name": "10", "question": "Top View of a Binary Tree." },
-      { "id": 11, "name": "11", "question": "Lowest Common Ancestor of a Binary Tree." },
-      { "id": 12, "name": "12", "question": "Construct Binary Tree from preorder and inorder traversal." },
-      { "id": 13, "name": "13", "question": "Validate Binary Search Tree." },
-      { "id": 14, "name": "14", "isSurprise": true, "question": "Surprise Tree Question" }
+      { "id": 1, "name": "E1", "question": "Implement pre-order traversal of a binary tree.\n\nSample Input: A binary tree with root 1, left child 2, right child 3.\nSample Output: [1, 2, 3]" },
+      { "id": 2, "name": "E2", "question": "Implement in-order traversal of a binary tree.\n\nSample Input: A binary tree with root 1, left child 2, right child 3.\nSample Output: [2, 1, 3]" },
+      { "id": 3, "name": "E3", "question": "Implement post-order traversal of a binary tree.\n\nSample Input: A binary tree with root 1, left child 2, right child 3.\nSample Output: [2, 3, 1]" },
+      { "id": 4, "name": "M1", "question": "Find the maximum depth (height) of a binary tree.\n\nSample Input: A binary tree with 3 levels.\nSample Output: 3" },
+      { "id": 5, "name": "M2", "question": "Check if a binary tree is balanced.\n\nSample Input: A balanced binary tree.\nSample Output: true" },
+      { "id": 6, "name": "M3", "question": "Find the diameter of a binary tree.\n\nSample Input: A binary tree.\nSample Output: The length of the longest path between any two nodes." },
+      { "id": 7, "name": "H1", "question": "Find the lowest common ancestor (LCA) of two nodes in a binary tree.\n\nSample Input: A binary tree and two node values.\nSample Output: The value of the LCA node." },
+      { "id": 8, "name": "H2", "question": "Serialize and deserialize a binary tree.\n\nSample Input: A binary tree.\nSample Output: A string representation that can be converted back to the original tree." },
+      { "id": 9, "isSurprise": true, "name": "S1", "question": "Print the top view of a binary tree.\n\nSample Input: A binary tree.\nSample Output: A list of node values visible from the top." }
     ]
   },
   {
     "id": "graphs",
     "name": "Graphs",
-    "description": "Represent and solve network problems with nodes and connections.",
+    "description": "Navigating complex networks with BFS, DFS, and other algorithms.",
     "initialLives": 5,
     "levels": [
-      { "id": 1, "name": "1", "question": "Graph representation (Adjacency Matrix, Adjacency List)." },
-      { "id": 2, "name": "2", "question": "Breadth-First Search (BFS)." },
-      { "id": 3, "name": "3", "question": "Depth-First Search (DFS)." },
-      { "id": 4, "name": "4", "question": "Number of Provinces." },
-      { "id": 5, "name": "5", "question": "Detect cycle in an undirected graph." },
-      { "id": 6, "name": "6", "question": "Detect cycle in a directed graph." },
-      { "id": 7, "name": "7", "question": "Topological Sort." },
-      { "id": 8, "name": "8", "question": "Shortest path in an unweighted graph." },
-      { "id": 9, "name": "9", "question": "Dijkstra's Algorithm." },
-      { "id": 10, "name": "10", "question": "Prim's Algorithm for Minimum Spanning Tree." },
-      { "id": 11, "name": "11", "isSurprise": true, "question": "Surprise Graph Question" }
-    ]
-  },
-  {
-    "id": "hash-tables",
-    "name": "Hash Tables",
-    "description": "Implement efficient key-value lookups with hashing.",
-    "initialLives": 3,
-    "levels": [
-        { "id": 1, "name": "1", "question": "Count frequency of array elements." },
-        { "id": 2, "name": "2", "question": "Find the highest/lowest frequency elements." },
-        { "id": 3, "name": "3", "question": "Two Sum problem using hashing." },
-        { "id": 4, "name": "4", "question": "Four Sum problem." },
-        { "id": 5, "name": "5", "question": "Longest consecutive sequence." },
-        { "id": 6, "name": "6", "question": "Largest subarray with 0 sum." },
-        { "id": 7, "name": "7", "question": "Count number of subarrays with given xor K." },
-        { "id": 8, "name": "8", "isSurprise": true, "question": "Surprise Hashing Question" }
-    ]
-  },
-  {
-    "id": "heaps",
-    "name": "Heaps",
-    "description": "Master priority queues and their implementations using heaps.",
-    "initialLives": 3,
-    "levels": [
-      { "id": 1, "name": "1", "question": "Implement a Max-Heap from an array." },
-      { "id": 2, "name": "2", "question": "Kth largest element in an array." },
-      { "id": 3, "name": "3", "question": "Merge K sorted arrays." },
-      { "id": 4, "name": "4", "question": "Find median from a data stream." },
-      { "id": 5, "name": "5", "isSurprise": true, "question": "Surprise Heap Question" }
+      { "id": 1, "name": "E1", "question": "Implement Breadth-First Search (BFS) for a graph.\n\nSample Input: A graph and a starting vertex.\nSample Output: A list of vertices in BFS order." },
+      { "id": 2, "name": "E2", "question": "Implement Depth-First Search (DFS) for a graph.\n\nSample Input: A graph and a starting vertex.\nSample Output: A list of vertices in DFS order." },
+      { "id": 3, "name": "M1", "question": "Detect a cycle in an undirected graph.\n\nSample Input: A graph with a cycle.\nSample Output: true" },
+      { "id": 4, "name": "M2", "question": "Detect a cycle in a directed graph.\n\nSample Input: A directed graph with a cycle.\nSample Output: true" },
+      { "id": 5, "name": "M3", "question": "Perform a topological sort on a Directed Acyclic Graph (DAG).\n\nSample Input: A DAG.\nSample Output: A list of vertices in topological order." },
+      { "id": 6, "name": "H1", "question": "Implement Dijkstra's algorithm to find the shortest path from a source vertex to all other vertices in a weighted graph.\n\nSample Input: A weighted graph and a source vertex.\nSample Output: A list of shortest distances." },
+      { "id": 7, "name": "H2", "question": "Implement Prim's algorithm to find the Minimum Spanning Tree (MST) of a graph.\n\nSample Input: A weighted, connected, undirected graph.\nSample Output: The total weight of the MST." },
+      { "id": 8, "isSurprise": true, "name": "S1", "question": "Find the number of connected components in an undirected graph.\n\nSample Input: A graph.\nSample Output: The number of components." }
     ]
   },
   {
     "id": "dynamic-programming",
     "name": "Dynamic Programming",
-    "description": "Optimize recursive solutions by storing results of subproblems.",
+    "description": "Solving optimization problems with memoization and tabulation.",
     "initialLives": 5,
     "levels": [
-      { "id": 1, "name": "1", "question": "Fibonacci Number using DP." },
-      { "id": 2, "name": "2", "question": "Climbing Stairs." },
-      { "id": 3, "name": "3", "question": "House Robber." },
-      { "id": 4, "name": "4", "question": "0/1 Knapsack Problem." },
-      { "id": 5, "name": "5", "question": "Longest Common Subsequence." },
-      { "id": 6, "name": "6", "question": "Longest Increasing Subsequence." },
-      { "id": 7, "name": "7", "question": "Edit Distance." },
-      { "id": 8, "name": "8", "question": "Coin Change." },
-      { "id": 9, "name": "9", "question": "Matrix Chain Multiplication." },
-      { "id": 10, "name": "10", "question": "Best Time to Buy and Sell Stock with Cooldown." },
-      { "id": 11, "name": "11", "isSurprise": true, "question": "Surprise DP Question" }
-    ]
-  },
-  {
-    "id": "sorting-searching",
-    "name": "Sorting & Searching",
-    "description": "Efficiently organize and find data in collections.",
-    "initialLives": 3,
-    "levels": [
-      { "id": 1, "name": "1", "question": "Implement Bubble Sort." },
-      { "id": 2, "name": "2", "question": "Implement Selection Sort." },
-      { "id": 3, "name": "3", "question": "Implement Insertion Sort." },
-      { "id": 4, "name": "4", "question": "Implement Merge Sort." },
-      { "id": 5, "name": "5", "question": "Implement Quick Sort." },
-      { "id": 6, "name": "6", "question": "Binary Search Algorithm." },
-      { "id": 7, "name": "7", "question": "Find first and last positions of an element in a sorted array." },
-      { "id": 8, "name": "8", "question": "Search in a rotated sorted array." },
-      { "id": 9, "name": "9", "question": "Find peak element." },
-      { "id": 10, "name": "10", "isSurprise": true, "question": "Surprise Sort/Search Question" }
-    ]
-  },
-  {
-    "id": "bit-manipulation",
-    "name": "Bit Manipulation",
-    "description": "Perform operations at the bit level for optimization.",
-    "initialLives": 3,
-    "levels": [
-      { "id": 1, "name": "1", "question": "Check if a number is even or odd." },
-      { "id": 2, "name": "2", "question": "Count set bits in an integer." },
-      { "id": 3, "name": "3", "question": "Power of Two." },
-      { "id": 4, "name": "4", "question": "Find the only non-repeating element in an array where every other element repeats twice." },
-      { "id": 5, "name": "5", "question": "Swap two numbers without using a temporary variable." },
-      { "id": 6, "name": "6", "isSurprise": true, "question": "Surprise Bit Manipulation Question" }
+      { "id": 1, "name": "E1", "question": "Calculate the N-th Fibonacci number using DP.\n\nSample Input: N = 6\nSample Output: 8" },
+      { "id": 2, "name": "M1", "question": "Find the longest increasing subsequence in an array.\n\nSample Input: [10, 9, 2, 5, 3, 7, 101, 18]\nSample Output: 4 (e.g., [2, 3, 7, 101])" },
+      { "id": 3, "name": "M2", "question": "Solve the 0/1 Knapsack problem.\n\nSample Input: weights = [1, 2, 3], values = [60, 100, 120], capacity = 5\nSample Output: 220" },
+      { "id": 4, "name": "M3", "question": "Find the minimum number of coins to make a given amount.\n\nSample Input: coins = [1, 2, 5], amount = 11\nSample Output: 3 (5+5+1)" },
+      { "id": 5, "name": "H1", "question": "Find the longest common subsequence of two strings.\n\nSample Input: text1 = \"abcde\", text2 = \"ace\"\nSample Output: 3 (\"ace\")" },
+      { "id": 6, "name": "H2", "question": "Solve the Edit Distance problem: find the minimum number of operations (insert, delete, replace) to convert one string to another.\n\nSample Input: word1 = \"horse\", word2 = \"ros\"\nSample Output: 3" },
+      { "id": 7, "isSurprise": true, "name": "S1", "question": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?\n\nSample Input: n = 3\nSample Output: 3 (1+1+1, 1+2, 2+1)" }
     ]
   }
 ]
