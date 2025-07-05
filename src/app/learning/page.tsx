@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -33,6 +32,17 @@ export default function LearningPage() {
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold font-headline">Learning Path</h1>
           <p className="text-muted-foreground mt-2">Select a module to begin your quest.</p>
+          <p className="text-sm text-muted-foreground mt-4">
+            Curriculum inspired by the{' '}
+            <a 
+              href="https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="underline hover:text-primary"
+            >
+              Striver A2Z DSA Course Sheet
+            </a>.
+          </p>
         </div>
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
