@@ -37,6 +37,11 @@ type KeyUsageStats = {
   primary: { date: string; count: number };
   secondary: { date: string; count: number };
 };
+type StreamingMessage = {
+  id: number;
+  fullText: string;
+  displayText: string;
+};
 
 const interviewerImages: Record<string, InterviewerImageInfo> = {
   neutral:   { src: '/hr/calm.png' },
@@ -53,7 +58,7 @@ export default function InterviewPage() {
   const levelId = params.levelId as string;
 
   const { toast } = useToast();
-  const [apiKeys] = useLocalStorage<ApiKeys>(STORAGE_KEYS.API_KEYS, {});
+  const [apiKeys, setApiKeys] = useLocalStorage<ApiKeys>(STORAGE_KEYS.API_KEYS, {});
   const [keyUsageStats, setKeyUsageStats] = useLocalStorage<KeyUsageStats>(STORAGE_KEYS.KEY_USAGE_STATS, {
     primary: { date: '', count: 0 },
     secondary: { date: '', count: 0 },
@@ -86,6 +91,8 @@ export default function InterviewPage() {
   const [interviewPhase, setInterviewPhase] = useState<'greeting' | 'icebreaker' | 'technical'>('greeting');
   const [isRunningCode, setIsRunningCode] = useState(false);
   const [codeOutput, setCodeOutput] = useState<CodeOutput>(null);
+  const [streamingMessage, setStreamingMessage] = useState<StreamingMessage | null>(null);
+  const pendingTextRef = useRef<string | null>(null);
 
   const dialogueEndRef = useRef<HTMLDivElement>(null);
 
@@ -161,14 +168,21 @@ export default function InterviewPage() {
   }, [apiKeys.primaryApiKeyLimit, keyUsageStats.primary, toast]);
 
 
-  const handleInterviewerResponse = useCallback((text: string, keyUsed?: 'primary' | 'secondary') => {
+  const handleInterviewerResponse = useCallback((text: string) => {
     setIsAiTyping(true);
-    setConversation(conv => [...conv, { id: conversationIdCounter.current++, speaker: 'interviewer', text }]);
+    pendingTextRef.current = text;
     
     if (isTtsDisabled || (!apiKeys.primaryApiKey && !apiKeys.secondaryApiKey)) {
         setIsAiTyping(false);
+        setStreamingMessage({
+            id: conversationIdCounter.current++,
+            fullText: text,
+            displayText: '',
+        });
+        pendingTextRef.current = null;
         return;
     }
+
     checkAndWarnLimits();
     textToSpeech({
         text: text,
@@ -179,6 +193,14 @@ export default function InterviewPage() {
         if (ttsResponse?.audioDataUri) {
             setAudioUrl(ttsResponse.audioDataUri);
             updateUsageStats(ttsResponse.keyUsed);
+        } else {
+            setIsAiTyping(false);
+            setStreamingMessage({
+                id: conversationIdCounter.current++,
+                fullText: text,
+                displayText: '',
+            });
+            pendingTextRef.current = null;
         }
     })
     .catch(ttsError => {
@@ -198,8 +220,13 @@ export default function InterviewPage() {
                 variant: 'destructive',
             });
         }
-    }).finally(() => {
         setIsAiTyping(false);
+        setStreamingMessage({
+            id: conversationIdCounter.current++,
+            fullText: text,
+            displayText: '',
+        });
+        pendingTextRef.current = null;
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKeys, toast, isTtsDisabled, updateUsageStats, checkAndWarnLimits]);
@@ -285,7 +312,7 @@ export default function InterviewPage() {
 
   useEffect(() => {
     dialogueEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversation, isAiTyping]);
+  }, [conversation, isAiTyping, streamingMessage]);
 
   const handleSendMessage = async () => {
     if (isRecording) {
@@ -300,7 +327,6 @@ export default function InterviewPage() {
     const currentConversation: Conversation = { id: conversationIdCounter.current++, speaker: 'user', text: userInput, code: showCodeEditor ? userCode : undefined };
     setConversation(conv => [...conv, currentConversation]);
     setUserInput('');
-    setIsAiTyping(true);
 
     const conversationHistory = [...conversation, currentConversation].slice(-6).map(c => `${c.speaker}: ${c.text} ${c.code ? `\nCODE:\n${c.code}`:''}`).join('\n');
 
@@ -376,7 +402,6 @@ The main technical question you must ask is provided in the 'question' field. Af
       }
 
     } catch (error) {
-      setIsAiTyping(false);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast({
         title: 'AI Error',
@@ -486,6 +511,52 @@ The main technical question you must ask is provided in the 'question' field. Af
     }
   };
 
+  const handleAudioPlay = () => {
+    if (pendingTextRef.current) {
+        setIsAiTyping(false);
+        setStreamingMessage({
+            id: conversationIdCounter.current++,
+            fullText: pendingTextRef.current,
+            displayText: '',
+        });
+        pendingTextRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!streamingMessage) return;
+
+    if (streamingMessage.displayText.length === streamingMessage.fullText.length) {
+        setConversation(conv => [...conv, { 
+            id: streamingMessage.id, 
+            speaker: 'interviewer', 
+            text: streamingMessage.fullText 
+        }]);
+        setStreamingMessage(null);
+        return;
+    }
+
+    const words = streamingMessage.fullText.split(' ');
+    const currentWords = streamingMessage.displayText.split(' ').filter(w => w !== '');
+    const nextWordIndex = currentWords.length;
+
+    if (nextWordIndex >= words.length) {
+        setStreamingMessage(msg => msg ? { ...msg, displayText: msg.fullText } : null);
+        return;
+    }
+
+    const delay = 180; // WPM approximation
+    const timer = setTimeout(() => {
+        setStreamingMessage(msg => {
+            if (!msg) return null;
+            const newText = msg.displayText ? `${msg.displayText} ${words[nextWordIndex]}` : words[nextWordIndex];
+            return { ...msg, displayText: newText };
+        });
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [streamingMessage]);
+
   if (isDataLoading) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-black text-white">
@@ -504,16 +575,6 @@ The main technical question you must ask is provided in the 'question' field. Af
   }
 
   const currentImage = interviewerImages[sentiment.toLowerCase()] || interviewerImages.neutral;
-
-  const lastUserMessageIndex = conversation.map(c => c.speaker).lastIndexOf('user');
-  const lastInterviewerMessageIndex = conversation.map(c => c.speaker).lastIndexOf('interviewer');
-
-  const conversationToDisplay = conversation.filter((c, index) => {
-    if (lastUserMessageIndex === -1 && index === lastInterviewerMessageIndex) {
-      return true;
-    }
-    return index === lastUserMessageIndex || index === lastInterviewerMessageIndex;
-  });
 
   return (
     <>
@@ -542,12 +603,12 @@ The main technical question you must ask is provided in the 'question' field. Af
             <ArrowLeft className="mr-2 h-4 w-4"/> Back to Levels
         </Button>
 
-        {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" onEnded={() => setAudioUrl(null)} />}
+        {audioUrl && <audio key={audioUrl} src={audioUrl} autoPlay className="hidden" onPlay={handleAudioPlay} onEnded={() => setAudioUrl(null)} />}
 
         <div className="relative mt-auto p-4 flex flex-col gap-4">
             <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-4 flex flex-col justify-end">
                 <AnimatePresence>
-                    {conversationToDisplay.map((c) => (
+                    {conversation.map((c) => (
                         <motion.div
                             key={c.id}
                             layout
@@ -583,6 +644,26 @@ The main technical question you must ask is provided in the 'question' field. Af
                             )}
                         </motion.div>
                     ))}
+
+                    {streamingMessage && (
+                        <motion.div
+                            key={streamingMessage.id}
+                            layout
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            className="flex items-end gap-2 justify-start"
+                        >
+                             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                                <Sparkles className="w-4 h-4 text-primary-foreground" />
+                            </div>
+                            <div className="max-w-xl rounded-xl px-4 py-3 shadow-md bg-black/80 backdrop-blur-sm text-white rounded-bl-none">
+                                <p className="font-body text-base">{streamingMessage.displayText}</p>
+                            </div>
+                        </motion.div>
+                    )}
+
                     {isAiTyping && (
                         <motion.div
                             key="typing-indicator"
@@ -728,3 +809,5 @@ The main technical question you must ask is provided in the 'question' field. Af
     </>
   );
 }
+
+    
