@@ -24,7 +24,8 @@ type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } }
 
 export default function ModulePage() {
   const router = useRouter();
-  const { moduleId: rawModuleId } = useParams();
+  const params = useParams();
+  const rawModuleId = params.moduleId;
   const moduleId = String(rawModuleId);
   
   const [module, setModule] = useState<Module | undefined>(undefined);
