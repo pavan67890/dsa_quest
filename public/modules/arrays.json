@@ -4,93 +4,291 @@
     "id": 1,
     "name": "1",
     "question": "Find the largest element in an array.",
-    "sampleInput": "[1, 2, 9, 3, 8]",
-    "sampleOutput": "9"
+    "sampleInput": "[3, 2, 4, 1, 5]",
+    "sampleOutput": "5"
   },
   {
     "id": 2,
     "name": "2",
-    "question": "Find the second largest element in an array without sorting it."
+    "question": "Find the second largest and second smallest element in an array.",
+    "sampleInput": "[1, 2, 3, 4, 5]",
+    "sampleOutput": "Second Largest: 4, Second Smallest: 2"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "Check if an array is sorted in non-decreasing order."
+    "question": "Check if an array is sorted.",
+    "sampleInput": "[1, 2, 3, 4, 5]",
+    "sampleOutput": "true"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Remove duplicates from a sorted array and return the new length. Modify the array in-place.",
-    "sampleInput": "[0, 0, 1, 1, 1, 2, 2, 3, 3, 4]",
-    "sampleOutput": "5 (Array becomes [0, 1, 2, 3, 4, ...])"
+    "question": "Remove duplicates from a sorted array.",
+    "sampleInput": "[1, 1, 2, 2, 3, 4, 4]",
+    "sampleOutput": "5 (new length), array becomes [1, 2, 3, 4, _]"
   },
   {
     "id": 5,
     "name": "5",
-    "question": "Left rotate an array by one place."
+    "question": "Left rotate an array by one place.",
+    "sampleInput": "[1, 2, 3, 4, 5]",
+    "sampleOutput": "[2, 3, 4, 5, 1]"
   },
   {
     "id": 6,
     "name": "6",
     "question": "Left rotate an array by D places.",
-    "sampleInput": "Array: [1, 2, 3, 4, 5], D: 2",
+    "sampleInput": "arr = [1, 2, 3, 4, 5], D = 2",
     "sampleOutput": "[3, 4, 5, 1, 2]"
   },
   {
     "id": 7,
     "name": "7",
-    "question": "Given an array of integers, move all zeros to the end of it while maintaining the relative order of the non-zero elements.",
-    "sampleInput": "[0, 1, 0, 3, 12]",
-    "sampleOutput": "[1, 3, 12, 0, 0]"
+    "question": "Move all zeros to the end of the array.",
+    "sampleInput": "[1, 0, 2, 3, 0, 4, 0, 1]",
+    "sampleOutput": "[1, 2, 3, 4, 1, 0, 0, 0]"
   },
   {
     "id": 8,
     "name": "8",
-    "question": "Find the union of two sorted arrays."
+    "question": "Given a sorted array of N integers, write a program to find the index of a given number K.",
+    "sampleInput": "N = 5, arr[] = {1,2,3,4,5}, K = 4",
+    "sampleOutput": "3"
   },
   {
     "id": 9,
     "name": "9",
-    "question": "Find the missing number in an array of N-1 integers from a range of 1 to N.",
+    "question": "Find the missing number in an array of N-1 integers from 1 to N.",
     "sampleInput": "[1, 2, 4, 5]",
     "sampleOutput": "3"
   },
   {
     "id": 10,
     "name": "10",
-    "question": "Find the maximum number of consecutive 1s in a binary array."
+    "question": "Find the maximum number of consecutive 1s in an array.",
+    "sampleInput": "[1, 1, 0, 1, 1, 1]",
+    "sampleOutput": "3"
   },
   {
     "id": 11,
     "name": "11",
-    "question": "Find the single number that appears only once in an array where every other element appears twice."
+    "question": "Find the number that appears once, while all other numbers appear twice.",
+    "sampleInput": "[2, 2, 1]",
+    "sampleOutput": "1"
   },
   {
     "id": 12,
     "name": "12",
-    "question": "Find the length of the longest subarray with a given sum K.",
-    "sampleInput": "Array: [1, 2, 3, 1, 1, 1], K: 3",
-    "sampleOutput": "3 (Subarray is [1, 1, 1])"
+    "question": "Find the longest subarray with a given sum K (positives only).",
+    "sampleInput": "arr = [1, 2, 3, 1, 1, 1], k = 3",
+    "sampleOutput": "3 (subarray [1, 1, 1])"
   },
   {
     "id": 13,
     "name": "13",
-    "question": "Given two integers, an hour and a minute, return the smaller angle (in degrees) formed between the hour and the minute hand."
+    "question": "Find the longest subarray with a given sum K (positives, negatives, and zeros).",
+    "sampleInput": "arr = [10, 5, 2, 7, 1, 9], k = 15",
+    "sampleOutput": "4 (subarray [5, 2, 7, 1])"
   },
   {
     "id": 14,
-    "name": "S",
-    "question": "Surprise! A random question from this module awaits.",
-    "isSurprise": true
+    "name": "14",
+    "isSurprise": true,
+    "question": "Surprise! A random medium difficulty array problem."
   },
   {
     "id": 15,
-    "name": "14",
-    "question": "Find the majority element in an array (appears more than n/2 times)."
+    "name": "15",
+    "question": "Two Sum: Check if a pair with given sum exists in Array.",
+    "sampleInput": "arr = [2, 7, 11, 15], target = 9",
+    "sampleOutput": "true (indices 0, 1)"
   },
   {
     "id": 16,
-    "name": "15",
-    "question": "Given an array of integers, find the maximum product of any three numbers in the array."
+    "name": "16",
+    "question": "Sort an array of 0s, 1s, and 2s (Dutch National Flag problem).",
+    "sampleInput": "[2, 0, 2, 1, 1, 0]",
+    "sampleOutput": "[0, 0, 1, 1, 2, 2]"
+  },
+  {
+    "id": 17,
+    "name": "17",
+    "question": "Find the majority element that appears more than n/2 times.",
+    "sampleInput": "[2, 2, 1, 1, 1, 2, 2]",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 18,
+    "name": "18",
+    "question": "Find the maximum subarray sum (Kadane's Algorithm).",
+    "sampleInput": "[-2, 1, -3, 4, -1, 2, 1, -5, 4]",
+    "sampleOutput": "6 (subarray [4, -1, 2, 1])"
+  },
+  {
+    "id": 19,
+    "name": "19",
+    "question": "Stock Buy and Sell: Find the maximum profit.",
+    "sampleInput": "[7, 1, 5, 3, 6, 4]",
+    "sampleOutput": "7 (buy on day 2, sell on day 3 for profit 4, buy on day 4 sell on day 5 for profit 3)"
+  },
+  {
+    "id": 20,
+    "name": "20",
+    "question": "Rearrange array elements by sign (positive then negative).",
+    "sampleInput": "[3, 1, -2, -5, 2, -4]",
+    "sampleOutput": "[3, -2, 1, -5, 2, -4]"
+  },
+  {
+    "id": 21,
+    "name": "21",
+    "question": "Find the next permutation of an array.",
+    "sampleInput": "[1, 2, 3]",
+    "sampleOutput": "[1, 3, 2]"
+  },
+  {
+    "id": 22,
+    "name": "22",
+    "question": "Find the leaders in an array (elements greater than all elements to their right).",
+    "sampleInput": "[16, 17, 4, 3, 5, 2]",
+    "sampleOutput": "[17, 5, 2]"
+  },
+  {
+    "id": 23,
+    "name": "23",
+    "question": "Find the longest consecutive sequence in an array.",
+    "sampleInput": "[100, 4, 200, 1, 3, 2]",
+    "sampleOutput": "4 (sequence is [1, 2, 3, 4])"
+  },
+  {
+    "id": 24,
+    "name": "24",
+    "question": "Given an m x n matrix, if an element is 0, set its entire row and column to 0.",
+    "sampleInput": "[[1,1,1],[1,0,1],[1,1,1]]",
+    "sampleOutput": "[[1,0,1],[0,0,0],[1,0,1]]"
+  },
+  {
+    "id": 25,
+    "name": "25",
+    "question": "Rotate a matrix by 90 degrees clockwise.",
+    "sampleInput": "[[1,2,3],[4,5,6],[7,8,9]]",
+    "sampleOutput": "[[7,4,1],[8,5,2],[9,6,3]]"
+  },
+  {
+    "id": 26,
+    "name": "26",
+    "question": "Search a 2D matrix where rows and columns are sorted.",
+    "sampleInput": "matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 27,
+    "name": "27",
+    "question": "Spiral traversal of a matrix.",
+    "sampleInput": "[[1,2,3],[4,5,6],[7,8,9]]",
+    "sampleOutput": "[1, 2, 3, 6, 9, 8, 7, 4, 5]"
+  },
+  {
+    "id": 28,
+    "name": "28",
+    "isSurprise": true,
+    "question": "Surprise! A random hard difficulty array problem."
+  },
+  {
+    "id": 29,
+    "name": "29",
+    "question": "Count subarrays with sum K.",
+    "sampleInput": "arr = [1, 1, 1], k = 2",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 30,
+    "name": "30",
+    "question": "Find the majority elements that appear more than n/3 times.",
+    "sampleInput": "[3, 2, 3]",
+    "sampleOutput": "[3]"
+  },
+  {
+    "id": 31,
+    "name": "31",
+    "question": "3-Sum: Find all unique triplets in the array which gives the sum of zero.",
+    "sampleInput": "[-1, 0, 1, 2, -1, -4]",
+    "sampleOutput": "[[-1, -1, 2], [-1, 0, 1]]"
+  },
+  {
+    "id": 32,
+    "name": "32",
+    "question": "4-Sum: Find all unique quadruplets in the array which gives the sum of a target.",
+    "sampleInput": "arr = [1, 0, -1, 0, -2, 2], target = 0",
+    "sampleOutput": "[[-2, -1, 1, 2], [-2, 0, 0, 2], [-1, 0, 0, 1]]"
+  },
+  {
+    "id": 33,
+    "name": "33",
+    "question": "Count the number of subarrays with XOR as K.",
+    "sampleInput": "arr = [4, 2, 2, 6, 4], k = 6",
+    "sampleOutput": "4"
+  },
+  {
+    "id": 34,
+    "name": "34",
+    "question": "Find the number of repeating and missing numbers.",
+    "sampleInput": "[3, 1, 2, 5, 3]",
+    "sampleOutput": "Repeating = 3, Missing = 4"
+  },
+  {
+    "id": 35,
+    "name": "35",
+    "question": "Merge two sorted arrays without extra space.",
+    "sampleInput": "arr1 = [1, 3, 5, 7], arr2 = [0, 2, 6, 8, 9]",
+    "sampleOutput": "arr1 = [0, 1, 2, 3], arr2 = [5, 6, 7, 8, 9]"
+  },
+  {
+    "id": 36,
+    "name": "36",
+    "question": "Merge overlapping sub-intervals.",
+    "sampleInput": "[[1,3],[2,6],[8,10],[15,18]]",
+    "sampleOutput": "[[1,6],[8,10],[15,18]]"
+  },
+  {
+    "id": 37,
+    "name": "37",
+    "question": "Find the duplicate in an array of N+1 integers.",
+    "sampleInput": "[1, 3, 4, 2, 2]",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 38,
+    "name": "38",
+    "question": "Count inversions in an array.",
+    "sampleInput": "[8, 4, 2, 1]",
+    "sampleOutput": "6"
+  },
+  {
+    "id": 39,
+    "name": "39",
+    "question": "Reverse pairs in an array.",
+    "sampleInput": "[1, 3, 2, 3, 1]",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 40,
+    "name": "40",
+    "question": "Find the maximum product subarray.",
+    "sampleInput": "[2, 3, -2, 4]",
+    "sampleOutput": "6 (subarray [2, 3])"
+  },
+  {
+    "id": 41,
+    "name": "41",
+    "question": "Pascal's Triangle: Generate the first n rows.",
+    "sampleInput": "5",
+    "sampleOutput": "[[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]"
+  },
+  {
+    "id": 42,
+    "name": "42",
+    "isSurprise": true,
+    "question": "Surprise! A random very hard difficulty array problem."
   }
 ]

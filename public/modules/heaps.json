@@ -3,32 +3,104 @@
   {
     "id": 1,
     "name": "1",
-    "question": "Explain the difference between a min-heap and a max-heap. How is the heap property maintained?"
+    "question": "Implement a Min-Heap from scratch and perform insertion and extraction.",
+    "sampleInput": "Insert: 5, 3, 8, 1. Extract min.",
+    "sampleOutput": "1"
   },
   {
     "id": 2,
     "name": "2",
-    "question": "Given an array, convert it into a max-heap in-place."
+    "question": "Convert a given array into a Max-Heap.",
+    "sampleInput": "[4, 10, 3, 5, 1]",
+    "sampleOutput": "[10, 5, 3, 4, 1]"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "Implement K-th largest element in an array using a min-heap."
+    "question": "Find the Kth largest element in an array.",
+    "sampleInput": "arr = [3, 2, 1, 5, 6, 4], k = 2",
+    "sampleOutput": "5"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Find the K closest points to the origin (0, 0) in a 2D plane."
+    "question": "Sort a K-sorted array.",
+    "sampleInput": "arr = [6, 5, 3, 2, 8, 10, 9], k = 3",
+    "sampleOutput": "[2, 3, 5, 6, 8, 9, 10]"
   },
   {
     "id": 5,
     "name": "5",
-    "question": "Merge K sorted arrays into a single sorted array."
+    "question": "Merge K sorted arrays.",
+    "sampleInput": "[[1, 5, 9], [45, 90], [2, 6, 78, 100, 234], [0]]",
+    "sampleOutput": "[0, 1, 2, 5, 6, 9, 45, 78, 90, 100, 234]"
   },
   {
     "id": 6,
-    "name": "S",
-    "question": "Surprise! A random question from this module awaits.",
-    "isSurprise": true
+    "name": "6",
+    "question": "Find the Kth smallest element in a sorted matrix.",
+    "sampleInput": "matrix = [[1,5,9],[10,11,13],[12,13,15]], k = 8",
+    "sampleOutput": "13"
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Find median from a data stream.",
+    "sampleInput": "Add 2, Add 3, Get Median, Add 5, Get Median",
+    "sampleOutput": "2.5, 3"
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "isSurprise": true,
+    "question": "Surprise! A medium priority queue problem."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Merge K sorted linked lists.",
+    "sampleInput": "lists = [[1,4,5],[1,3,4],[2,6]]",
+    "sampleOutput": "[1,1,2,3,4,4,5,6]"
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "Replace each element of the array with its rank in the array.",
+    "sampleInput": "[20, 15, 26, 2, 98, 6]",
+    "sampleOutput": "[4, 3, 5, 1, 6, 2]"
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Task Scheduler: Find the least number of units of time needed to finish all tasks.",
+    "sampleInput": "tasks = ['A','A','A','B','B','B'], n = 2",
+    "sampleOutput": "8 (A -> B -> idle -> A -> B -> idle -> A -> B)"
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "Hands of Straights: Determine if cards can be rearranged into groups of W consecutive cards.",
+    "sampleInput": "hand = [1,2,3,6,2,3,4,7,8], W = 3",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "Design Twitter: Design a simplified version of Twitter where users can post tweets, follow/unfollow another user, and see the 10 most recent tweets in their news feed.",
+    "sampleInput": "Various API calls",
+    "sampleOutput": "Correct feed results"
+  },
+  {
+    "id": 14,
+    "name": "14",
+    "question": "Connect `n` ropes with minimum cost.",
+    "sampleInput": "ropes = [4, 3, 2, 6]",
+    "sampleOutput": "29"
+  },
+  {
+    "id": 15,
+    "name": "15",
+    "isSurprise": true,
+    "question": "Surprise! A hard priority queue problem."
   }
 ]

@@ -3,79 +3,139 @@
   {
     "id": 1,
     "name": "1",
-    "question": "Implement binary search to find a target in a sorted array. Return its index or -1.",
-    "sampleInput": "Array: [1, 3, 5, 7, 9], Target: 5",
-    "sampleOutput": "2"
+    "question": "Implement binary search to find an element in a sorted array.",
+    "sampleInput": "arr = [1, 3, 7, 9, 11, 12, 45], target = 9",
+    "sampleOutput": "3"
   },
   {
     "id": 2,
     "name": "2",
-    "question": "Find the lower bound: the first index where arr[i] >= target."
+    "question": "Implement lower bound: find the first index where arr[i] >= x.",
+    "sampleInput": "arr = [1, 2, 2, 3], x = 2",
+    "sampleOutput": "1"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "Find the upper bound: the first index where arr[i] > target."
+    "question": "Implement upper bound: find the first index where arr[i] > x.",
+    "sampleInput": "arr = [1, 2, 2, 3], x = 2",
+    "sampleOutput": "3"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Given a sorted array and a target, find the starting and ending position of the target. If not found, return [-1, -1]."
+    "question": "Search insert position in a sorted array.",
+    "sampleInput": "[1, 3, 5, 6], target = 5",
+    "sampleOutput": "2"
   },
   {
     "id": 5,
     "name": "5",
-    "question": "Find the number of occurrences of a target in a sorted array."
+    "question": "Find the floor and ceil of a target in a sorted array.",
+    "sampleInput": "arr = [3, 4, 4, 7, 8, 10], target = 5",
+    "sampleOutput": "Floor: 4, Ceil: 7"
   },
   {
     "id": 6,
     "name": "6",
-    "question": "Search in a rotated sorted array for a target value."
+    "question": "Find the first and last occurrence of a number in a sorted array.",
+    "sampleInput": "arr = [1, 2, 2, 2, 3], target = 2",
+    "sampleOutput": "First: 1, Last: 3"
   },
   {
     "id": 7,
     "name": "7",
-    "question": "Find the minimum element in a rotated sorted array."
+    "question": "Count occurrences of a number in a sorted array.",
+    "sampleInput": "arr = [1, 1, 2, 2, 2, 3], target = 2",
+    "sampleOutput": "3"
   },
   {
     "id": 8,
     "name": "8",
-    "question": "Find a peak element in an array (an element greater than its neighbors)."
+    "question": "Search in a rotated sorted array (unique elements).",
+    "sampleInput": "arr = [4, 5, 6, 7, 0, 1, 2], target = 0",
+    "sampleOutput": "4"
   },
   {
     "id": 9,
     "name": "9",
-    "question": "Implement a function to calculate the integer square root of a number x."
+    "question": "Search in a rotated sorted array (duplicate elements).",
+    "sampleInput": "arr = [2, 5, 6, 0, 0, 1, 2], target = 0",
+    "sampleOutput": "true"
   },
   {
     "id": 10,
     "name": "10",
-    "question": "You have n coins and you want to build a staircase with these coins. The staircase consists of k rows where the i-th row has exactly i coins. Given n, return the number of full staircase rows you can form."
+    "question": "Find the minimum element in a rotated sorted array.",
+    "sampleInput": "[3, 4, 5, 1, 2]",
+    "sampleOutput": "1"
   },
   {
     "id": 11,
     "name": "11",
-    "question": "Koko loves to eat bananas. There are n piles of bananas, the i-th pile has piles[i] bananas. She can eat at a speed of k bananas per hour. Find the minimum integer k such that she can eat all the bananas within h hours."
+    "question": "Find a single element in a sorted array where every element appears twice except for one.",
+    "sampleInput": "[1, 1, 2, 3, 3, 4, 4, 8, 8]",
+    "sampleOutput": "2"
   },
   {
     "id": 12,
     "name": "12",
-    "question": "We have to ship packages from one port to another within D days. The i-th package has a weight of weights[i]. We must ship all packages in order. Find the least weight capacity of the ship that will result in all the packages being shipped within D days."
+    "question": "Find the peak element in an array.",
+    "sampleInput": "[1, 2, 3, 1]",
+    "sampleOutput": "2 (index of peak 3)"
   },
   {
     "id": 13,
     "name": "13",
-    "question": "You are given a sorted array of distinct integers and a target value. If the target is found, return the index. If not, return the index where it would be if it were inserted in order."
+    "isSurprise": true,
+    "question": "Surprise! A problem on Binary Search on Answers."
   },
   {
     "id": 14,
-    "name": "S",
-    "question": "A surprise question from this module awaits.",
-    "isSurprise": true
+    "name": "14",
+    "question": "Find the square root of a number using binary search.",
+    "sampleInput": "n = 25",
+    "sampleOutput": "5"
   },
   {
     "id": 15,
-    "name": "14",
-    "question": "Find the median of two sorted arrays."
+    "name": "15",
+    "question": "Find the N-th root of a number M.",
+    "sampleInput": "N = 3, M = 27",
+    "sampleOutput": "3"
+  },
+  {
+    "id": 16,
+    "name": "16",
+    "question": "Koko Eating Bananas: Find the minimum eating speed to finish all bananas within H hours.",
+    "sampleInput": "piles = [3, 6, 7, 11], h = 8",
+    "sampleOutput": "4"
+  },
+  {
+    "id": 17,
+    "name": "17",
+    "question": "Minimum Number of Days to Make m Bouquets.",
+    "sampleInput": "bloomDay = [1, 10, 3, 10, 2], m = 3, k = 1",
+    "sampleOutput": "3"
+  },
+  {
+    "id": 18,
+    "name": "18",
+    "question": "Find the Smallest Divisor Given a Threshold.",
+    "sampleInput": "nums = [1, 2, 5, 9], threshold = 6",
+    "sampleOutput": "5"
+  },
+  {
+    "id": 19,
+    "name": "19",
+    "question": "Capacity To Ship Packages Within D Days.",
+    "sampleInput": "weights = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], days = 5",
+    "sampleOutput": "15"
+  },
+  {
+    "id": 20,
+    "name": "20",
+    "isSurprise": true,
+    "question": "Surprise! A hard problem on Binary Search on Answers."
   }
 ]

@@ -3,32 +3,104 @@
   {
     "id": 1,
     "name": "1",
-    "question": "You have an array of coin denominations and a total amount. Find the minimum number of coins to make up that amount. Assume an infinite supply of each coin."
+    "question": "Assign Cookies: Assign cookies to children to maximize content children.",
+    "sampleInput": "g = [1,2,3], s = [1,1]",
+    "sampleOutput": "1"
   },
   {
     "id": 2,
     "name": "2",
-    "question": "You are given N activities with their start and end times. Select the maximum number of activities that can be performed by a single person, assuming that a person can only work on a single activity at a time."
+    "question": "Fractional Knapsack: Given weights and values of N items, put these items in a knapsack of capacity W to get the maximum total value.",
+    "sampleInput": "items = [{value: 60, weight: 10}, {value: 100, weight: 20}, {value: 120, weight: 30}], W = 50",
+    "sampleOutput": "240.0"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "Implement Fractional Knapsack. Given weights and values of N items, put these items in a knapsack of capacity W to get the maximum total value. You can break items."
+    "question": "Find minimum number of coins to make change for a value.",
+    "sampleInput": "coins = [1, 2, 5, 10, 20, 50, 100, 500, 1000], value = 49",
+    "sampleOutput": "4 (20 + 20 + 5 + 2 + 2)"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Given an array of meeting time intervals, find the minimum number of conference rooms required."
+    "question": "N meetings in one room: Find the maximum number of meetings that can be accommodated in one room.",
+    "sampleInput": "start = [1,3,0,5,8,5], end = [2,4,6,7,9,9]",
+    "sampleOutput": "4"
   },
   {
     "id": 5,
     "name": "5",
-    "question": "There are N gas stations along a circular route, where the amount of gas at station i is gas[i]. You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from station i to its next station (i+1). You begin the journey with an empty tank at one of the gas stations. Return the starting gas station's index if you can travel around the circuit once in the clockwise direction, otherwise return -1."
+    "question": "Jump Game: Determine if you can reach the last index.",
+    "sampleInput": "nums = [2,3,1,1,4]",
+    "sampleOutput": "true"
   },
   {
     "id": 6,
-    "name": "S",
-    "question": "Surprise! A random question from this module awaits.",
-    "isSurprise": true
+    "name": "6",
+    "question": "Jump Game II: Find the minimum number of jumps to reach the last index.",
+    "sampleInput": "nums = [2,3,1,1,4]",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Job Sequencing Problem: Maximize profit by sequencing jobs.",
+    "sampleInput": "Jobs = [(1,4,20),(2,1,10),(3,1,40),(4,1,30)] (id, deadline, profit)",
+    "sampleOutput": "Profit: 60, Jobs: 1, 3"
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "isSurprise": true,
+    "question": "Surprise! A random greedy algorithm problem."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Valid Parenthesis Checker.",
+    "sampleInput": "'()[]{}'",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "Insert Interval: Insert a new interval into a list of non-overlapping intervals.",
+    "sampleInput": "intervals = [[1,3],[6,9]], newInterval = [2,5]",
+    "sampleOutput": "[[1,5],[6,9]]"
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Merge Intervals.",
+    "sampleInput": "[[1,3],[2,6],[8,10],[15,18]]",
+    "sampleOutput": "[[1,6],[8,10],[15,18]]"
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "Non-overlapping Intervals: Find the minimum number of intervals to remove to make the rest non-overlapping.",
+    "sampleInput": "[[1,2],[2,3],[3,4],[1,3]]",
+    "sampleOutput": "1"
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "Gas Station: Find the starting gas station's index if you can travel around the circuit once.",
+    "sampleInput": "gas = [1,2,3,4,5], cost = [3,4,5,1,2]",
+    "sampleOutput": "3"
+  },
+  {
+    "id": 14,
+    "name": "14",
+    "question": "Candy: Distribute candies to children based on their ratings.",
+    "sampleInput": "ratings = [1,0,2]",
+    "sampleOutput": "5 (2, 1, 2)"
+  },
+  {
+    "id": 15,
+    "name": "15",
+    "isSurprise": true,
+    "question": "Surprise! A hard greedy algorithm problem."
   }
 ]

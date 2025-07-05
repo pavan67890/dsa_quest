@@ -3,92 +3,311 @@
   {
     "id": 1,
     "name": "1",
-    "question": "Explain how to represent a graph using an Adjacency List and an Adjacency Matrix. What are the pros and cons of each?"
+    "question": "Represent a graph using an adjacency list.",
+    "sampleInput": "Edges: (0,1), (0,4), (1,2), (1,3), (1,4), (2,3), (3,4)",
+    "sampleOutput": "A data structure representing the graph, e.g., vector<vector<int>> in C++."
   },
   {
     "id": 2,
     "name": "2",
-    "question": "Implement Breadth-First Search (BFS) traversal for a given graph starting from a source node."
+    "question": "Implement Breadth-First Search (BFS) traversal.",
+    "sampleInput": "Graph from Q1, start at node 0.",
+    "sampleOutput": "0 1 4 2 3"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "Implement Depth-First Search (DFS) traversal for a given graph starting from a source node."
+    "question": "Implement Depth-First Search (DFS) traversal.",
+    "sampleInput": "Graph from Q1, start at node 0.",
+    "sampleOutput": "0 1 2 3 4"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Given a 2D grid of '1's (land) and '0's (water), count the number of islands."
+    "question": "Count the number of provinces (connected components) in a graph.",
+    "sampleInput": "Adjacency matrix: [[1,1,0],[1,1,0],[0,0,1]]",
+    "sampleOutput": "2"
   },
   {
     "id": 5,
     "name": "5",
-    "question": "Given a 2D grid, a start coordinate, and a new color, 'flood fill' the area. "
+    "question": "Find the number of islands in a 2D grid.",
+    "sampleInput": "grid = [['1','1','0','0','0'], ['1','1','0','0','0'], ['0','0','1','0','0'], ['0','0','0','1','1']]",
+    "sampleOutput": "3"
   },
   {
     "id": 6,
     "name": "6",
-    "question": "Detect if a cycle exists in an undirected graph using BFS."
+    "question": "Flood Fill Algorithm: Fill a connected area of a grid with a new color.",
+    "sampleInput": "image = [[1,1,1],[1,1,0],[1,0,1]], sr = 1, sc = 1, newColor = 2",
+    "sampleOutput": "[[2,2,2],[2,2,0],[2,0,1]]"
   },
   {
     "id": 7,
     "name": "7",
-    "question": "Detect if a cycle exists in an undirected graph using DFS."
+    "question": "Rotten Oranges: Find minimum time to rot all oranges.",
+    "sampleInput": "grid = [[2,1,1],[1,1,0],[0,1,1]]",
+    "sampleOutput": "4"
   },
   {
     "id": 8,
     "name": "8",
-    "question": "There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai. Return true if you can finish all courses. Otherwise, return false."
+    "isSurprise": true,
+    "question": "Surprise! A medium graph traversal problem."
   },
   {
     "id": 9,
     "name": "9",
-    "question": "Find the topological sort of a Directed Acyclic Graph (DAG)."
+    "question": "Detect a cycle in an undirected graph using BFS.",
+    "sampleInput": "Graph with edges (0,1), (1,2), (2,0)",
+    "sampleOutput": "true"
   },
   {
     "id": 10,
     "name": "10",
-    "question": "Detect if a cycle exists in a directed graph using DFS."
+    "question": "Detect a cycle in an undirected graph using DFS.",
+    "sampleInput": "Graph with edges (0,1), (1,2)",
+    "sampleOutput": "false"
   },
   {
     "id": 11,
     "name": "11",
-    "question": "Given a directed graph, find the shortest path from a source node to all other nodes. Assume all edge weights are 1."
+    "question": "Find the distance of the nearest cell having 1 in a binary grid.",
+    "sampleInput": "[[0,0,0],[0,1,0],[0,0,0]]",
+    "sampleOutput": "[[2,1,2],[1,0,1],[2,1,2]]"
   },
   {
     "id": 12,
     "name": "12",
-    "question": "Implement Dijkstra's algorithm to find the shortest path in a weighted graph with non-negative weights."
+    "question": "Surrounded Regions: Capture all regions surrounded by 'X'.",
+    "sampleInput": "[['X','X','X','X'],['X','O','O','X'],['X','X','O','X'],['X','O','X','X']]",
+    "sampleOutput": "[['X','X','X','X'],['X','X','X','X'],['X','X','X','X'],['X','O','X','X']]"
   },
   {
     "id": 13,
     "name": "13",
-    "question": "Implement the Bellman-Ford algorithm for finding the shortest paths from a single source vertex to all of the other vertices in a weighted digraph. It is slower than Dijkstra's algorithm, but more versatile, as it is capable of handling graphs in which some of the edge weights are negative numbers."
+    "question": "Number of Enclaves: Count land cells from which we cannot walk off the boundary.",
+    "sampleInput": "[[0,0,0,0],[1,0,1,0],[0,1,1,0],[0,0,0,0]]",
+    "sampleOutput": "3"
   },
   {
     "id": 14,
     "name": "14",
-    "question": "Implement Floyd-Warshall algorithm to find the shortest paths between all pairs of vertices in a weighted graph."
+    "question": "Word Ladder I: Find the length of the shortest transformation sequence from beginWord to endWord.",
+    "sampleInput": "beginWord = 'hit', endWord = 'cog', wordList = ['hot','dot','dog','lot','log','cog']",
+    "sampleOutput": "5 ('hit' -> 'hot' -> 'dot' -> 'dog' -> 'cog')"
   },
   {
     "id": 15,
     "name": "15",
-    "question": "Find the Minimum Spanning Tree (MST) of a connected, undirected graph using Prim's algorithm."
+    "question": "Word Ladder II: Find all shortest transformation sequences.",
+    "sampleInput": "beginWord = 'hit', endWord = 'cog', wordList = ['hot','dot','dog','lot','log','cog']",
+    "sampleOutput": "[['hit','hot','dot','dog','cog'], ['hit','hot','lot','log','cog']]"
   },
   {
     "id": 16,
     "name": "16",
-    "question": "Find the Minimum Spanning Tree (MST) of a connected, undirected graph using Kruskal's algorithm."
+    "isSurprise": true,
+    "question": "Surprise! A hard graph traversal problem."
   },
   {
     "id": 17,
-    "name": "S",
-    "question": "A surprise question from this module awaits.",
-    "isSurprise": true
+    "name": "17",
+    "question": "Topological Sort using DFS.",
+    "sampleInput": "Graph with edges (5,2), (5,0), (4,0), (4,1), (2,3), (3,1)",
+    "sampleOutput": "5 4 2 3 1 0"
   },
   {
     "id": 18,
-    "name": "17",
-    "question": "Given a graph, find the number of connected components."
+    "name": "18",
+    "question": "Topological Sort using BFS (Kahn's Algorithm).",
+    "sampleInput": "Graph with edges (5,2), (5,0), (4,0), (4,1), (2,3), (3,1)",
+    "sampleOutput": "4 5 0 2 3 1"
+  },
+  {
+    "id": 19,
+    "name": "19",
+    "question": "Detect a cycle in a directed graph using DFS.",
+    "sampleInput": "Graph with edges (0,1), (1,2), (2,0)",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 20,
+    "name": "20",
+    "question": "Detect a cycle in a directed graph using BFS (Kahn's Algorithm).",
+    "sampleInput": "Graph with edges (0,1), (1,2)",
+    "sampleOutput": "false"
+  },
+  {
+    "id": 21,
+    "name": "21",
+    "question": "Course Schedule I: Determine if you can finish all courses.",
+    "sampleInput": "numCourses = 2, prerequisites = [[1,0]]",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 22,
+    "name": "22",
+    "question": "Course Schedule II: Return the ordering of courses you should take.",
+    "sampleInput": "numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]",
+    "sampleOutput": "[0, 1, 2, 3] or [0, 2, 1, 3]"
+  },
+  {
+    "id": 23,
+    "name": "23",
+    "question": "Find eventual safe states in a directed graph.",
+    "sampleInput": "graph = [[1,2],[2,3],[5],[0],[5],[],[]]",
+    "sampleOutput": "[2, 4, 5, 6]"
+  },
+  {
+    "id": 24,
+    "name": "24",
+    "question": "Alien Dictionary: Find the order of characters in an alien language.",
+    "sampleInput": "words = ['wrt', 'wrf', 'er', 'ett', 'rftt']",
+    "sampleOutput": "'wertf'"
+  },
+  {
+    "id": 25,
+    "name": "25",
+    "isSurprise": true,
+    "question": "Surprise! A topological sort problem."
+  },
+  {
+    "id": 26,
+    "name": "26",
+    "question": "Implement Dijkstra's Algorithm using a priority queue.",
+    "sampleInput": "Graph with weighted edges, find shortest path from source.",
+    "sampleOutput": "Array of shortest distances from source to all other nodes."
+  },
+  {
+    "id": 27,
+    "name": "27",
+    "question": "Find the shortest path in an unweighted graph from a source.",
+    "sampleInput": "Unweighted graph, source node",
+    "sampleOutput": "Array of shortest distances."
+  },
+  {
+    "id": 28,
+    "name": "28",
+    "question": "Shortest Path in a Directed Acyclic Graph (DAG).",
+    "sampleInput": "Weighted DAG, source node",
+    "sampleOutput": "Array of shortest distances."
+  },
+  {
+    "id": 29,
+    "name": "29",
+    "question": "Shortest path in a binary maze.",
+    "sampleInput": "Grid with 0s (path) and 1s (wall), source, destination.",
+    "sampleOutput": "Length of shortest path."
+  },
+  {
+    "id": 30,
+    "name": "30",
+    "question": "Path with minimum effort.",
+    "sampleInput": "heights = [[1,2,2],[3,8,2],[5,3,5]]",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 31,
+    "name": "31",
+    "question": "Cheapest Flights Within K Stops.",
+    "sampleInput": "n = 3, flights = [[0,1,100],[1,2,100],[0,2,500]], src = 0, dst = 2, k = 1",
+    "sampleOutput": "200"
+  },
+  {
+    "id": 32,
+    "name": "32",
+    "question": "Network Delay Time (Dijkstra).",
+    "sampleInput": "times = [[2,1,1],[2,3,1],[3,4,1]], n = 4, k = 2",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 33,
+    "name": "33",
+    "question": "Number of Ways to Arrive at Destination.",
+    "sampleInput": "n = 7, roads = [[0,6,7],[0,1,2],[1,2,3],[1,3,3],[6,3,3],[3,5,1],[6,5,1],[2,5,1],[0,4,5],[4,6,2]]",
+    "sampleOutput": "4"
+  },
+  {
+    "id": 34,
+    "name": "34",
+    "question": "Implement Bellman-Ford algorithm to find shortest paths from a source (handles negative weights).",
+    "sampleInput": "Weighted graph with possible negative edges, source node",
+    "sampleOutput": "Array of shortest distances or detects negative cycle."
+  },
+  {
+    "id": 35,
+    "name": "35",
+    "question": "Implement Floyd-Warshall algorithm to find all-pairs shortest paths.",
+    "sampleInput": "Adjacency matrix of a weighted graph.",
+    "sampleOutput": "Matrix of shortest distances between all pairs of nodes."
+  },
+  {
+    "id": 36,
+    "name": "36",
+    "isSurprise": true,
+    "question": "Surprise! A shortest path algorithm problem."
+  },
+  {
+    "id": 37,
+    "name": "37",
+    "question": "Minimum Spanning Tree: Prim's Algorithm.",
+    "sampleInput": "Weighted undirected graph.",
+    "sampleOutput": "Weight of the Minimum Spanning Tree."
+  },
+  {
+    "id": 38,
+    "name": "38",
+    "question": "Minimum Spanning Tree: Kruskal's Algorithm using Disjoint Set Union (DSU).",
+    "sampleInput": "Weighted undirected graph.",
+    "sampleOutput": "Weight of the Minimum Spanning Tree."
+  },
+  {
+    "id": 39,
+    "name": "39",
+    "question": "Number of Operations to Make Network Connected.",
+    "sampleInput": "n = 4, connections = [[0,1],[0,2],[1,2]]",
+    "sampleOutput": "1"
+  },
+  {
+    "id": 40,
+    "name": "40",
+    "question": "Most Stones Removed with Same Row or Column.",
+    "sampleInput": "stones = [[0,0],[0,1],[1,0],[1,2],[2,1],[2,2]]",
+    "sampleOutput": "5"
+  },
+  {
+    "id": 41,
+    "name": "41",
+    "question": "Find bridges in a graph.",
+    "sampleInput": "Graph connections",
+    "sampleOutput": "List of bridges (critical connections)."
+  },
+  {
+    "id": 42,
+    "name": "42",
+    "question": "Find articulation points in a graph.",
+    "sampleInput": "Graph connections",
+    "sampleOutput": "List of articulation points."
+  },
+  {
+    "id": 43,
+    "name": "43",
+    "question": "Kosaraju's Algorithm for Strongly Connected Components (SCC).",
+    "sampleInput": "Directed graph",
+    "sampleOutput": "List of SCCs."
+  },
+  {
+    "id": 44,
+    "name": "44",
+    "question": "Is Graph Bipartite?",
+    "sampleInput": "graph = [[1,3],[0,2],[1,3],[0,2]]",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 45,
+    "name": "45",
+    "isSurprise": true,
+    "question": "Surprise! A hard graph algorithm problem."
   }
 ]

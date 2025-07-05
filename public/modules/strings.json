@@ -3,52 +3,174 @@
   {
     "id": 1,
     "name": "1",
-    "question": "Remove outermost parentheses from a valid parentheses string."
+    "question": "Remove outermost parentheses.",
+    "sampleInput": "'(()())(())'",
+    "sampleOutput": "'()()()'"
   },
   {
     "id": 2,
     "name": "2",
-    "question": "Reverse the words in a given string."
+    "question": "Reverse words in a string.",
+    "sampleInput": "'the sky is blue'",
+    "sampleOutput": "'blue is sky the'"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "Find the largest odd number in a string representing a large integer."
+    "question": "Find the largest odd number in a string.",
+    "sampleInput": "'52'",
+    "sampleOutput": "'5'"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Find the longest common prefix string amongst an array of strings."
+    "question": "Find the longest common prefix.",
+    "sampleInput": "['flower', 'flow', 'flight']",
+    "sampleOutput": "'fl'"
   },
   {
     "id": 5,
     "name": "5",
-    "question": "Check if two strings are isomorphic."
+    "question": "Check if two strings are isomorphic.",
+    "sampleInput": "s = 'egg', t = 'add'",
+    "sampleOutput": "true"
   },
   {
     "id": 6,
     "name": "6",
-    "question": "Check if two strings are rotations of each other."
+    "question": "Check if one string is a rotation of another.",
+    "sampleInput": "s1 = 'abcde', s2 = 'cdeab'",
+    "sampleOutput": "true"
   },
   {
     "id": 7,
     "name": "7",
-    "question": "Given two strings, check if one is an anagram of the other."
+    "question": "Check if two strings are anagrams.",
+    "sampleInput": "s = 'anagram', t = 'nagaram'",
+    "sampleOutput": "true"
   },
   {
     "id": 8,
     "name": "8",
-    "question": "Implement the atoi() function, which converts a string to an integer."
+    "question": "Sort characters by frequency.",
+    "sampleInput": "'tree'",
+    "sampleOutput": "'eert' or 'eetr'"
   },
   {
     "id": 9,
     "name": "9",
-    "question": "Find the length of the longest palindromic substring in a given string."
+    "question": "Convert a string to an integer (atoi).",
+    "sampleInput": "'   -42'",
+    "sampleOutput": "-42"
   },
   {
     "id": 10,
-    "name": "S",
-    "question": "Surprise! A random question from this module awaits.",
-    "isSurprise": true
+    "name": "10",
+    "question": "Count number of substrings with exactly K distinct characters.",
+    "sampleInput": "s = 'aabacbebebe', K = 3",
+    "sampleOutput": "7"
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Roman to Integer conversion.",
+    "sampleInput": "'MCMXCIV'",
+    "sampleOutput": "1994"
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "Integer to Roman conversion.",
+    "sampleInput": "1994",
+    "sampleOutput": "'MCMXCIV'"
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "Find the longest palindromic substring.",
+    "sampleInput": "'babad'",
+    "sampleOutput": "'bab' or 'aba'"
+  },
+  {
+    "id": 14,
+    "name": "14",
+    "isSurprise": true,
+    "question": "Surprise! A medium difficulty string problem."
+  },
+  {
+    "id": 15,
+    "name": "15",
+    "question": "Sum of Beauty of All Substrings.",
+    "sampleInput": "'aabcb'",
+    "sampleOutput": "5"
+  },
+  {
+    "id": 16,
+    "name": "16",
+    "question": "Find the first occurrence of a substring (Implement strStr()).",
+    "sampleInput": "haystack = 'hello', needle = 'll'",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 17,
+    "name": "17",
+    "question": "Implement the Knuth-Morris-Pratt (KMP) algorithm for pattern searching.",
+    "sampleInput": "text = 'ABABDABACDABABCABAB', pattern = 'ABABCABAB'",
+    "sampleOutput": "10"
+  },
+  {
+    "id": 18,
+    "name": "18",
+    "question": "Find the shortest palindrome by adding characters to the front.",
+    "sampleInput": "'aacecaaa'",
+    "sampleOutput": "'aaacecaaa'"
+  },
+  {
+    "id": 19,
+    "name": "19",
+    "question": "Longest Happy Prefix (KMP).",
+    "sampleInput": "'level'",
+    "sampleOutput": "'l'"
+  },
+  {
+    "id": 20,
+    "name": "20",
+    "question": "Count and Say.",
+    "sampleInput": "n = 4",
+    "sampleOutput": "'1211'"
+  },
+  {
+    "id": 21,
+    "name": "21",
+    "question": "Group Anagrams.",
+    "sampleInput": "['eat', 'tea', 'tan', 'ate', 'nat', 'bat']",
+    "sampleOutput": "[['bat'],['nat','tan'],['ate','eat','tea']]"
+  },
+  {
+    "id": 22,
+    "name": "22",
+    "question": "Generate Parentheses.",
+    "sampleInput": "n = 3",
+    "sampleOutput": "['((()))','(()())','(())()','()(())','()()()']"
+  },
+  {
+    "id": 23,
+    "name": "23",
+    "question": "Simplify Path.",
+    "sampleInput": "'/home//foo/'",
+    "sampleOutput": "'/home/foo'"
+  },
+  {
+    "id": 24,
+    "name": "24",
+    "question": "Minimum Window Substring.",
+    "sampleInput": "S = 'ADOBECODEBANC', T = 'ABC'",
+    "sampleOutput": "'BANC'"
+  },
+  {
+    "id": 25,
+    "name": "25",
+    "isSurprise": true,
+    "question": "Surprise! A hard string algorithm problem."
   }
 ]

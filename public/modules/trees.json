@@ -1,105 +1,350 @@
 
 [
-    {
-      "id": 1,
-      "name": "1",
-      "question": "Implement pre-order traversal of a binary tree (recursive and iterative)."
-    },
-    {
-      "id": 2,
-      "name": "2",
-      "question": "Implement in-order traversal of a binary tree (recursive and iterative)."
-    },
-    {
-      "id": 3,
-      "name": "3",
-      "question": "Implement post-order traversal of a binary tree (recursive and iterative)."
-    },
-    {
-      "id": 4,
-      "name": "4",
-      "question": "Implement level-order traversal of a binary tree."
-    },
-    {
-      "id": 5,
-      "name": "5",
-      "question": "Find the maximum depth (or height) of a binary tree."
-    },
-    {
-      "id": 6,
-      "name": "6",
-      "question": "Check if a binary tree is balanced."
-    },
-    {
-      "id": 7,
-      "name": "7",
-      "question": "Find the diameter of a binary tree. The diameter is the length of the longest path between any two nodes."
-    },
-    {
-      "id": 8,
-      "name": "8",
-      "question": "Find the maximum path sum in a binary tree. A path can start and end at any node."
-    },
-    {
-      "id": 9,
-      "name": "9",
-      "question": "Check if two binary trees are identical."
-    },
-    {
-      "id": 10,
-      "name": "10",
-      "question": "Implement a zig-zag level order traversal of a binary tree."
-    },
-    {
-      "id": 11,
-      "name": "11",
-      "question": "Get the boundary traversal of a binary tree (left boundary, leaves, right boundary)."
-    },
-    {
-      "id": 12,
-      "name": "12",
-      "question": "Get the vertical order traversal of a binary tree."
-    },
-    {
-      "id": 13,
-      "name": "13",
-      "question": "Get the top view of a binary tree."
-    },
-    {
-      "id": 14,
-      "name": "14",
-      "question": "Get the bottom view of a binary tree."
-    },
-    {
-      "id": 15,
-      "name": "15",
-      "question": "Get the right/left view of a binary tree."
-    },
-    {
-      "id": 16,
-      "name": "16",
-      "question": "Check if a binary tree is symmetric (a mirror of itself)."
-    },
-    {
-      "id": 17,
-      "name": "17",
-      "question": "Find the lowest common ancestor (LCA) of two given nodes in a binary tree."
-    },
-    {
-      "id": 18,
-      "name": "18",
-      "question": "Validate if a given binary tree is a valid Binary Search Tree (BST)."
-    },
-    {
-        "id": 19,
-        "name": "19",
-        "question": "Find the k-th smallest element in a BST."
-    },
-    {
-      "id": 20,
-      "name": "S",
-      "question": "A surprise question from this module awaits.",
-      "isSurprise": true
-    }
-  ]
-  
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Introduction to Trees: Define a binary tree node.",
+    "sampleInput": "Data: 10, Left Child: 5, Right Child: 15",
+    "sampleOutput": "A correctly defined Node/TreeNode class."
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Implement pre-order traversal (Root, Left, Right) for a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed in pre-order."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Implement in-order traversal (Left, Root, Right) for a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed in in-order."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Implement post-order traversal (Left, Right, Root) for a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed in post-order."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Implement level-order traversal for a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed level by level."
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Implement iterative pre-order traversal.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed in pre-order."
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Implement iterative in-order traversal.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed in in-order."
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "Implement iterative post-order traversal using two stacks.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed in post-order."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Implement iterative post-order traversal using one stack.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed in post-order."
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "Combine pre-order, in-order, and post-order traversals in one function.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Three lists representing the three traversals."
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "isSurprise": true,
+    "question": "Surprise! A medium tree traversal problem."
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "Find the maximum depth (height) of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "The height of the tree."
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "Check if a binary tree is balanced.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "true or false"
+  },
+  {
+    "id": 14,
+    "name": "14",
+    "question": "Find the diameter of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "The longest path between any two nodes."
+  },
+  {
+    "id": 15,
+    "name": "15",
+    "question": "Find the maximum path sum in a binary tree.",
+    "sampleInput": "A binary tree with positive and negative node values.",
+    "sampleOutput": "The maximum sum of a path."
+  },
+  {
+    "id": 16,
+    "name": "16",
+    "question": "Check if two trees are identical.",
+    "sampleInput": "Two binary trees.",
+    "sampleOutput": "true or false"
+  },
+  {
+    "id": 17,
+    "name": "17",
+    "question": "Zigzag (or spiral) level order traversal.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "Nodes printed level by level, alternating left-to-right and right-to-left."
+  },
+  {
+    "id": 18,
+    "name": "18",
+    "question": "Find the boundary traversal of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "A list of nodes forming the boundary."
+  },
+  {
+    "id": 19,
+    "name": "19",
+    "question": "Find the vertical order traversal of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "A list of lists, where each inner list contains nodes at a specific vertical line."
+  },
+  {
+    "id": 20,
+    "name": "20",
+    "question": "Find the top view of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "A list of nodes visible from the top."
+  },
+  {
+    "id": 21,
+    "name": "21",
+    "question": "Find the bottom view of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "A list of nodes visible from the bottom."
+  },
+  {
+    "id": 22,
+    "name": "22",
+    "question": "Find the right/left view of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "A list of nodes visible from the right (or left) side."
+  },
+  {
+    "id": 23,
+    "name": "23",
+    "question": "Check for a symmetric binary tree (mirror image of itself).",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "true or false"
+  },
+  {
+    "id": 24,
+    "name": "24",
+    "isSurprise": true,
+    "question": "Surprise! A hard tree view problem."
+  },
+  {
+    "id": 25,
+    "name": "25",
+    "question": "Find all root-to-leaf paths.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "A list of all paths from the root to each leaf."
+  },
+  {
+    "id": 26,
+    "name": "26",
+    "question": "Find the Lowest Common Ancestor (LCA) in a binary tree.",
+    "sampleInput": "A binary tree and two nodes p and q.",
+    "sampleOutput": "The LCA node."
+  },
+  {
+    "id": 27,
+    "name": "27",
+    "question": "Find the maximum width of a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "The maximum width among all levels."
+  },
+  {
+    "id": 28,
+    "name": "28",
+    "question": "Find all nodes at distance K from a given node.",
+    "sampleInput": "A binary tree, a target node, and a distance K.",
+    "sampleOutput": "A list of nodes at distance K."
+  },
+  {
+    "id": 29,
+    "name": "29",
+    "question": "Minimum time to burn a binary tree from a given node.",
+    "sampleInput": "A binary tree and the starting node for the fire.",
+    "sampleOutput": "The minimum time required."
+  },
+  {
+    "id": 30,
+    "name": "30",
+    "question": "Count total nodes in a complete binary tree.",
+    "sampleInput": "A complete binary tree.",
+    "sampleOutput": "The total number of nodes."
+  },
+  {
+    "id": 31,
+    "name": "31",
+    "question": "Construct a binary tree from pre-order and in-order traversal.",
+    "sampleInput": "preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]",
+    "sampleOutput": "The reconstructed binary tree."
+  },
+  {
+    "id": 32,
+    "name": "32",
+    "question": "Construct a binary tree from post-order and in-order traversal.",
+    "sampleInput": "inorder = [9,3,15,20,7], postorder = [9,15,7,20,3]",
+    "sampleOutput": "The reconstructed binary tree."
+  },
+  {
+    "id": 33,
+    "name": "33",
+    "question": "Serialize and deserialize a binary tree.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "A string representation and the ability to reconstruct the tree from it."
+  },
+  {
+    "id": 34,
+    "name": "34",
+    "question": "Flatten a binary tree to a linked list.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "The tree flattened into a linked-list structure."
+  },
+  {
+    "id": 35,
+    "name": "35",
+    "isSurprise": true,
+    "question": "Surprise! A hard tree construction problem."
+  },
+  {
+    "id": 36,
+    "name": "36",
+    "question": "Introduction to Binary Search Trees (BST): Define properties.",
+    "sampleInput": "N/A",
+    "sampleOutput": "Understanding of BST properties."
+  },
+  {
+    "id": 37,
+    "name": "37",
+    "question": "Search for a value in a BST.",
+    "sampleInput": "A BST and a target value.",
+    "sampleOutput": "The node containing the value, or null."
+  },
+  {
+    "id": 38,
+    "name": "38",
+    "question": "Find the ceil of a value in a BST.",
+    "sampleInput": "A BST and a target value.",
+    "sampleOutput": "The smallest value in the BST greater than or equal to the target."
+  },
+  {
+    "id": 39,
+    "name": "39",
+    "question": "Find the floor of a value in a BST.",
+    "sampleInput": "A BST and a target value.",
+    "sampleOutput": "The largest value in the BST less than or equal to the target."
+  },
+  {
+    "id": 40,
+    "name": "40",
+    "question": "Insert a node into a BST.",
+    "sampleInput": "A BST and a value to insert.",
+    "sampleOutput": "The BST with the new node inserted."
+  },
+  {
+    "id": 41,
+    "name": "41",
+    "question": "Delete a node from a BST.",
+    "sampleInput": "A BST and a value to delete.",
+    "sampleOutput": "The BST with the node deleted."
+  },
+  {
+    "id": 42,
+    "name": "42",
+    "question": "Find the Kth smallest element in a BST.",
+    "sampleInput": "A BST and an integer k.",
+    "sampleOutput": "The Kth smallest value."
+  },
+  {
+    "id": 43,
+    "name": "43",
+    "question": "Find the Kth largest element in a BST.",
+    "sampleInput": "A BST and an integer k.",
+    "sampleOutput": "The Kth largest value."
+  },
+  {
+    "id": 44,
+    "name": "44",
+    "question": "Validate a binary tree to check if it's a BST.",
+    "sampleInput": "A binary tree.",
+    "sampleOutput": "true or false"
+  },
+  {
+    "id": 45,
+    "name": "45",
+    "question": "Find the Lowest Common Ancestor (LCA) in a BST.",
+    "sampleInput": "A BST and two nodes p and q.",
+    "sampleOutput": "The LCA node."
+  },
+  {
+    "id": 46,
+    "name": "46",
+    "question": "Construct a BST from a pre-order traversal.",
+    "sampleInput": "[8, 5, 1, 7, 10, 12]",
+    "sampleOutput": "The reconstructed BST."
+  },
+  {
+    "id": 47,
+    "name": "47",
+    "question": "Find the inorder successor/predecessor in a BST.",
+    "sampleInput": "A BST and a node.",
+    "sampleOutput": "The inorder successor or predecessor node."
+  },
+  {
+    "id": 48,
+    "name": "48",
+    "question": "Implement a BST iterator (next() and hasNext()).",
+    "sampleInput": "A BST.",
+    "sampleOutput": "An iterator that returns nodes in increasing order."
+  },
+  {
+    "id": 49,
+    "name": "49",
+    "question": "Two Sum IV - Input is a BST.",
+    "sampleInput": "A BST and a target k.",
+    "sampleOutput": "true if there exist two elements in the BST such that their sum is equal to k."
+  },
+  {
+    "id": 50,
+    "name": "50",
+    "question": "Recover a BST where two nodes are swapped.",
+    "sampleInput": "A BST with two nodes swapped.",
+    "sampleOutput": "The corrected BST."
+  }
+]

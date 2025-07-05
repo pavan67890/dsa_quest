@@ -3,62 +3,174 @@
   {
     "id": 1,
     "name": "1",
-    "question": "Implement a singly linked list with insert and delete operations."
+    "question": "Introduction to Linked List: Create and traverse a linked list.",
+    "sampleInput": "Nodes: 1 -> 2 -> 3 -> 4",
+    "sampleOutput": "Correctly constructed list."
   },
   {
     "id": 2,
     "name": "2",
-    "question": "Reverse a singly linked list."
+    "question": "Insert a node at the beginning of a linked list.",
+    "sampleInput": "List: 2 -> 3 -> 4, New Node: 1",
+    "sampleOutput": "1 -> 2 -> 3 -> 4"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "Find the middle of a linked list using the slow and fast pointer approach."
+    "question": "Insert a node at the end of a linked list.",
+    "sampleInput": "List: 1 -> 2 -> 3, New Node: 4",
+    "sampleOutput": "1 -> 2 -> 3 -> 4"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Merge two sorted linked lists into a single sorted list."
+    "question": "Introduction to Doubly Linked List: Create and traverse.",
+    "sampleInput": "Nodes: 1 <-> 2 <-> 3",
+    "sampleOutput": "Correctly constructed list."
   },
   {
     "id": 5,
     "name": "5",
-    "question": "Given a linked list, detect if it has a cycle (a loop)."
+    "question": "Insert a node before a given node in a doubly linked list.",
+    "sampleInput": "List: 1 <-> 3, Given Node: 3, New Node: 2",
+    "sampleOutput": "1 <-> 2 <-> 3"
   },
   {
     "id": 6,
     "name": "6",
-    "question": "Given a linked list with a cycle, find the starting node of the cycle."
+    "question": "Delete the head of a linked list.",
+    "sampleInput": "1 -> 2 -> 3",
+    "sampleOutput": "2 -> 3"
   },
   {
     "id": 7,
     "name": "7",
-    "question": "Given a linked list, check if it is a palindrome."
+    "question": "Delete the tail of a linked list.",
+    "sampleInput": "1 -> 2 -> 3",
+    "sampleOutput": "1 -> 2"
   },
   {
     "id": 8,
     "name": "8",
-    "question": "Given two linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list."
+    "question": "Delete the k-th element of a linked list.",
+    "sampleInput": "1 -> 2 -> 3 -> 4, k = 3",
+    "sampleOutput": "1 -> 2 -> 4"
   },
   {
     "id": 9,
     "name": "9",
-    "question": "Remove the N-th node from the end of a linked list."
+    "question": "Find the middle of a linked list.",
+    "sampleInput": "1 -> 2 -> 3 -> 4 -> 5",
+    "sampleOutput": "Node with value 3"
   },
   {
     "id": 10,
     "name": "10",
-    "question": "Given the head of a linked list, rotate the list to the right by k places."
+    "question": "Reverse a linked list.",
+    "sampleInput": "1 -> 2 -> 3 -> 4 -> 5",
+    "sampleOutput": "5 -> 4 -> 3 -> 2 -> 1"
   },
   {
     "id": 11,
     "name": "11",
-    "question": "Copy a linked list with a next and a random pointer."
+    "question": "Detect a cycle in a linked list (Floyd's Tortoise and Hare).",
+    "sampleInput": "A list where the last node points back to the second node.",
+    "sampleOutput": "true"
   },
   {
     "id": 12,
-    "name": "S",
-    "question": "Surprise! A random question from this module awaits.",
-    "isSurprise": true
+    "name": "12",
+    "question": "Find the starting point of the cycle in a linked list.",
+    "sampleInput": "A list where the last node points back to the second node.",
+    "sampleOutput": "The second node."
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "Check if a linked list is a palindrome.",
+    "sampleInput": "1 -> 2 -> 2 -> 1",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 14,
+    "name": "14",
+    "isSurprise": true,
+    "question": "Surprise! A medium difficulty linked list problem."
+  },
+  {
+    "id": 15,
+    "name": "15",
+    "question": "Segregate odd and even nodes in a linked list.",
+    "sampleInput": "1 -> 2 -> 3 -> 4 -> 5",
+    "sampleOutput": "1 -> 3 -> 5 -> 2 -> 4"
+  },
+  {
+    "id": 16,
+    "name": "16",
+    "question": "Remove Nth node from the end of a linked list.",
+    "sampleInput": "1 -> 2 -> 3 -> 4 -> 5, n = 2",
+    "sampleOutput": "1 -> 2 -> 3 -> 5"
+  },
+  {
+    "id": 17,
+    "name": "17",
+    "question": "Delete the middle node of a linked list.",
+    "sampleInput": "1 -> 3 -> 4 -> 7 -> 1 -> 2 -> 6",
+    "sampleOutput": "1 -> 3 -> 4 -> 1 -> 2 -> 6"
+  },
+  {
+    "id": 18,
+    "name": "18",
+    "question": "Sort a linked list of 0s, 1s, and 2s.",
+    "sampleInput": "1 -> 0 -> 2 -> 1 -> 0",
+    "sampleOutput": "0 -> 0 -> 1 -> 1 -> 2"
+  },
+  {
+    "id": 19,
+    "name": "19",
+    "question": "Add two numbers represented by linked lists.",
+    "sampleInput": "l1 = [2, 4, 3], l2 = [5, 6, 4]",
+    "sampleOutput": "[7, 0, 8]"
+  },
+  {
+    "id": 20,
+    "name": "20",
+    "question": "Find the intersection point of two linked lists.",
+    "sampleInput": "Two lists that merge at a certain node.",
+    "sampleOutput": "The intersection node."
+  },
+  {
+    "id": 21,
+    "name": "21",
+    "isSurprise": true,
+    "question": "Surprise! A hard linked list problem."
+  },
+  {
+    "id": 22,
+    "name": "22",
+    "question": "Reverse a linked list in groups of size K.",
+    "sampleInput": "1 -> 2 -> 3 -> 4 -> 5, K = 2",
+    "sampleOutput": "2 -> 1 -> 4 -> 3 -> 5"
+  },
+  {
+    "id": 23,
+    "name": "23",
+    "question": "Rotate a linked list by K places.",
+    "sampleInput": "1 -> 2 -> 3 -> 4 -> 5, K = 2",
+    "sampleOutput": "4 -> 5 -> 1 -> 2 -> 3"
+  },
+  {
+    "id": 24,
+    "name": "24",
+    "question": "Flatten a multilevel linked list.",
+    "sampleInput": "A list where each node has a `next` and `child` pointer.",
+    "sampleOutput": "A single-level flattened list."
+  },
+  {
+    "id": 25,
+    "name": "25",
+    "question": "Clone a linked list with next and random pointers.",
+    "sampleInput": "A linked list where each node has an additional pointer to a random node.",
+    "sampleOutput": "A deep copy of the list."
   }
 ]

@@ -3,77 +3,346 @@
   {
     "id": 1,
     "name": "1",
-    "question": "Given a number N, find the N-th Fibonacci number using dynamic programming (memoization)."
+    "question": "Introduction to DP: Implement Fibonacci sequence with memoization.",
+    "sampleInput": "n = 5",
+    "sampleOutput": "5"
   },
   {
     "id": 2,
     "name": "2",
-    "question": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?"
+    "question": "Climbing Stairs: You can climb 1 or 2 steps at a time. How many distinct ways can you climb to the top?",
+    "sampleInput": "n = 3",
+    "sampleOutput": "3 (1+1+1, 1+2, 2+1)"
   },
   {
     "id": 3,
     "name": "3",
-    "question": "A frog can jump 1, 2, or 3 steps at a time. Find the number of ways it can reach the N-th stair."
+    "question": "Frog Jump: A frog can jump 1 or 2 steps. Find the minimum energy to reach the end, where energy cost is |height[i] - height[j]|.",
+    "sampleInput": "heights = [10, 20, 30, 10]",
+    "sampleOutput": "20"
   },
   {
     "id": 4,
     "name": "4",
-    "question": "Given an array of non-negative integers, you are initially positioned at the first index. Each element in the array represents your maximum jump length at that position. Determine if you can reach the last index."
+    "question": "Frog Jump with k distances: The frog can jump from 1 to k steps. Find minimum energy.",
+    "sampleInput": "heights = [10, 20, 30, 10], k = 2",
+    "sampleOutput": "20"
   },
   {
     "id": 5,
     "name": "5",
-    "question": "Find the maximum sum of a subsequence of an array with no adjacent elements."
+    "question": "Maximum sum of non-adjacent elements (House Robber).",
+    "sampleInput": "[2, 7, 9, 3, 1]",
+    "sampleOutput": "12 (2 + 9 + 1)"
   },
   {
     "id": 6,
     "name": "6",
-    "question": "Given a 2D grid, find the number of unique paths from the top-left corner to the bottom-right corner. You can only move down or right."
+    "question": "House Robber II: Same as before, but the houses are in a circle.",
+    "sampleInput": "[1, 2, 3, 1]",
+    "sampleOutput": "4 (rob house 1 and 3)"
   },
   {
     "id": 7,
     "name": "7",
-    "question": "Given a triangle array, find the minimum path sum from top to bottom. For each step, you may move to an adjacent number on the row below."
+    "isSurprise": true,
+    "question": "Surprise! A 1D DP problem."
   },
   {
     "id": 8,
     "name": "8",
-    "question": "Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible. This is the 0/1 Knapsack problem."
+    "question": "Ninja's Training: A ninja has 3 activities. He can't do the same activity on two consecutive days. Find max merit points.",
+    "sampleInput": "points = [[10, 40, 70], [20, 50, 80], [30, 60, 90]]",
+    "sampleOutput": "210 (70 + 50 + 90)"
   },
   {
     "id": 9,
     "name": "9",
-    "question": "Given an array of positive integers, partition the array into two subsets such that the absolute difference between their sums is minimized."
+    "question": "Unique Paths: Find the number of unique paths from top-left to bottom-right in a grid.",
+    "sampleInput": "m = 3, n = 2",
+    "sampleOutput": "3"
   },
   {
     "id": 10,
     "name": "10",
-    "question": "Find the length of the longest common subsequence between two strings."
+    "question": "Unique Paths II: Find unique paths in a grid with obstacles.",
+    "sampleInput": "[[0,0,0],[0,1,0],[0,0,0]]",
+    "sampleOutput": "2"
   },
   {
     "id": 11,
     "name": "11",
-    "question": "Find the length of the longest increasing subsequence in an array."
+    "question": "Minimum Path Sum in a grid.",
+    "sampleInput": "[[1,3,1],[1,5,1],[4,2,1]]",
+    "sampleOutput": "7 (1 -> 3 -> 1 -> 1 -> 1)"
   },
   {
     "id": 12,
     "name": "12",
-    "question": "Given a string, find the length of the longest palindromic subsequence."
+    "question": "Triangle: Find the minimum path sum from top to bottom.",
+    "sampleInput": "[[2],[3,4],[6,5,7],[4,1,8,3]]",
+    "sampleOutput": "11 (2 + 3 + 5 + 1)"
   },
   {
     "id": 13,
     "name": "13",
-    "question": "You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money. Return the fewest number of coins that you need to make up that amount."
+    "question": "Minimum Falling Path Sum in a grid.",
+    "sampleInput": "[[2,1,3],[6,5,4],[7,8,9]]",
+    "sampleOutput": "13 (1 + 5 + 7)"
   },
   {
     "id": 14,
-    "name": "S",
-    "question": "A surprise question from this module awaits.",
-    "isSurprise": true
+    "name": "14",
+    "question": "Cherry Pickup II (3D DP): Two robots collect cherries in a grid. Find the maximum cherries they can collect.",
+    "sampleInput": "grid = [[3,1,1],[2,5,1],[1,5,5],[2,1,1]]",
+    "sampleOutput": "24"
   },
   {
     "id": 15,
-    "name": "14",
-    "question": "Given two strings, find the minimum number of operations (insert, delete, replace) required to convert one string to the other (Edit Distance)."
+    "name": "15",
+    "isSurprise": true,
+    "question": "Surprise! A Grid DP problem."
+  },
+  {
+    "id": 16,
+    "name": "16",
+    "question": "Subset Sum Equal to K.",
+    "sampleInput": "arr = [1, 2, 3, 4], k = 4",
+    "sampleOutput": "true ([1, 3] or [4])"
+  },
+  {
+    "id": 17,
+    "name": "17",
+    "question": "Partition Equal Subset Sum.",
+    "sampleInput": "[1, 5, 11, 5]",
+    "sampleOutput": "true ([1, 5, 5] and [11])"
+  },
+  {
+    "id": 18,
+    "name": "18",
+    "question": "Partition a set into two subsets with minimum absolute sum difference.",
+    "sampleInput": "[1, 6, 11, 5]",
+    "sampleOutput": "1"
+  },
+  {
+    "id": 19,
+    "name": "19",
+    "question": "Count Subsets with Sum K.",
+    "sampleInput": "arr = [1, 2, 2, 3], k = 3",
+    "sampleOutput": "3 ([1, 2], [1, 2], [3])"
+  },
+  {
+    "id": 20,
+    "name": "20",
+    "question": "Count Partitions With Given Difference.",
+    "sampleInput": "arr = [5, 2, 6, 4], diff = 3",
+    "sampleOutput": "1"
+  },
+  {
+    "id": 21,
+    "name": "21",
+    "question": "0/1 Knapsack problem.",
+    "sampleInput": "weights = [1, 2, 3], values = [6, 10, 12], capacity = 5",
+    "sampleOutput": "22 (items with weight 2 and 3)"
+  },
+  {
+    "id": 22,
+    "name": "22",
+    "question": "Coin Change: Find minimum number of coins to make a target amount.",
+    "sampleInput": "coins = [1, 2, 5], amount = 11",
+    "sampleOutput": "3 (5 + 5 + 1)"
+  },
+  {
+    "id": 23,
+    "name": "23",
+    "question": "Coin Change 2: Find the number of combinations that make up an amount.",
+    "sampleInput": "coins = [1, 2, 5], amount = 5",
+    "sampleOutput": "4"
+  },
+  {
+    "id": 24,
+    "name": "24",
+    "question": "Unbounded Knapsack.",
+    "sampleInput": "weights = [2, 4, 6], values = [5, 11, 13], capacity = 10",
+    "sampleOutput": "27 (two items of weight 2, one of weight 6)"
+  },
+  {
+    "id": 25,
+    "name": "25",
+    "question": "Rod Cutting Problem.",
+    "sampleInput": "lengths = [1, 2, 3, 4], prices = [1, 5, 8, 9], rodLength = 4",
+    "sampleOutput": "10 (two pieces of length 2)"
+  },
+  {
+    "id": 26,
+    "name": "26",
+    "isSurprise": true,
+    "question": "Surprise! A DP on Subsequences problem."
+  },
+  {
+    "id": 27,
+    "name": "27",
+    "question": "Longest Common Subsequence (LCS).",
+    "sampleInput": "text1 = 'abcde', text2 = 'ace'",
+    "sampleOutput": "3 ('ace')"
+  },
+  {
+    "id": 28,
+    "name": "28",
+    "question": "Print Longest Common Subsequence.",
+    "sampleInput": "text1 = 'abcde', text2 = 'ace'",
+    "sampleOutput": "'ace'"
+  },
+  {
+    "id": 29,
+    "name": "29",
+    "question": "Longest Common Substring.",
+    "sampleInput": "text1 = 'abcde', text2 = 'abce'",
+    "sampleOutput": "3 ('abc')"
+  },
+  {
+    "id": 30,
+    "name": "30",
+    "question": "Longest Palindromic Subsequence.",
+    "sampleInput": "'bbbab'",
+    "sampleOutput": "4 ('bbbb')"
+  },
+  {
+    "id": 31,
+    "name": "31",
+    "question": "Minimum insertions to make a string palindrome.",
+    "sampleInput": "'mbadm'",
+    "sampleOutput": "2 ('mbdadbm')"
+  },
+  {
+    "id": 32,
+    "name": "32",
+    "question": "Minimum insertions/deletions to convert String A to String B.",
+    "sampleInput": "str1 = 'heap', str2 = 'pea'",
+    "sampleOutput": "Insertions: 1, Deletions: 2"
+  },
+  {
+    "id": 33,
+    "name": "33",
+    "question": "Shortest Common Supersequence.",
+    "sampleInput": "str1 = 'abac', str2 = 'cab'",
+    "sampleOutput": "'cabac'"
+  },
+  {
+    "id": 34,
+    "name": "34",
+    "question": "Distinct Subsequences.",
+    "sampleInput": "s = 'rabbbit', t = 'rabbit'",
+    "sampleOutput": "3"
+  },
+  {
+    "id": 35,
+    "name": "35",
+    "question": "Edit Distance: Minimum operations (insert, delete, replace) to convert word1 to word2.",
+    "sampleInput": "word1 = 'horse', word2 = 'ros'",
+    "sampleOutput": "3"
+  },
+  {
+    "id": 36,
+    "name": "36",
+    "question": "Wildcard Matching.",
+    "sampleInput": "s = 'adceb', p = '*a*b'",
+    "sampleOutput": "true"
+  },
+  {
+    "id": 37,
+    "name": "37",
+    "isSurprise": true,
+    "question": "Surprise! A DP on Strings problem."
+  },
+  {
+    "id": 38,
+    "name": "38",
+    "question": "Best Time to Buy and Sell Stock I.",
+    "sampleInput": "[7, 1, 5, 3, 6, 4]",
+    "sampleOutput": "5 (buy at 1, sell at 6)"
+  },
+  {
+    "id": 39,
+    "name": "39",
+    "question": "Best Time to Buy and Sell Stock II (multiple transactions).",
+    "sampleInput": "[7, 1, 5, 3, 6, 4]",
+    "sampleOutput": "7"
+  },
+  {
+    "id": 40,
+    "name": "40",
+    "question": "Best Time to Buy and Sell Stock III (at most two transactions).",
+    "sampleInput": "[3, 3, 5, 0, 0, 3, 1, 4]",
+    "sampleOutput": "6"
+  },
+  {
+    "id": 41,
+    "name": "41",
+    "question": "Best Time to Buy and Sell Stock IV (at most k transactions).",
+    "sampleInput": "k = 2, prices = [2, 4, 1]",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 42,
+    "name": "42",
+    "question": "Best Time to Buy and Sell Stock with Cooldown.",
+    "sampleInput": "[1, 2, 3, 0, 2]",
+    "sampleOutput": "3"
+  },
+  {
+    "id": 43,
+    "name": "43",
+    "question": "Best Time to Buy and Sell Stock with Transaction Fee.",
+    "sampleInput": "prices = [1, 3, 2, 8, 4, 9], fee = 2",
+    "sampleOutput": "8"
+  },
+  {
+    "id": 44,
+    "name": "44",
+    "question": "Longest Increasing Subsequence (LIS).",
+    "sampleInput": "[10, 9, 2, 5, 3, 7, 101, 18]",
+    "sampleOutput": "4 ([2, 3, 7, 101])"
+  },
+  {
+    "id": 45,
+    "name": "45",
+    "question": "Print Longest Increasing Subsequence.",
+    "sampleInput": "[10, 9, 2, 5, 3, 7, 101, 18]",
+    "sampleOutput": "[2, 3, 7, 101]"
+  },
+  {
+    "id": 46,
+    "name": "46",
+    "question": "Largest Divisible Subset.",
+    "sampleInput": "[1, 2, 3]",
+    "sampleOutput": "[1, 2] or [1, 3]"
+  },
+  {
+    "id": 47,
+    "name": "47",
+    "question": "Longest String Chain.",
+    "sampleInput": "['a', 'b', 'ba', 'bca', 'bda', 'bdca']",
+    "sampleOutput": "4 ('a', 'ba', 'bda', 'bdca')"
+  },
+  {
+    "id": 48,
+    "name": "48",
+    "question": "Matrix Chain Multiplication.",
+    "sampleInput": "dims = [10, 30, 5, 60]",
+    "sampleOutput": "4500"
+  },
+  {
+    "id": 49,
+    "name": "49",
+    "question": "Burst Balloons.",
+    "sampleInput": "[3, 1, 5, 8]",
+    "sampleOutput": "167"
+  },
+  {
+    "id": 50,
+    "name": "50",
+    "isSurprise": true,
+    "question": "Surprise! A very hard DP problem."
   }
 ]
