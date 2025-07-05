@@ -44,6 +44,7 @@ export default function LoginPage() {
             localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(progressData[STORAGE_KEYS.USER_PROGRESS] || {}));
             localStorage.setItem(STORAGE_KEYS.USER_XP, JSON.stringify(progressData[STORAGE_KEYS.USER_XP] || 0));
             localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
+            localStorage.setItem(STORAGE_KEYS.API_KEYS, JSON.stringify(progressData[STORAGE_KEYS.API_KEYS] || {}));
             toast({
               title: 'Progress Loaded!',
               description: `Welcome back, ${result.user.displayName}! Your progress has been restored from the cloud.`,

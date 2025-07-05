@@ -148,14 +148,15 @@ export async function triggerSync() {
             throw new Error('Could not retrieve access token from Google.');
         }
 
-        const progressData = {
+        const allData = {
             [STORAGE_KEYS.USER_PROGRESS]: JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_PROGRESS) || '{}'),
             [STORAGE_KEYS.USER_XP]: JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_XP) || '0'),
             [STORAGE_KEYS.EARNED_BADGES]: JSON.parse(localStorage.getItem(STORAGE_KEYS.EARNED_BADGES) || '[]'),
+            [STORAGE_KEYS.API_KEYS]: JSON.parse(localStorage.getItem(STORAGE_KEYS.API_KEYS) || '{}'),
         };
         
-        await saveProgress(token, progressData);
-        console.log("Progress synced to drive successfully.");
+        await saveProgress(token, allData);
+        console.log("All user data synced to drive successfully.");
 
     } catch (error) {
         console.error("Auto-sync failed", error);

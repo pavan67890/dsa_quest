@@ -90,12 +90,27 @@ export default function SettingsPage() {
     return () => unsubscribe();
   }, []);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setApiKeys(values);
     toast({
       title: 'Settings Saved!',
-      description: 'Your API keys and limits have been updated locally.',
+      description: 'Your API keys and limits have been updated.',
     });
+    if (loginMethod === 'google') {
+        try {
+            await triggerSync();
+            toast({
+                title: 'Settings Synced!',
+                description: 'Your new API keys have also been saved to your Google Drive.',
+            });
+        } catch (e) {
+            toast({
+                title: 'Sync Failed',
+                description: 'Could not sync your new keys to Google Drive.',
+                variant: 'destructive',
+            });
+        }
+    }
   }
 
   const handleSignIn = async (): Promise<void> => {
@@ -119,6 +134,7 @@ export default function SettingsPage() {
                     localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(progressData[STORAGE_KEYS.USER_PROGRESS] || {}));
                     localStorage.setItem(STORAGE_KEYS.USER_XP, JSON.stringify(progressData[STORAGE_KEYS.USER_XP] || 0));
                     localStorage.setItem(STORAGE_KEYS.EARNED_BADGES, JSON.stringify(progressData[STORAGE_KEYS.EARNED_BADGES] || []));
+                    localStorage.setItem(STORAGE_KEYS.API_KEYS, JSON.stringify(progressData[STORAGE_KEYS.API_KEYS] || {}));
                     toast({ title: 'Progress Loaded!', description: `Welcome back, ${result.user.displayName}! Your progress has been restored from Google Drive.` });
                 } else {
                      toast({ title: `Welcome, ${result.user.displayName}!`, description: 'No cloud save found. Your future progress will be synced automatically.', variant: 'default' });
@@ -269,7 +285,7 @@ export default function SettingsPage() {
                             <li>Click the "Create Key" button.</li>
                             <li>Copy your new API key and paste it into the appropriate field on the settings page.</li>
                             </ol>
-                            <p className="text-sm text-muted-foreground">Your API keys are stored securely in your browser's local storage. They are <strong>not</strong> included in the data synced to your Google Drive.</p>
+                            <p className="text-sm text-muted-foreground">When you sign in with Google, your API keys are saved to your personal Google Drive along with your game progress.</p>
                         </div>
                         </SheetContent>
                     </Sheet>
@@ -310,14 +326,14 @@ export default function SettingsPage() {
                                     <Cloud className="h-4 w-4" />
                                     <AlertTitle>Cloud Sync is Active</AlertTitle>
                                     <AlertDescription>
-                                        Your progress is automatically saved to Google Drive when you complete interviews.
+                                        Your progress and settings are automatically saved to Google Drive when you complete interviews or update your keys.
                                     </AlertDescription>
                                 </Alert>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 <p className="text-sm text-muted-foreground">
-                                    Sign in with your Google account to automatically save and load your progress to your private Google Drive app folder.
+                                    Sign in with your Google account to automatically save and load all your progress and settings to your private Google Drive app folder.
                                 </p>
                                 <Button onClick={handleSignIn} className="w-full" size="lg">
                                     <LogIn /> Sign in with Google to Enable Sync
