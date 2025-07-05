@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -18,8 +17,16 @@ export default function HomePage() {
   const [loginMethod] = useLocalStorage(STORAGE_KEYS.LOGIN_METHOD, '');
   const [hasCompletedModule, setHasCompletedModule] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) {
+      return;
+    }
     // Redirect if user lands here without choosing a login method
     if (!loginMethod) {
       router.replace('/login');
@@ -36,10 +43,10 @@ export default function HomePage() {
         setHasCompletedModule(completed);
         setIsLoading(false);
       });
-  }, [progress, loginMethod, router]);
+  }, [progress, loginMethod, router, isClient]);
 
-  // Render nothing while redirecting
-  if (!loginMethod) {
+  // Render nothing while redirecting or on the server to prevent hydration mismatch
+  if (!isClient || !loginMethod) {
     return null;
   }
 
