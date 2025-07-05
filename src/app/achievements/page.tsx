@@ -1,12 +1,10 @@
-
 'use client';
 
 import type { LucideProps } from 'lucide-react';
 import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { GameHeader } from '@/components/GameHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import useLocalStorage from '@/hooks/useLocalStorage';
 import {
   Medal,
   ShieldCheck,
@@ -22,11 +20,12 @@ import {
   Search,
   BookOpen,
 } from 'lucide-react';
-import { STORAGE_KEYS } from '@/lib/storageKeys';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Module } from '@/lib/dsa-modules';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 type BadgeInfo = {
   id: string;
@@ -54,7 +53,7 @@ const badgeDetails: Record<string, Omit<BadgeInfo, 'id' | 'description'>> = {
 };
 
 export default function AchievementsPage() {
-  const [earnedBadges] = useLocalStorage<string[]>(STORAGE_KEYS.EARNED_BADGES, []);
+  const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [allBadges, setAllBadges] = useState<BadgeInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -81,10 +80,20 @@ export default function AchievementsPage() {
       });
   }, []);
 
+  const handleBadgeToggle = (badgeId: string, checked: boolean) => {
+    setEarnedBadges(prev => {
+      if (checked) {
+        return [...prev, badgeId];
+      } else {
+        return prev.filter(id => id !== badgeId);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen">
       <GameHeader />
-      <main className="flex flex-col items-center justify-center min-h-screen pt-20 px-4">
+      <main className="flex flex-col items-center justify-center min-h-screen pt-20 px-4 pb-20">
         <Card className="w-full max-w-4xl shadow-2xl">
           <CardHeader>
             <CardTitle className="font-headline text-3xl">Your Achievements</CardTitle>
@@ -145,6 +154,31 @@ export default function AchievementsPage() {
             )}
           </CardContent>
         </Card>
+
+        {!isLoading && allBadges.length > 0 && (
+          <Card className="w-full max-w-4xl shadow-2xl mt-8">
+            <CardHeader>
+              <CardTitle className="font-headline text-2xl">Testing Controls</CardTitle>
+              <CardDescription>Click checkboxes to see the badges come to life.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {allBadges.map(badge => (
+                  <div key={`check-${badge.id}`} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`check-${badge.id}`}
+                      checked={earnedBadges.includes(badge.id)}
+                      onCheckedChange={(checked) => handleBadgeToggle(badge.id, !!checked)}
+                    />
+                    <Label htmlFor={`check-${badge.id}`} className="text-sm font-medium leading-none cursor-pointer">
+                      {badge.name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
