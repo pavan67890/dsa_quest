@@ -1,0 +1,45 @@
+
+[
+    {
+        "id": 1,
+        "name": "1",
+        "question": "Implement a Trie (Prefix Tree) data structure, supporting `insert`, `search`, and `startsWith` methods.",
+        "sampleInput": "Commands: insert(\"apple\"), search(\"apple\"), search(\"app\"), startsWith(\"app\")",
+        "sampleOutput": "true, false, true"
+    },
+    {
+        "id": 2,
+        "name": "2",
+        "question": "Implement a Trie-II, which supports `insert`, `countWordsEqualTo`, `countWordsStartingWith`, and `erase` methods.",
+        "sampleInput": "Commands: insert(\"apple\"), insert(\"app\"), countWordsEqualTo(\"apple\")",
+        "sampleOutput": "1"
+    },
+    {
+        "id": 3,
+        "name": "3",
+        "question": "Given an array of strings `words`, find the longest string in `words` that can be built one character at a time by other words in `words`.",
+        "sampleInput": "words = [\"w\",\"wo\",\"wor\",\"worl\",\"world\"]",
+        "sampleOutput": "\"world\""
+    },
+    {
+        "id": 4,
+        "name": "4",
+        "question": "Given a string `s`, return the number of distinct substrings of `s`.",
+        "sampleInput": "s = \"ababa\"",
+        "sampleOutput": "10"
+    },
+    {
+        "id": 5,
+        "name": "5",
+        "question": "Given a non-empty array of integers `nums`, find the maximum result of `nums[i] XOR nums[j]`, where `i` < `j`.",
+        "sampleInput": "nums = [3, 10, 5, 25, 2, 8]",
+        "sampleOutput": "28"
+    },
+    {
+        "id": 6,
+        "name": "6",
+        "question": "Given an array `nums` and a set of queries where `queries[i] = [xi, mi]`, find the maximum XOR of `xi` with any `num` in `nums` where `num <= mi`.",
+        "sampleInput": "nums = [5, 2, 4, 6, 6, 3], queries = [[12, 5], [8, 1], [6, 3]]",
+        "sampleOutput": "[15, -1, 5]"
+    }
+]

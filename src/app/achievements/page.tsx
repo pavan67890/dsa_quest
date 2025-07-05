@@ -47,6 +47,7 @@ const badgeDetails: Record<string, Omit<BadgeInfo, 'id' | 'description'>> = {
   heaps: { name: 'Heap Hopper', Icon: Pyramid, className: 'text-amber-400' },
   greedy: { name: 'Greedy Genius', Icon: Cpu, className: 'text-teal-400' },
   trees: { name: 'Tree Traversal Titan', Icon: Binary, className: 'text-green-400' },
+  tries: { name: 'Trie Templar', Icon: Table, className: 'text-lime-400' },
   graphs: { name: 'Graph Guru', Icon: GitGraph, className: 'text-blue-400' },
   'dynamic-programming': { name: 'DP Dynamo', Icon: BrainCircuit, className: 'text-pink-400' },
   'stacks-queues': { name: 'Stack Strategist', Icon: Layers, className: 'text-indigo-400' },

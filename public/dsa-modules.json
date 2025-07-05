@@ -1,99 +1,107 @@
 
 [
-  {
-    "id": "arrays",
-    "name": "Arrays",
-    "description": "Master the fundamentals of arrays, from simple manipulations to complex subarray problems.",
-    "initialLives": 5,
-    "levelCount": 42,
-    "dataFile": "/modules/arrays.json"
-  },
-  {
-    "id": "binary-search",
-    "name": "Binary Search",
-    "description": "Learn the power of divide and conquer with binary search on sorted and rotated arrays.",
-    "initialLives": 5,
-    "levelCount": 20,
-    "dataFile": "/modules/binary-search.json"
-  },
-  {
-    "id": "strings",
-    "name": "Strings",
-    "description": "Tackle string manipulation, pattern matching, and parsing problems.",
-    "initialLives": 5,
-    "levelCount": 25,
-    "dataFile": "/modules/strings.json"
-  },
-  {
-    "id": "linked-list",
-    "name": "Linked List",
-    "description": "Dive into singly, doubly, and circular linked lists, and solve reversal and cycle detection problems.",
-    "initialLives": 5,
-    "levelCount": 25,
-    "dataFile": "/modules/linked-list.json"
-  },
-  {
-    "id": "recursion-backtracking",
-    "name": "Recursion & Backtracking",
-    "description": "Understand the art of solving complex problems by breaking them down into smaller, recursive steps.",
-    "initialLives": 5,
-    "levelCount": 20,
-    "dataFile": "/modules/recursion-backtracking.json"
-  },
-  {
-    "id": "stacks-queues",
-    "name": "Stacks & Queues",
-    "description": "Implement and use LIFO and FIFO data structures to solve a variety of problems.",
-    "initialLives": 5,
-    "levelCount": 20,
-    "dataFile": "/modules/stacks-queues.json"
-  },
-  {
-    "id": "heaps",
-    "name": "Heaps (Priority Queues)",
-    "description": "Learn to manage and process elements based on priority using min-heaps and max-heaps.",
-    "initialLives": 5,
-    "levelCount": 15,
-    "dataFile": "/modules/heaps.json"
-  },
-  {
-    "id": "greedy",
-    "name": "Greedy Algorithms",
-    "description": "Solve optimization problems by making the locally optimal choice at each step.",
-    "initialLives": 5,
-    "levelCount": 15,
-    "dataFile": "/modules/greedy.json"
-  },
-  {
-    "id": "bit-manipulation",
-    "name": "Bit Manipulation",
-    "description": "Explore the power of bitwise operators to solve problems efficiently.",
-    "initialLives": 5,
-    "levelCount": 15,
-    "dataFile": "/modules/bit-manipulation.json"
-  },
-  {
-    "id": "trees",
-    "name": "Trees",
-    "description": "Master binary trees, binary search trees, and their traversals.",
-    "initialLives": 5,
-    "levelCount": 50,
-    "dataFile": "/modules/trees.json"
-  },
-  {
-    "id": "graphs",
-    "name": "Graphs",
-    "description": "Explore graph theory, traversals (BFS, DFS), and algorithms for shortest paths and cycles.",
-    "initialLives": 5,
-    "levelCount": 45,
-    "dataFile": "/modules/graphs.json"
-  },
-  {
-    "id": "dynamic-programming",
-    "name": "Dynamic Programming",
-    "description": "Conquer complex problems by breaking them into overlapping subproblems and storing results.",
-    "initialLives": 5,
-    "levelCount": 50,
-    "dataFile": "/modules/dynamic-programming.json"
-  }
+    {
+        "id": "arrays",
+        "name": "Arrays",
+        "description": "Master the fundamentals of arrays, from simple manipulations to complex subarray problems.",
+        "initialLives": 5,
+        "levelCount": 16,
+        "dataFile": "/modules/arrays.json"
+    },
+    {
+        "id": "binary-search",
+        "name": "Binary Search",
+        "description": "Learn the power of divide and conquer with binary search on sorted and rotated arrays.",
+        "initialLives": 5,
+        "levelCount": 15,
+        "dataFile": "/modules/binary-search.json"
+    },
+    {
+        "id": "strings",
+        "name": "Strings",
+        "description": "Solve string manipulation, pattern matching, and parsing problems.",
+        "initialLives": 5,
+        "levelCount": 10,
+        "dataFile": "/modules/strings.json"
+    },
+    {
+        "id": "linked-list",
+        "name": "Linked List",
+        "description": "Learn list synergy, reversal, and cycle detection problems.",
+        "initialLives": 5,
+        "levelCount": 14,
+        "dataFile": "/modules/linked-list.json"
+    },
+    {
+        "id": "recursion-backtracking",
+        "name": "Recursion & Backtracking",
+        "description": "Understand the art of solving complex problems by breaking them down into simpler, recursive steps.",
+        "initialLives": 5,
+        "levelCount": 11,
+        "dataFile": "/modules/recursion-backtracking.json"
+    },
+    {
+        "id": "stacks-queues",
+        "name": "Stacks & Queues",
+        "description": "Implement and use LIFO and FIFO data structures to solve a variety of problems.",
+        "initialLives": 5,
+        "levelCount": 10,
+        "dataFile": "/modules/stacks-queues.json"
+    },
+    {
+        "id": "heaps",
+        "name": "Heaps (Priority Queues)",
+        "description": "Learn to manage and process elements based on priority using min-heaps and max-heaps.",
+        "initialLives": 5,
+        "levelCount": 6,
+        "dataFile": "/modules/heaps.json"
+    },
+    {
+        "id": "greedy",
+        "name": "Greedy Algorithms",
+        "description": "Build optimal solutions step-by-step by making the locally optimal choice at each stage.",
+        "initialLives": 5,
+        "levelCount": 8,
+        "dataFile": "/modules/greedy.json"
+    },
+    {
+        "id": "bit-manipulation",
+        "name": "Bit Manipulation",
+        "description": "Explore the power of bitwise operations to solve problems efficiently.",
+        "initialLives": 5,
+        "levelCount": 7,
+        "dataFile": "/modules/bit-manipulation.json"
+    },
+    {
+        "id": "trees",
+        "name": "Trees",
+        "description": "Master tree traversal, binary search trees, and their applications.",
+        "initialLives": 5,
+        "levelCount": 24,
+        "dataFile": "/modules/trees.json"
+    },
+    {
+        "id": "tries",
+        "name": "Tries",
+        "description": "Master trie data structures for efficient string searching and prefix-based operations.",
+        "initialLives": 5,
+        "levelCount": 6,
+        "dataFile": "/modules/tries.json"
+    },
+    {
+        "id": "graphs",
+        "name": "Graphs",
+        "description": "Explore graph theory, traversal algorithms (BFS, DFS), and algorithms for shortest paths and cycles.",
+        "initialLives": 5,
+        "levelCount": 21,
+        "dataFile": "/modules/graphs.json"
+    },
+    {
+        "id": "dynamic-programming",
+        "name": "Dynamic Programming",
+        "description": "Conquer complex problems by breaking them into overlapping subproblems and storing results.",
+        "initialLives": 5,
+        "levelCount": 20,
+        "dataFile": "/modules/dynamic-programming.json"
+    }
 ]
