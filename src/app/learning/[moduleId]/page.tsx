@@ -114,7 +114,7 @@ export default function ModulePage() {
     <div className="min-h-screen">
       <GameHeader />
       <main className="container mx-auto max-w-5xl px-4 py-24">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-start mb-8">
             <div>
                 <h1 className="text-5xl font-bold font-headline">{module.name}</h1>
                 <p className="text-muted-foreground mt-2">{module.description}</p>
