@@ -4,7 +4,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import type { Module, ModuleWithLevels } from '@/lib/dsa-modules';
 import { GameHeader } from '@/components/GameHeader';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { Heart, Lock, Sparkles, AlertTriangle } from 'lucide-react';
@@ -175,13 +175,12 @@ export default function ModulePage() {
                     })}
                 </div>
             </CardContent>
+            <CardFooter className="flex justify-end">
+                <Button variant="destructive" onClick={() => setShowResetConfirm(true)}>
+                    <AlertTriangle className="mr-2 h-4 w-4" /> Reset Progress for this Module
+                </Button>
+            </CardFooter>
         </Card>
-        
-        <div className="mt-8 flex justify-end">
-            <Button variant="destructive" onClick={() => setShowResetConfirm(true)}>
-                <AlertTriangle className="mr-2 h-4 w-4" /> Reset Progress for this Module
-            </Button>
-        </div>
       </main>
 
        <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
