@@ -11,12 +11,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useState, useEffect } from 'react';
 
 export function GameHeader() {
   const [xp] = useLocalStorage('user-xp', 0);
   const [loginMethod] = useLocalStorage('login-method', 'guest');
   const level = Math.floor(xp / 100) + 1;
   const progress = (xp % 100);
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-background/80 backdrop-blur-sm">
@@ -43,7 +50,7 @@ export function GameHeader() {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {loginMethod === 'guest' && (
+        {isClient && loginMethod === 'guest' && (
            <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
