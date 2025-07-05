@@ -119,17 +119,26 @@ export default function ModulePage() {
                 <h1 className="text-5xl font-bold font-headline">{module.name}</h1>
                 <p className="text-muted-foreground mt-2">{module.description}</p>
             </div>
-            <Card className="p-4 flex items-center gap-2">
-                <div className="flex items-center gap-1 text-red-500">
-                    {[...Array(moduleProgress.lives)].map((_, i) => (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Card className="p-4 flex items-center gap-3">
+                    <div className="flex items-center gap-1 text-red-500">
+                      {[...Array(moduleProgress.lives)].map((_, i) => (
                         <Heart key={i} className="h-6 w-6 fill-current" />
-                    ))}
-                    {[...Array(module.initialLives - moduleProgress.lives)].map((_, i) => (
-                        <Heart key={i} className="h-6 w-6 text-muted-foreground" />
-                    ))}
-                </div>
-                <span className="font-bold text-lg">{moduleProgress.lives} / {module.initialLives}</span>
-            </Card>
+                      ))}
+                      {[...Array(module.initialLives - moduleProgress.lives)].map((_, i) => (
+                          <Heart key={i} className="h-6 w-6 text-muted-foreground" />
+                      ))}
+                    </div>
+                    <span className="font-bold text-2xl">{moduleProgress.lives}</span>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{moduleProgress.lives} / {module.initialLives} lives remaining</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
         </div>
 
         <Card>
