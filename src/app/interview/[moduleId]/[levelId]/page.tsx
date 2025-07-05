@@ -17,8 +17,9 @@ import { provideRealtimeCodeReview } from '@/ai/flows/provide-realtime-code-revi
 import { analyzeInterviewPerformance } from '@/ai/flows/analyze-interview-performance';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { executeCode } from '@/ai/flows/execute-code';
+import { triggerSync } from '@/services/driveService';
 import { ApiKeyDialog } from '@/components/ApiKeyDialog';
-import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User, Play, X } from 'lucide-react';
+import { Loader, Send, Code, Mic, SkipForward, ArrowLeft, Star, HeartCrack, Sparkles, User, Play, X, Cloud } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Progress = { [moduleId: string]: { unlockedLevel: number; lives: number } };
@@ -417,6 +418,26 @@ The main technical question you must ask is provided in the 'question' field. Af
                 newProgress = { ...progress, [module!.id]: { ...currentModuleProgress, lives: newLives } };
             }
             setProgress(newProgress);
+        }
+        
+        try {
+          await triggerSync();
+          toast({
+            title: 'Progress Synced',
+            description: 'Your results have been saved to the cloud.',
+            action: (
+              <div className="p-1">
+                <Cloud className="h-5 w-5 text-primary" />
+              </div>
+            ),
+          });
+        } catch (syncError) {
+          console.error("Sync failed after interview:", syncError);
+          toast({
+            title: 'Sync Failed',
+            description: 'Your progress was saved locally, but failed to sync to the cloud.',
+            variant: 'destructive'
+          });
         }
 
     } catch(error: any) {

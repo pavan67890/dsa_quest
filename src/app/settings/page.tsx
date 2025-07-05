@@ -19,12 +19,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { GameHeader } from '@/components/GameHeader';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, UploadCloud, DownloadCloud, Loader, AlertTriangle, Info } from 'lucide-react';
+import { KeyRound, Save, Terminal, Cloud, LogIn, LogOut, Loader, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { auth, googleProvider } from '@/lib/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, type User, GoogleAuthProvider } from 'firebase/auth';
-import { saveProgress, loadProgress } from '@/services/driveService';
+import { loadProgress } from '@/services/driveService';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -56,7 +56,6 @@ export default function SettingsPage() {
   const { toast } = useToast();
 
   const [user, setUser] = useState<User | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [, setLoginMethod] = useLocalStorage('login-method', 'guest');
 
@@ -99,22 +98,32 @@ export default function SettingsPage() {
     });
   }
 
-  const getFreshToken = async (): Promise<string | null> => {
+  const handleSignInAndLoad = async (): Promise<void> => {
       if (!auth || !googleProvider) {
         toast({ title: 'Cloud Sync Is Not Configured', description: 'Firebase configuration not detected. Please ensure your keys are in a `.env.local` file and that you have restarted your development server to enable cloud sync.', variant: 'destructive' });
-        return null;
+        return;
       }
 
       try {
+          setIsAuthLoading(true);
           const result = await signInWithPopup(auth, googleProvider);
           const credential = GoogleAuthProvider.credentialFromResult(result);
+          
           if (credential?.accessToken) {
               setUser(result.user);
               setLoginMethod('google');
-              toast({ title: 'Sync Enabled!', description: 'Your progress will now be synced with your Google Drive.' });
-              return credential.accessToken;
+              
+              const progressData: any = await loadProgress(credential.accessToken);
+              if (progressData) {
+                  localStorage.setItem('user-progress', JSON.stringify(progressData['user-progress'] || {}));
+                  localStorage.setItem('user-xp', JSON.stringify(progressData['user-xp'] || 0));
+                  localStorage.setItem('earned-badges', JSON.stringify(progressData['earned-badges'] || []));
+                  toast({ title: 'Progress Loaded!', description: 'Your progress has been restored from Google Drive. The page will now reload.' });
+                  setTimeout(() => window.location.reload(), 2000);
+              } else {
+                   toast({ title: 'Welcome!', description: 'No cloud save found. Your future progress will be synced automatically.', variant: 'default' });
+              }
           }
-          return null;
       } catch (error: any) {
           console.error("Google Sign-In Error", error);
           let description = 'Could not sign in with Google. Please try again.';
@@ -124,7 +133,8 @@ export default function SettingsPage() {
             description = 'The sign-in window was closed before completing. Please try again.';
           }
           toast({ title: 'Sign-In Failed', description, variant: 'destructive' });
-          return null;
+      } finally {
+        setIsAuthLoading(false);
       }
   };
 
@@ -134,51 +144,6 @@ export default function SettingsPage() {
     setUser(null);
     setLoginMethod('guest');
     toast({ title: "Signed Out", description: "You are now in guest mode. Your progress will only be saved in this browser." });
-  };
-
-  const handleSaveToDrive = async () => {
-      const token = await getFreshToken();
-      if (!token) return;
-
-      setIsSyncing(true);
-      try {
-          const progressData = {
-              'user-progress': JSON.parse(localStorage.getItem('user-progress') || '{}'),
-              'user-xp': JSON.parse(localStorage.getItem('user-xp') || '0'),
-              'earned-badges': JSON.parse(localStorage.getItem('earned-badges') || '[]'),
-          };
-          await saveProgress(token, progressData);
-          toast({ title: 'Progress Saved!', description: 'Your progress has been saved to Google Drive.' });
-      } catch (error) {
-          console.error('Save to Drive Error', error);
-          toast({ title: 'Save Failed', description: String(error) || 'Could not save progress to Google Drive.', variant: 'destructive' });
-      } finally {
-          setIsSyncing(false);
-      }
-  };
-
-  const handleLoadFromDrive = async () => {
-      const token = await getFreshToken();
-      if (!token) return;
-
-      setIsSyncing(true);
-      try {
-          const progressData: any = await loadProgress(token);
-          if (progressData) {
-              localStorage.setItem('user-progress', JSON.stringify(progressData['user-progress'] || {}));
-              localStorage.setItem('user-xp', JSON.stringify(progressData['user-xp'] || 0));
-              localStorage.setItem('earned-badges', JSON.stringify(progressData['earned-badges'] || []));
-              toast({ title: 'Progress Loaded!', description: 'Your progress has been loaded. The page will now reload.' });
-              setTimeout(() => window.location.reload(), 2000);
-          } else {
-               toast({ title: 'No Progress Found', description: 'No saved data was found in your Google Drive.', variant: 'default' });
-          }
-      } catch (error) {
-          console.error('Load from Drive Error', error);
-          toast({ title: 'Load Failed', description: String(error) || 'Could not load progress from Google Drive.', variant: 'destructive' });
-      } finally {
-          setIsSyncing(false);
-      }
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -327,9 +292,6 @@ export default function SettingsPage() {
                     </Alert>
                 ) : (
                     <>
-                        <p className="text-sm text-muted-foreground">
-                            Sign in with your Google account to save and load your progress to your private Google Drive app folder.
-                        </p>
                         {isAuthLoading ? (
                             <div className="flex items-center justify-center h-20">
                                 <Loader className="animate-spin" />
@@ -340,21 +302,23 @@ export default function SettingsPage() {
                                     <p className="font-semibold">Signed in as {user.displayName || user.email}</p>
                                     <Button variant="outline" onClick={handleSignOut}><LogOut />Sign Out</Button>
                                 </div>
-                                <div className="flex gap-4">
-                                    <Button onClick={handleSaveToDrive} className="w-full" disabled={isSyncing}>
-                                        {isSyncing ? <Loader className="animate-spin" /> : <UploadCloud />}
-                                        Save to Drive
-                                    </Button>
-                                    <Button onClick={handleLoadFromDrive} className="w-full" variant="outline" disabled={isSyncing}>
-                                        {isSyncing ? <Loader className="animate-spin" /> : <DownloadCloud />}
-                                        Load from Drive
-                                    </Button>
-                                </div>
+                                 <Alert>
+                                    <Cloud className="h-4 w-4" />
+                                    <AlertTitle>Cloud Sync is Active</AlertTitle>
+                                    <AlertDescription>
+                                        Your progress is automatically saved to Google Drive when you complete interviews.
+                                    </AlertDescription>
+                                </Alert>
                             </div>
                         ) : (
-                            <Button onClick={() => getFreshToken()} className="w-full" size="lg">
-                                <LogIn /> Sign in with Google to Enable Sync
-                            </Button>
+                            <>
+                                <p className="text-sm text-muted-foreground">
+                                    Sign in with your Google account to save and load your progress to your private Google Drive app folder.
+                                </p>
+                                <Button onClick={handleSignInAndLoad} className="w-full" size="lg">
+                                    <LogIn /> Sign in with Google to Enable Sync
+                                </Button>
+                            </>
                         )}
                     </>
                 )}

@@ -1,4 +1,7 @@
 
+import { auth, googleProvider } from '@/lib/firebase';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+
 const APP_FILE_NAME = 'dsa-quest-progress.json';
 const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
@@ -118,4 +121,44 @@ export async function loadProgress(accessToken: string): Promise<object | null> 
     }
 
     return response.json();
+}
+
+/**
+ * Triggers a sync to Google Drive. This function will prompt the user to sign in
+ * if necessary to get a fresh access token, then save all local progress data.
+ */
+export async function triggerSync() {
+    if (!auth || !googleProvider) {
+        console.warn('Firebase not configured, skipping sync.');
+        return;
+    }
+
+    const loginMethod = localStorage.getItem('login-method');
+    if (loginMethod !== '"google"') {
+        return; // Only sync if user is in google mode
+    }
+
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential?.accessToken;
+
+        if (!token) {
+            throw new Error('Could not retrieve access token from Google.');
+        }
+
+        const progressData = {
+            'user-progress': JSON.parse(localStorage.getItem('user-progress') || '{}'),
+            'user-xp': JSON.parse(localStorage.getItem('user-xp') || '0'),
+            'earned-badges': JSON.parse(localStorage.getItem('earned-badges') || '[]'),
+        };
+        
+        await saveProgress(token, progressData);
+        console.log("Progress synced to drive successfully.");
+
+    } catch (error) {
+        console.error("Auto-sync failed", error);
+        // Re-throw so the caller can handle it (e.g., show a toast)
+        throw error;
+    }
 }

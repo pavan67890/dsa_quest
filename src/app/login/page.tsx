@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -7,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LogIn, User } from 'lucide-react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { auth, googleProvider } from '@/lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import { loadProgress } from '@/services/driveService';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,8 +33,28 @@ export default function LoginPage() {
     }
 
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
       setLoginMethod('google');
+      
+      if (credential?.accessToken) {
+        try {
+          const progressData: any = await loadProgress(credential.accessToken);
+          if (progressData) {
+            localStorage.setItem('user-progress', JSON.stringify(progressData['user-progress'] || {}));
+            localStorage.setItem('user-xp', JSON.stringify(progressData['user-xp'] || 0));
+            localStorage.setItem('earned-badges', JSON.stringify(progressData['earned-badges'] || []));
+            toast({
+              title: 'Progress Loaded!',
+              description: 'Welcome back! Your progress has been restored from the cloud.',
+            });
+          }
+        } catch (e) {
+          console.error('Failed to load progress on login:', e);
+          // Fail silently on load error, don't block login
+        }
+      }
+      
       router.push('/home');
     } catch (error: any) {
       console.error("Google Sign-In Error", error);
@@ -42,6 +64,8 @@ export default function LoginPage() {
         description = 'Your Firebase API key is invalid or expired. Please generate a new one, add it to your .env file, and restart the server.';
       } else if (error.code === 'auth/popup-closed-by-user') {
         description = 'The sign-in window was closed before completing. Please try again.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        description = "This app's domain is not authorized for Firebase sign-in. Please add it to the authorized domains in your Firebase project settings.";
       }
       
       toast({
