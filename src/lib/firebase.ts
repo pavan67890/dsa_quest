@@ -16,6 +16,9 @@ let googleProvider: GoogleAuthProvider | null = null;
 
 // Only initialize Firebase if the API key is provided to prevent crashes.
 if (firebaseConfig.apiKey) {
+    if (typeof window !== 'undefined') {
+        console.log('Firebase Init: Using authDomain:', firebaseConfig.authDomain);
+    }
     try {
         app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
         auth = getAuth(app);
@@ -26,6 +29,10 @@ if (firebaseConfig.apiKey) {
         console.error("Firebase initialization error:", e);
         auth = null;
         googleProvider = null;
+    }
+} else {
+    if (typeof window !== 'undefined') {
+        console.warn('Firebase configuration (API Key) not found. Cloud Sync will be disabled.');
     }
 }
 
