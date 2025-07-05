@@ -4,6 +4,30 @@ const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3/files';
 
 /**
+ * A helper function to create a more informative error from a Google API response.
+ * @param response The raw fetch response.
+ * @param action A string describing the action that failed (e.g., "list files").
+ * @returns An Error object.
+ */
+async function createDriveApiError(response: Response, action: string): Promise<Error> {
+    // A 403 error is a strong indicator that the Drive API is not enabled.
+    if (response.status === 403) {
+        return new Error('Google Drive API access denied. Please ensure the "Google Drive API" is enabled for your project in the Google Cloud Console.');
+    }
+    
+    let errorDetails = `Status: ${response.status}`;
+    try {
+        const error = await response.json();
+        console.error(`Failed to ${action}`, error);
+        errorDetails = error.error?.message || JSON.stringify(error);
+    } catch (e) {
+        console.error(`Failed to parse error JSON from Google Drive API during ${action}.`);
+    }
+
+    return new Error(`Could not ${action} in Google Drive. ${errorDetails}`);
+}
+
+/**
  * Finds the unique ID of the application's data file within the user's hidden appDataFolder.
  * This ensures the app only interacts with its own sandboxed data in the user's drive.
  * @param accessToken The user's Google OAuth2 access token.
@@ -17,9 +41,7 @@ async function getAppFileId(accessToken: string): Promise<string | null> {
     headers: { 'Authorization': `Bearer ${accessToken}` }
   });
   if (!response.ok) {
-    const error = await response.json();
-    console.error('Failed to list files in appDataFolder', error);
-    throw new Error(`Could not access Google Drive. ${error.error?.message || ''}`);
+    throw await createDriveApiError(response, 'list files');
   }
   const { files } = await response.json();
   const existingFile = files.find((file: any) => file.name === APP_FILE_NAME);
@@ -53,7 +75,7 @@ export async function saveProgress(accessToken: string, progressData: object): P
             body: JSON.stringify({ ...metadata, parents: ['appDataFolder'] }),
         });
         if (!createResponse.ok) {
-            throw new Error('Could not create file in Google Drive.');
+            throw await createDriveApiError(createResponse, 'create file');
         }
         const newFile = await createResponse.json();
         fileId = newFile.id;
@@ -71,7 +93,7 @@ export async function saveProgress(accessToken: string, progressData: object): P
     });
 
     if (!uploadResponse.ok) {
-        throw new Error('Could not save progress to Google Drive.');
+        throw await createDriveApiError(uploadResponse, 'save progress');
     }
 }
 
@@ -92,7 +114,7 @@ export async function loadProgress(accessToken: string): Promise<object | null> 
     });
 
     if (!response.ok) {
-        throw new Error('Could not load progress from Google Drive.');
+        throw await createDriveApiError(response, 'load progress');
     }
 
     return response.json();
