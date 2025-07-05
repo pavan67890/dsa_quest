@@ -93,6 +93,7 @@ export default function InterviewPage() {
   const [codeOutput, setCodeOutput] = useState<CodeOutput>(null);
   const [streamingMessage, setStreamingMessage] = useState<StreamingMessage | null>(null);
   const pendingTextRef = useRef<string | null>(null);
+  const initialMessageSent = useRef(false);
 
   const dialogueEndRef = useRef<HTMLDivElement>(null);
 
@@ -288,10 +289,11 @@ export default function InterviewPage() {
   };
   
   useEffect(() => {
-    if (isDataLoading) return;
+    if (isDataLoading || initialMessageSent.current) return;
     if (!apiKeys.primaryApiKey && !apiKeys.secondaryApiKey) {
       setIsApiKeyDialogOpen(true);
     } else if (module && level && conversation.length === 0 && interviewPhase === 'greeting') {
+      initialMessageSent.current = true;
       let questionText = level.question;
       if (level.isSurprise) {
         const regularLevels = module.levels.filter(l => !l.isSurprise && l.id !== level.id);
@@ -809,5 +811,3 @@ The main technical question you must ask is provided in the 'question' field. Af
     </>
   );
 }
-
-    
