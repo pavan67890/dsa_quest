@@ -1,0 +1,96 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Find the largest element in an array.",
+    "sampleInput": "[1, 2, 9, 3, 8]",
+    "sampleOutput": "9"
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Find the second largest element in an array without sorting it."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Check if an array is sorted in non-decreasing order."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Remove duplicates from a sorted array and return the new length. Modify the array in-place.",
+    "sampleInput": "[0, 0, 1, 1, 1, 2, 2, 3, 3, 4]",
+    "sampleOutput": "5 (Array becomes [0, 1, 2, 3, 4, ...])"
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Left rotate an array by one place."
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Left rotate an array by D places.",
+    "sampleInput": "Array: [1, 2, 3, 4, 5], D: 2",
+    "sampleOutput": "[3, 4, 5, 1, 2]"
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Given an array of integers, move all zeros to the end of it while maintaining the relative order of the non-zero elements.",
+    "sampleInput": "[0, 1, 0, 3, 12]",
+    "sampleOutput": "[1, 3, 12, 0, 0]"
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "Find the union of two sorted arrays."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Find the missing number in an array of N-1 integers from a range of 1 to N.",
+    "sampleInput": "[1, 2, 4, 5]",
+    "sampleOutput": "3"
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "Find the maximum number of consecutive 1s in a binary array."
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Find the single number that appears only once in an array where every other element appears twice."
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "Find the length of the longest subarray with a given sum K.",
+    "sampleInput": "Array: [1, 2, 3, 1, 1, 1], K: 3",
+    "sampleOutput": "3 (Subarray is [1, 1, 1])"
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "Given two integers, an hour and a minute, return the smaller angle (in degrees) formed between the hour and the minute hand."
+  },
+  {
+    "id": 14,
+    "name": "S",
+    "question": "Surprise! A random question from this module awaits.",
+    "isSurprise": true
+  },
+  {
+    "id": 15,
+    "name": "14",
+    "question": "Find the majority element in an array (appears more than n/2 times)."
+  },
+  {
+    "id": 16,
+    "name": "15",
+    "question": "Given an array of integers, find the maximum product of any three numbers in the array."
+  }
+]

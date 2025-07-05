@@ -1,0 +1,54 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Remove outermost parentheses from a valid parentheses string."
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Reverse the words in a given string."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Find the largest odd number in a string representing a large integer."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Find the longest common prefix string amongst an array of strings."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Check if two strings are isomorphic."
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Check if two strings are rotations of each other."
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Given two strings, check if one is an anagram of the other."
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "Implement the atoi() function, which converts a string to an integer."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Find the length of the longest palindromic substring in a given string."
+  },
+  {
+    "id": 10,
+    "name": "S",
+    "question": "Surprise! A random question from this module awaits.",
+    "isSurprise": true
+  }
+]

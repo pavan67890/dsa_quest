@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -30,7 +31,7 @@ export default function HomePage() {
       .then((data: Module[]) => {
         const completed = data.some(module => {
             const moduleProgress = progress[module.id];
-            return moduleProgress && moduleProgress.unlockedLevel > module.levels.length;
+            return moduleProgress && moduleProgress.unlockedLevel > module.levelCount;
         });
         setHasCompletedModule(completed);
         setIsLoading(false);

@@ -1,0 +1,64 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Implement a singly linked list with insert and delete operations."
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Reverse a singly linked list."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Find the middle of a linked list using the slow and fast pointer approach."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Merge two sorted linked lists into a single sorted list."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Given a linked list, detect if it has a cycle (a loop)."
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Given a linked list with a cycle, find the starting node of the cycle."
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Given a linked list, check if it is a palindrome."
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "Given two linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Remove the N-th node from the end of a linked list."
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "Given the head of a linked list, rotate the list to the right by k places."
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Copy a linked list with a next and a random pointer."
+  },
+  {
+    "id": 12,
+    "name": "S",
+    "question": "Surprise! A random question from this module awaits.",
+    "isSurprise": true
+  }
+]

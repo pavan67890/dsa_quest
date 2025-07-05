@@ -1,0 +1,94 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Explain how to represent a graph using an Adjacency List and an Adjacency Matrix. What are the pros and cons of each?"
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Implement Breadth-First Search (BFS) traversal for a given graph starting from a source node."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Implement Depth-First Search (DFS) traversal for a given graph starting from a source node."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Given a 2D grid of '1's (land) and '0's (water), count the number of islands."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Given a 2D grid, a start coordinate, and a new color, 'flood fill' the area. "
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Detect if a cycle exists in an undirected graph using BFS."
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Detect if a cycle exists in an undirected graph using DFS."
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai. Return true if you can finish all courses. Otherwise, return false."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Find the topological sort of a Directed Acyclic Graph (DAG)."
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "Detect if a cycle exists in a directed graph using DFS."
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Given a directed graph, find the shortest path from a source node to all other nodes. Assume all edge weights are 1."
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "Implement Dijkstra's algorithm to find the shortest path in a weighted graph with non-negative weights."
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "Implement the Bellman-Ford algorithm for finding the shortest paths from a single source vertex to all of the other vertices in a weighted digraph. It is slower than Dijkstra's algorithm, but more versatile, as it is capable of handling graphs in which some of the edge weights are negative numbers."
+  },
+  {
+    "id": 14,
+    "name": "14",
+    "question": "Implement Floyd-Warshall algorithm to find the shortest paths between all pairs of vertices in a weighted graph."
+  },
+  {
+    "id": 15,
+    "name": "15",
+    "question": "Find the Minimum Spanning Tree (MST) of a connected, undirected graph using Prim's algorithm."
+  },
+  {
+    "id": 16,
+    "name": "16",
+    "question": "Find the Minimum Spanning Tree (MST) of a connected, undirected graph using Kruskal's algorithm."
+  },
+  {
+    "id": 17,
+    "name": "S",
+    "question": "A surprise question from this module awaits.",
+    "isSurprise": true
+  },
+  {
+    "id": 18,
+    "name": "17",
+    "question": "Given a graph, find the number of connected components."
+  }
+]

@@ -1,0 +1,54 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Explain the concept of recursion and base cases."
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Print numbers from 1 to N using recursion."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Calculate the factorial of a number N using recursion."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Reverse an array using recursion."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Check if a string is a palindrome using recursion."
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Generate all subsequences of a string using recursion."
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Given a set of distinct integers, nums, return all possible subsets (the power set)."
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "Given a collection of numbers that might contain duplicates, return all possible unique permutations."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Solve the N-Queens problem: place N chess queens on an N×N chessboard so that no two queens threaten each other."
+  },
+  {
+    "id": 10,
+    "name": "S",
+    "question": "Surprise! A random question from this module awaits.",
+    "isSurprise": true
+  }
+]

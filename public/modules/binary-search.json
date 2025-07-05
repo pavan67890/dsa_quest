@@ -1,0 +1,81 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Implement binary search to find a target in a sorted array. Return its index or -1.",
+    "sampleInput": "Array: [1, 3, 5, 7, 9], Target: 5",
+    "sampleOutput": "2"
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Find the lower bound: the first index where arr[i] >= target."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Find the upper bound: the first index where arr[i] > target."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Given a sorted array and a target, find the starting and ending position of the target. If not found, return [-1, -1]."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Find the number of occurrences of a target in a sorted array."
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Search in a rotated sorted array for a target value."
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Find the minimum element in a rotated sorted array."
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "Find a peak element in an array (an element greater than its neighbors)."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Implement a function to calculate the integer square root of a number x."
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "You have n coins and you want to build a staircase with these coins. The staircase consists of k rows where the i-th row has exactly i coins. Given n, return the number of full staircase rows you can form."
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Koko loves to eat bananas. There are n piles of bananas, the i-th pile has piles[i] bananas. She can eat at a speed of k bananas per hour. Find the minimum integer k such that she can eat all the bananas within h hours."
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "We have to ship packages from one port to another within D days. The i-th package has a weight of weights[i]. We must ship all packages in order. Find the least weight capacity of the ship that will result in all the packages being shipped within D days."
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "You are given a sorted array of distinct integers and a target value. If the target is found, return the index. If not, return the index where it would be if it were inserted in order."
+  },
+  {
+    "id": 14,
+    "name": "S",
+    "question": "A surprise question from this module awaits.",
+    "isSurprise": true
+  },
+  {
+    "id": 15,
+    "name": "14",
+    "question": "Find the median of two sorted arrays."
+  }
+]

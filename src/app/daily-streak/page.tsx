@@ -123,7 +123,7 @@ export default function DailyStreakPage() {
             const completedModules = allModules
                 .filter(module => {
                     const moduleProgress = progress[module.id];
-                    return moduleProgress && moduleProgress.unlockedLevel > module.levels.length;
+                    return moduleProgress && moduleProgress.unlockedLevel > module.levelCount;
                 })
                 .map(module => module.name);
 

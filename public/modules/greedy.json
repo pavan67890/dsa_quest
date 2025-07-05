@@ -1,0 +1,34 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "You have an array of coin denominations and a total amount. Find the minimum number of coins to make up that amount. Assume an infinite supply of each coin."
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "You are given N activities with their start and end times. Select the maximum number of activities that can be performed by a single person, assuming that a person can only work on a single activity at a time."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Implement Fractional Knapsack. Given weights and values of N items, put these items in a knapsack of capacity W to get the maximum total value. You can break items."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Given an array of meeting time intervals, find the minimum number of conference rooms required."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "There are N gas stations along a circular route, where the amount of gas at station i is gas[i]. You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from station i to its next station (i+1). You begin the journey with an empty tank at one of the gas stations. Return the starting gas station's index if you can travel around the circuit once in the clockwise direction, otherwise return -1."
+  },
+  {
+    "id": 6,
+    "name": "S",
+    "question": "Surprise! A random question from this module awaits.",
+    "isSurprise": true
+  }
+]

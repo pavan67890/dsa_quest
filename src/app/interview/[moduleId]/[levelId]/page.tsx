@@ -9,7 +9,7 @@ import Editor from '@monaco-editor/react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Module, Level } from '@/lib/dsa-modules';
+import type { Module, Level, ModuleWithLevels } from '@/lib/dsa-modules';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
 import { simulateAiInterviewer } from '@/ai/flows/simulate-ai-interviewer';
@@ -62,7 +62,7 @@ export default function InterviewPage() {
   const [xp, setXp] = useLocalStorage(STORAGE_KEYS.USER_XP, 0);
   const [earnedBadges, setEarnedBadges] = useLocalStorage<string[]>(STORAGE_KEYS.EARNED_BADGES, []);
   
-  const [module, setModule] = useState<Module | null>(null);
+  const [module, setModule] = useState<ModuleWithLevels | null>(null);
   const [level, setLevel] = useState<Level | null>(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
@@ -94,11 +94,22 @@ export default function InterviewPage() {
     setIsDataLoading(true);
     fetch('/dsa-modules.json')
       .then((res) => res.json())
-      .then((data: Module[]) => {
-        const foundModule = data.find((m) => m.id === moduleId);
-        const foundLevel = foundModule?.levels.find((l) => l.id.toString() === levelId);
-        setModule(foundModule || null);
-        setLevel(foundLevel || null);
+      .then((modules: Module[]) => {
+        const foundModule = modules.find((m) => m.id === moduleId);
+        if (foundModule) {
+          fetch(foundModule.dataFile)
+            .then(res => res.json())
+            .then((levels: Level[]) => {
+              const fullModule = { ...foundModule, levels };
+              setModule(fullModule);
+              const foundLevel = fullModule.levels.find((l) => l.id.toString() === levelId);
+              setLevel(foundLevel || null);
+              if (foundLevel && foundLevel.sampleInput) {
+                const starterCode = `function solve() {\n  // Sample Input:\n  // ${foundLevel.sampleInput}\n  //\n  // Your code here\n  //\n  // Expected Output:\n  // ${foundLevel.sampleOutput}\n}\n`;
+                setUserCode(starterCode);
+              }
+            });
+        }
       })
       .catch((error) => console.error('Failed to load module data:', error))
       .finally(() => setIsDataLoading(false));

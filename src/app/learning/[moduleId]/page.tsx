@@ -2,7 +2,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import type { Module } from '@/lib/dsa-modules';
+import type { Module, ModuleWithLevels } from '@/lib/dsa-modules';
 import { GameHeader } from '@/components/GameHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -29,22 +29,34 @@ export default function ModulePage() {
   const rawModuleId = params.moduleId;
   const moduleId = String(rawModuleId);
   
-  const [module, setModule] = useState<Module | undefined>(undefined);
+  const [module, setModule] = useState<ModuleWithLevels | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
   const [progress, setProgress] = useLocalStorage<Progress>(STORAGE_KEYS.USER_PROGRESS, {});
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch('/dsa-modules.json')
       .then((res) => res.json())
-      .then((data: Module[]) => {
-        const foundModule = data.find((m) => m.id === moduleId);
-        setModule(foundModule);
-        setIsLoading(false);
+      .then((modules: Module[]) => {
+        const foundModule = modules.find((m) => m.id === moduleId);
+        if (foundModule) {
+            fetch(foundModule.dataFile)
+                .then(res => res.json())
+                .then((levels) => {
+                    setModule({ ...foundModule, levels });
+                })
+                .catch(err => {
+                    console.error(`Failed to load levels for ${moduleId}:`, err);
+                })
+                .finally(() => setIsLoading(false));
+        } else {
+            setIsLoading(false);
+        }
       })
       .catch((error) => {
-        console.error('Failed to load module data:', error);
+        console.error('Failed to load module index data:', error);
         setIsLoading(false);
       });
   }, [moduleId]);

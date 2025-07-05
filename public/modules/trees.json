@@ -1,0 +1,105 @@
+
+[
+    {
+      "id": 1,
+      "name": "1",
+      "question": "Implement pre-order traversal of a binary tree (recursive and iterative)."
+    },
+    {
+      "id": 2,
+      "name": "2",
+      "question": "Implement in-order traversal of a binary tree (recursive and iterative)."
+    },
+    {
+      "id": 3,
+      "name": "3",
+      "question": "Implement post-order traversal of a binary tree (recursive and iterative)."
+    },
+    {
+      "id": 4,
+      "name": "4",
+      "question": "Implement level-order traversal of a binary tree."
+    },
+    {
+      "id": 5,
+      "name": "5",
+      "question": "Find the maximum depth (or height) of a binary tree."
+    },
+    {
+      "id": 6,
+      "name": "6",
+      "question": "Check if a binary tree is balanced."
+    },
+    {
+      "id": 7,
+      "name": "7",
+      "question": "Find the diameter of a binary tree. The diameter is the length of the longest path between any two nodes."
+    },
+    {
+      "id": 8,
+      "name": "8",
+      "question": "Find the maximum path sum in a binary tree. A path can start and end at any node."
+    },
+    {
+      "id": 9,
+      "name": "9",
+      "question": "Check if two binary trees are identical."
+    },
+    {
+      "id": 10,
+      "name": "10",
+      "question": "Implement a zig-zag level order traversal of a binary tree."
+    },
+    {
+      "id": 11,
+      "name": "11",
+      "question": "Get the boundary traversal of a binary tree (left boundary, leaves, right boundary)."
+    },
+    {
+      "id": 12,
+      "name": "12",
+      "question": "Get the vertical order traversal of a binary tree."
+    },
+    {
+      "id": 13,
+      "name": "13",
+      "question": "Get the top view of a binary tree."
+    },
+    {
+      "id": 14,
+      "name": "14",
+      "question": "Get the bottom view of a binary tree."
+    },
+    {
+      "id": 15,
+      "name": "15",
+      "question": "Get the right/left view of a binary tree."
+    },
+    {
+      "id": 16,
+      "name": "16",
+      "question": "Check if a binary tree is symmetric (a mirror of itself)."
+    },
+    {
+      "id": 17,
+      "name": "17",
+      "question": "Find the lowest common ancestor (LCA) of two given nodes in a binary tree."
+    },
+    {
+      "id": 18,
+      "name": "18",
+      "question": "Validate if a given binary tree is a valid Binary Search Tree (BST)."
+    },
+    {
+        "id": 19,
+        "name": "19",
+        "question": "Find the k-th smallest element in a BST."
+    },
+    {
+      "id": 20,
+      "name": "S",
+      "question": "A surprise question from this module awaits.",
+      "isSurprise": true
+    }
+  ]
+  

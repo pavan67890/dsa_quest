@@ -1,0 +1,34 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Explain the difference between a min-heap and a max-heap. How is the heap property maintained?"
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "Given an array, convert it into a max-heap in-place."
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "Implement K-th largest element in an array using a min-heap."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Find the K closest points to the origin (0, 0) in a 2D plane."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Merge K sorted arrays into a single sorted array."
+  },
+  {
+    "id": 6,
+    "name": "S",
+    "question": "Surprise! A random question from this module awaits.",
+    "isSurprise": true
+  }
+]

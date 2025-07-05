@@ -1,0 +1,79 @@
+
+[
+  {
+    "id": 1,
+    "name": "1",
+    "question": "Given a number N, find the N-th Fibonacci number using dynamic programming (memoization)."
+  },
+  {
+    "id": 2,
+    "name": "2",
+    "question": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?"
+  },
+  {
+    "id": 3,
+    "name": "3",
+    "question": "A frog can jump 1, 2, or 3 steps at a time. Find the number of ways it can reach the N-th stair."
+  },
+  {
+    "id": 4,
+    "name": "4",
+    "question": "Given an array of non-negative integers, you are initially positioned at the first index. Each element in the array represents your maximum jump length at that position. Determine if you can reach the last index."
+  },
+  {
+    "id": 5,
+    "name": "5",
+    "question": "Find the maximum sum of a subsequence of an array with no adjacent elements."
+  },
+  {
+    "id": 6,
+    "name": "6",
+    "question": "Given a 2D grid, find the number of unique paths from the top-left corner to the bottom-right corner. You can only move down or right."
+  },
+  {
+    "id": 7,
+    "name": "7",
+    "question": "Given a triangle array, find the minimum path sum from top to bottom. For each step, you may move to an adjacent number on the row below."
+  },
+  {
+    "id": 8,
+    "name": "8",
+    "question": "Given a set of items, each with a weight and a value, determine the number of each item to include in a collection so that the total weight is less than or equal to a given limit and the total value is as large as possible. This is the 0/1 Knapsack problem."
+  },
+  {
+    "id": 9,
+    "name": "9",
+    "question": "Given an array of positive integers, partition the array into two subsets such that the absolute difference between their sums is minimized."
+  },
+  {
+    "id": 10,
+    "name": "10",
+    "question": "Find the length of the longest common subsequence between two strings."
+  },
+  {
+    "id": 11,
+    "name": "11",
+    "question": "Find the length of the longest increasing subsequence in an array."
+  },
+  {
+    "id": 12,
+    "name": "12",
+    "question": "Given a string, find the length of the longest palindromic subsequence."
+  },
+  {
+    "id": 13,
+    "name": "13",
+    "question": "You are given an integer array coins representing coins of different denominations and an integer amount representing a total amount of money. Return the fewest number of coins that you need to make up that amount."
+  },
+  {
+    "id": 14,
+    "name": "S",
+    "question": "A surprise question from this module awaits.",
+    "isSurprise": true
+  },
+  {
+    "id": 15,
+    "name": "14",
+    "question": "Given two strings, find the minimum number of operations (insert, delete, replace) required to convert one string to the other (Edit Distance)."
+  }
+]

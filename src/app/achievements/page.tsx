@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { LucideProps } from 'lucide-react';
@@ -19,6 +20,7 @@ import {
   BrainCircuit,
   Search,
   BookOpen,
+  Atom,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,17 +40,17 @@ type BadgeInfo = {
 // Map module IDs to their badge details
 const badgeDetails: Record<string, Omit<BadgeInfo, 'id' | 'description'>> = {
   arrays: { name: 'Array Alchemist', Icon: Star, className: 'text-yellow-400' },
+  'binary-search': { name: 'Binary Sage', Icon: Search, className: 'text-violet-400' },
   strings: { name: 'String Sensei', Icon: Medal, className: 'text-orange-400' },
-  'linked-lists': { name: 'List Lancer', Icon: Link, className: 'text-cyan-400' },
-  'stacks-queues': { name: 'Stack Strategist', Icon: Layers, className: 'text-indigo-400' },
-  recursion: { name: 'Recursion Ruler', Icon: ShieldCheck, className: 'text-purple-400' },
+  'linked-list': { name: 'List Lancer', Icon: Link, className: 'text-cyan-400' },
+  'recursion-backtracking': { name: 'Recursion Ruler', Icon: ShieldCheck, className: 'text-purple-400' },
+  heaps: { name: 'Heap Hopper', Icon: Pyramid, className: 'text-amber-400' },
+  greedy: { name: 'Greedy Genius', Icon: Cpu, className: 'text-teal-400' },
   trees: { name: 'Tree Traversal Titan', Icon: Binary, className: 'text-green-400' },
   graphs: { name: 'Graph Guru', Icon: GitGraph, className: 'text-blue-400' },
-  'hash-tables': { name: 'Hash Hero', Icon: Table, className: 'text-rose-400' },
-  heaps: { name: 'Heap Hopper', Icon: Pyramid, className: 'text-amber-400' },
   'dynamic-programming': { name: 'DP Dynamo', Icon: BrainCircuit, className: 'text-pink-400' },
-  'sorting-searching': { name: 'Sort Sage', Icon: Search, className: 'text-violet-400' },
-  'bit-manipulation': { name: 'Bit Brawler', Icon: Cpu, className: 'text-teal-400' },
+  'stacks-queues': { name: 'Stack Strategist', Icon: Layers, className: 'text-indigo-400' },
+  'bit-manipulation': { name: 'Bit Brawler', Icon: Atom, className: 'text-rose-400' },
   default: { name: 'Module Master', Icon: BookOpen, className: 'text-gray-400' }
 };
 
@@ -68,7 +70,7 @@ export default function AchievementsPage() {
             name: details.name,
             Icon: details.Icon,
             className: details.className,
-            description: `Mastered the ${module.name} module.`,
+            description: `Master the ${module.name} module.`,
           };
         });
         setAllBadges(generatedBadges);
@@ -91,7 +93,7 @@ export default function AchievementsPage() {
           <CardContent>
             {isLoading ? (
                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                {[...Array(9)].map((_, i) => (
+                {[...Array(12)].map((_, i) => (
                   <div key={i} className="p-6 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center">
                     <Skeleton className="h-24 w-24 rounded-full mb-4" />
                     <Skeleton className="h-6 w-3/4 mb-2" />
@@ -104,7 +106,7 @@ export default function AchievementsPage() {
                     No modules found. Cannot display achievements.
                 </p>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 <AnimatePresence>
                   {allBadges.map(({ id, name, Icon, className, description }, index) => {
                       const hasBadge = earnedBadges.includes(id);
