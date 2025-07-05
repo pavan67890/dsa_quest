@@ -40,25 +40,25 @@ export default function AchievementsPage() {
                     No achievements earned yet. Complete modules to earn badges!
                 </p>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                 {allBadges.map(({ id, name, Icon, className, description }) => {
                     const hasBadge = earnedBadges.includes(id);
                     return (
                     <div
                         key={id}
-                        className={`p-6 rounded-lg border-2 flex flex-col items-center justify-center text-center transition-all duration-300 ${
+                        className={`group p-6 rounded-2xl border-2 flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out transform hover:-translate-y-2 ${
                         hasBadge
-                            ? 'border-primary bg-primary/10 shadow-lg'
+                            ? 'border-primary bg-primary/10 shadow-2xl shadow-primary/20 hover:shadow-primary/30'
                             : 'border-dashed bg-muted/50 filter grayscale opacity-60'
                         }`}
                     >
                         <div className="mb-4">
-                            <Icon className={`h-8 w-8 ${className}`} />
+                            <Icon className={`h-16 w-16 transition-transform duration-300 group-hover:scale-110 ${hasBadge ? className : 'text-muted-foreground'}`} />
                         </div>
-                        <h3 className="text-lg font-bold font-headline">{name}</h3>
+                        <h3 className="text-xl font-bold font-headline">{name}</h3>
                         <p className="text-sm text-muted-foreground mt-1">{description}</p>
                         {hasBadge && (
-                            <Badge variant="default" className="mt-4 bg-primary">Unlocked</Badge>
+                            <Badge variant="default" className="mt-4 bg-primary text-primary-foreground shadow-lg">Unlocked</Badge>
                         )}
                     </div>
                     );
