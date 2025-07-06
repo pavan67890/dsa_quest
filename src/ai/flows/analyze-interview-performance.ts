@@ -16,6 +16,7 @@ const AnalyzeInterviewPerformanceInputSchema = z.object({
   interviewTranscript: z
     .string()
     .describe('The complete transcript of the mock interview.'),
+  levelId: z.number().describe('The ID of the level, as an indicator of difficulty.'),
   primaryApiKey: z.string().optional().describe("The user's primary Google AI API key."),
   secondaryApiKey: z.string().optional().describe("The user's secondary Google AI API key for fallback."),
 });
@@ -61,7 +62,10 @@ const analyzeInterviewPerformancePrompt = ai.definePrompt({
 
   Based on the interview transcript, provide a summary of the candidate's performance, highlighting their key strengths and weaknesses. Also, suggest specific actions the candidate can take to improve their skills.
 
-  Finally, assign experience points to the user between 0 and 100 based on their interview performance. Better performance should be awarded more experience points.
+  Finally, assign experience points to the user based on their interview performance and the level's difficulty. The level ID is {{levelId}}.
+  - Base XP should scale with the level ID. For example, level 1 might have a base of 10 XP, while level 10 has a base of 100 XP.
+  - Performance should act as a multiplier on the base XP. Excellent performance on a difficult level should award the most points. A poor performance should award few or zero points, even on a difficult level.
+  - The maximum XP for a single level should not exceed 150.
 
   Interview Transcript:
   {{interviewTranscript}}`,

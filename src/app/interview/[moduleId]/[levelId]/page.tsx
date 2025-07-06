@@ -424,6 +424,7 @@ The main technical question you must ask is provided in the 'question' field. Af
     try {
         const report = await analyzeInterviewPerformance({ 
             interviewTranscript: transcript,
+            levelId: level!.id,
             primaryApiKey: apiKeys.primaryApiKey,
             secondaryApiKey: apiKeys.secondaryApiKey,
         });
@@ -431,7 +432,7 @@ The main technical question you must ask is provided in the 'question' field. Af
         setFinalReport(report);
         setIsInterviewOver(true);
 
-        const passed = report.xpPoints > 50;
+        const passed = report.xpPoints > 0;
         const currentModuleProgress = progress[module!.id] || { unlockedLevel: 1, lives: module!.initialLives };
         
         if (passed) {
@@ -783,7 +784,7 @@ The main technical question you must ask is provided in the 'question' field. Af
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="text-center">
-                            {finalReport.xpPoints > 50 ? (
+                            {finalReport.xpPoints > 0 ? (
                                 <>
                                     <Star className="h-16 w-16 text-yellow-400 mx-auto animate-pulse" />
                                     <p className="text-2xl font-bold text-green-500 mt-2">Level Passed!</p>
